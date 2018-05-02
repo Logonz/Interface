@@ -1,0 +1,18 @@
+## Interface: 80000
+## Title: Blizzard_Communities
+## Secure: 1
+## LoadOnDemand: 0
+
+..\..\SharedXML\SecureUIPanelTemplates.lua
+CommunitiesUtil.lua
+CommunitiesList.xml
+CommunitiesMemberList.xml
+CommunitiesChatFrame.xml
+CommunitiesInvitationFrame.xml
+CommunitiesGuildFinderFrame.xml
+CommunitiesStreams.xml
+CommunitiesAddDialogInsecure.xml
+CommunitiesAddDialog.xml
+CommunitiesAddDialogOutbound.lua
+CommunitiesTabs.xml
+CommunitiesFrame.xml

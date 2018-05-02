@@ -1,0 +1,161 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\..\FrameXML\UI.xsd">
+	<Script file="CommunitiesFrame.lua"/>
+	
+	<Frame name="CommunitiesFrame" toplevel="true" parent="UIParent" movable="true" enableMouse="true" hidden="true" inherits="ButtonFrameTemplate" mixin="CommunitiesFrameMixin">
+		<Size x="814" y="426"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<MaskTexture parentKey="CircleMask" file="Interface\CharacterFrame\TempPortraitAlphaMask" hWrapMode="CLAMPTOBLACKADDITIVE" vWrapMode="CLAMPTOBLACKADDITIVE">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.portrait"/>
+						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.portrait"/>
+					</Anchors>
+					<MaskedTextures>
+						<MaskedTexture childKey="portrait"/>
+					</MaskedTextures>
+				</MaskTexture>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Frame parentKey="PortraitOverlay" setAllPoints="true">
+				<Layers>
+					<Layer level="OVERLAY" textureSubLevel="-1">
+						<Texture parentKey="Portrait">
+							<Size x="61" y="61"/>
+							<Anchors>
+								<Anchor point="TOPLEFT" x="-6" y="8" />
+							</Anchors>
+						</Texture>
+					</Layer>
+					<Layer level="OVERLAY">
+						<Texture inherits="UI-Frame-Portrait" parentKey="PortraitFrame">
+							<Anchors>
+								<Anchor point="TOPLEFT" x="-14" y="11"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+					<Layer level="ARTWORK">
+						<MaskTexture parentKey="CircleMask" file="Interface\CharacterFrame\TempPortraitAlphaMask" hWrapMode="CLAMPTOBLACKADDITIVE" vWrapMode="CLAMPTOBLACKADDITIVE">
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeKey="$parent.Portrait"/>
+								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.Portrait"/>
+							</Anchors>
+							<MaskedTextures>
+								<MaskedTexture childKey="Portrait"/>
+							</MaskedTextures>
+						</MaskTexture>
+					</Layer>
+				</Layers>
+			</Frame>
+			<Frame parentKey="MaximizeMinimizeFrame" inherits="MaximizeMinimizeButtonFrameTemplate">
+				<Anchors>
+					<Anchor point="RIGHT" relativeKey="$parent.CloseButton" relativePoint="LEFT" x="10" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture atlas="UI-OuterBorderButtonPatch" useAtlasSize="true">
+							<Anchors>
+								<Anchor point="CENTER" relativePoint="LEFT" x="6" y="0"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad function="CommunitiesFrameMaximizeMinimizeButton_OnLoad"/>
+				</Scripts>
+			</Frame>
+			<Frame parentKey="CommunitiesList" inherits="CommunitiesListFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="0" y="-23"/>
+					<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" x="170" y="29"/>
+				</Anchors>
+			</Frame>
+			<CheckButton parentKey="ChatTab" hidden="true" inherits="CommunitiesChatTabTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="0" y="-36"/>
+				</Anchors>
+			</CheckButton>
+			<CheckButton parentKey="RosterTab" hidden="true" inherits="CommunitiesRosterTabTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.ChatTab" relativePoint="BOTTOMLEFT" x="0" y="-20"/>
+				</Anchors>
+			</CheckButton>
+			<CheckButton parentKey="GuildBenefitsTab" hidden="true" inherits="CommunitiesGuildBenefitsTabTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.RosterTab" relativePoint="BOTTOMLEFT" x="0" y="-20"/>
+				</Anchors>
+			</CheckButton>
+			<CheckButton parentKey="GuildInfoTab" hidden="true" inherits="CommunitiesGuildInfoTabTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.PerksTab" relativePoint="BOTTOMLEFT" x="0" y="-20"/>
+				</Anchors>
+			</CheckButton>
+			<Frame parentKey="StreamDropDownMenu" inherits="StreamDropDownMenuTemplate">
+				<Size x="40" y="28"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="188" y="-32"/>
+				</Anchors>
+			</Frame>
+			<Frame parentKey="CommunitiesListDropDownMenu" inherits="CommunitiesListDropDownMenuTemplate">
+				<Size x="40" y="28"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="-12" y="-28"/>
+				</Anchors>
+			</Frame>
+			<Frame parentKey="MemberList" inherits="CommunitiesMemberListFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="-165" y="-63"/>
+					<Anchor point="BOTTOMRIGHT" x="-26" y="28"/>
+				</Anchors>
+			</Frame>
+			<Frame parentKey="Chat" inherits="CommunitiesChatTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.CommunitiesList" relativePoint="TOPRIGHT" x="30" y="-46"/>
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.MemberList" relativePoint="BOTTOMLEFT" x="-22" y="28"/>
+				</Anchors>
+			</Frame>
+			<EditBox parentKey="ChatEditBox" frameLevel="1200" inherits="CommunitiesChatEditBoxTemplate">
+				<Size x="0" y="32"/>
+				<!-- Anchored in code -->
+			</EditBox>
+			<Frame parentKey="InvitationFrame" inherits="CommunitiesInvitationFrameTemplate" hidden="true">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.CommunitiesList" relativePoint="TOPRIGHT" x="24" y="-40"/>
+					<Anchor point="BOTTOMRIGHT" x="-12" y="30"/>
+				</Anchors>
+			</Frame>
+			<Frame parentKey="GuildFinderFrame" inherits="CommunitiesGuildFinderFrameTemplate" hidden="true">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.CommunitiesList" relativePoint="TOPRIGHT" x="24" y="-40"/>
+					<Anchor point="BOTTOMRIGHT" x="-12" y="30"/>
+				</Anchors>
+			</Frame>
+			<Frame parentKey="EditStreamDialog" frameStrata="DIALOG" inherits="CommunitiesEditStreamDialogTemplate" hidden="true">
+				<Size x="320" y="260"/>
+				<Anchors>
+					<Anchor point="CENTER" relativeTo="UIParent"/>
+				</Anchors>
+			</Frame>
+			<Button parentKey="AddToChatButton" inherits="AddToChatButtonTemplate">
+				<Size x="180" y="20"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeKey="$parent.ChatEditBox" relativePoint="RIGHT" x="5" y="0"/>
+					<Anchor point="BOTTOM" x="0" y="5"/>
+				</Anchors>
+			</Button>
+			<Button parentKey="InviteButton" inherits="CommunitiesInviteButtonTemplate">
+				<Size x="130" y="20"/>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT" x="-5" y="5"/>
+				</Anchors>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad method="OnLoad"/>
+			<OnShow method="OnShow"/>
+			<OnEvent method="OnEvent"/>
+			<OnHide method="OnHide"/>
+		</Scripts>
+	</Frame>
+</Ui>
