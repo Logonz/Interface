@@ -8,22 +8,36 @@ function WorldMapMixin:SetupTitle()
 	SetPortraitToTexture(self.BorderFrame.portrait, [[Interface\QuestFrame\UI-QuestLog-BookIcon]]);
 end
 
+function WorldMapMixin:SynchronizeDisplayState()
+	if self:IsMaximized() then
+		self.BorderFrame.TitleText:SetText(WORLD_MAP);
+		GameTooltip:Hide();
+		self.BlackoutFrame:Show();
+		MaximizeUIPanel(self);
+	else
+		self.BorderFrame.TitleText:SetText(MAP_AND_QUEST_LOG);
+		self.BlackoutFrame:Hide();
+		RestoreUIPanelArea(self);
+	end
+end
+
 function WorldMapMixin:Minimize()
 	self.isMaximized = false;
 
 	self:SetSize(self.minimizedWidth, self.minimizedHeight);
 
 	SetUIPanelAttribute(self, "bottomClampOverride", nil);
+	UpdateUIPanelPositions(self);
 
 	ButtonFrameTemplate_ShowPortrait(self.BorderFrame);
 	self.BorderFrame.Tutorial:Show();
 	self.NavBar:SetPoint("TOPLEFT", self.TitleCanvasSpacerFrame, "TOPLEFT", 64, -25);
 
-	UpdateUIPanelPositions(self);
+	self:SynchronizeDisplayState();
 
 	self.BorderFrame.MaximizeMinimizeFrame.MinimizeButton:Hide();
 	self.BorderFrame.MaximizeMinimizeFrame.MaximizeButton:Show();
-	
+
 	self:OnFrameSizeChanged();
 end
 
@@ -35,10 +49,11 @@ function WorldMapMixin:Maximize()
 	self.NavBar:SetPoint("TOPLEFT", self.TitleCanvasSpacerFrame, "TOPLEFT", 8, -25);
 
 	self:UpdateMaximizedSize();
+	self:SynchronizeDisplayState();
 
 	self.BorderFrame.MaximizeMinimizeFrame.MinimizeButton:Show();
 	self.BorderFrame.MaximizeMinimizeFrame.MaximizeButton:Hide();
-	
+
 	self:OnFrameSizeChanged();
 end
 
@@ -50,13 +65,13 @@ function WorldMapMixin:SetupMinimizeMaximizeButton()
 	local function OnMaximize()
 		self:HandleUserActionMaximizeSelf();
 	end
-	
+
 	self.BorderFrame.MaximizeMinimizeFrame:SetOnMaximizedCallback(OnMaximize);
-	
+
 	local function OnMinimize()
 		self:HandleUserActionMinimizeSelf();
 	end
-	
+
 	self.BorderFrame.MaximizeMinimizeFrame:SetOnMinimizedCallback(OnMinimize);
 end
 
@@ -65,7 +80,7 @@ function WorldMapMixin:IsMaximized()
 end
 
 function WorldMapMixin:OnLoad()
-	UIPanelWindows[self:GetName()] = { area = "left", pushable = 0, xoffset = 0, yoffset = 0, whileDead = 1, minYOffset = 0 };
+	UIPanelWindows[self:GetName()] = { area = "left", pushable = 0, xoffset = 0, yoffset = 0, whileDead = 1, minYOffset = 0, maximizePoint = "TOP" };
 
 	MapCanvasMixin.OnLoad(self);
 
@@ -79,7 +94,7 @@ function WorldMapMixin:OnLoad()
 
 	self:AddStandardDataProviders();
 	self:AddOverlayFrames();
-	
+
 	self:RegisterEvent("VARIABLES_LOADED");
 	self:RegisterEvent("DISPLAY_SIZE_CHANGED");
 
@@ -163,17 +178,18 @@ function WorldMapMixin:AddStandardDataProviders()
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_PET_TAMER");
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_SELECTABLE_GRAVEYARD");
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_GOSSIP");
-	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_VIGNETTE", 100);
+	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_AREA_POI");
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_DEBUG");
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_MAP_LINK");
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_ENCOUNTER");
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_CONTRIBUTION_COLLECTOR");
-	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_AREA_POI");
+	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_VIGNETTE", 200);
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_STORY_LINE");
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_SCENARIO");
+	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_WORLD_QUEST_PING");
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_WORLD_QUEST", 500);
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_ACTIVE_QUEST", C_QuestLog.GetMaxNumQuests());
-	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_SUPER_TRACKED_QUEST");	
+	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_SUPER_TRACKED_QUEST");
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_VEHICLE_BELOW_GROUP_MEMBER");
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_BONUS_OBJECTIVE");
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_BATTLEFIELD_FLAG");
@@ -193,7 +209,7 @@ function WorldMapMixin:AddOverlayFrames()
 	self.NavBar = self:AddOverlayFrame("WorldMapNavBarTemplate", "FRAME");
 	self.NavBar:SetPoint("TOPLEFT", self.TitleCanvasSpacerFrame, "TOPLEFT", 64, -25);
 	self.NavBar:SetPoint("BOTTOMRIGHT", self.TitleCanvasSpacerFrame, "BOTTOMRIGHT", -4, 9);
-	
+
 	self.SidePanelToggle = self:AddOverlayFrame("WorldMapSidePanelToggleTemplate", "BUTTON", "BOTTOMRIGHT", self:GetCanvasContainer(), "BOTTOMRIGHT", -2, 1);
 end
 
@@ -202,13 +218,13 @@ function WorldMapMixin:OnMapChanged()
 	self:RefreshOverlayFrames();
 	self:RefreshQuestLog();
 
-	if C_MapInternal then 
+	if C_MapInternal then
 		C_MapInternal.SetDebugMap(self:GetMapID());
 	end
 end
 
 function WorldMapMixin:OnShow()
-	local mapID = C_Map.GetBestMapForUnit("player");
+	local mapID = MapUtil.GetDisplayableMapForPlayer();
 	self:SetMapID(mapID);
 	MapCanvasMixin.OnShow(self);
 	self:ResetZoom();
@@ -240,12 +256,12 @@ function WorldMapMixin:RefreshOverlayFrames()
 	end
 end
 
-function WorldMapMixin:AddOverlayFrame(templateName, templateType, anchorPoint, relativeTo, relativePoint, offsetX, offsetY)
+function WorldMapMixin:AddOverlayFrame(templateName, templateType, anchorPoint, relativeFrame, relativePoint, offsetX, offsetY)
 	local frame = CreateFrame(templateType, nil, self, templateName);
 	if anchorPoint then
-		frame:SetPoint(anchorPoint, relativeTo, relativePoint, offsetX, offsetY);
+		frame:SetPoint(anchorPoint, relativeFrame, relativePoint, offsetX, offsetY);
 	end
-	frame.relativeTo = relativeTo or self;
+	frame.relativeFrame = relativeFrame or self;
 	if not self.overlayFrames then
 		self.overlayFrames = { };
 	end
@@ -257,13 +273,13 @@ end
 function WorldMapMixin:SetOverlayFrameLocation(frame, location)
 	frame:ClearAllPoints();
 	if location == LE_MAP_OVERLAY_DISPLAY_LOCATION_BOTTOM_LEFT then
-		frame:SetPoint("BOTTOMLEFT", frame.relativeTo, 15, 15);
+		frame:SetPoint("BOTTOMLEFT", frame.relativeFrame, 15, 15);
 	elseif location == LE_MAP_OVERLAY_DISPLAY_LOCATION_TOP_LEFT then
-		frame:SetPoint("TOPLEFT", frame.relativeTo, 15, -15);
+		frame:SetPoint("TOPLEFT", frame.relativeFrame, 15, -15);
 	elseif location == LE_MAP_OVERLAY_DISPLAY_LOCATION_BOTTOM_RIGHT then
-		frame:SetPoint("BOTTOMRIGHT", frame.relativeTo, -18, 15);
+		frame:SetPoint("BOTTOMRIGHT", frame.relativeFrame, -18, 15);
 	elseif location == LE_MAP_OVERLAY_DISPLAY_LOCATION_TOP_RIGHT then
-		frame:SetPoint("TOPRIGHT", frame.relativeTo, -15, -15);
+		frame:SetPoint("TOPRIGHT", frame.relativeFrame, -15, -15);
 	end
 end
 
@@ -372,19 +388,25 @@ function WorldMapMixin:ClearFocusedQuestID()
 	self:TriggerEvent("ClearFocusedQuestID");
 end
 
+function WorldMapMixin:PingQuestID(questID)
+	if self:IsVisible() then
+		self:TriggerEvent("PingQuestID", questID);
+	end
+end
+
 -- ============================================ GLOBAL API ===============================================================================
 function ToggleQuestLog()
 	WorldMapFrame:HandleUserActionToggleQuestLog();
 end
-	
+
 function ToggleWorldMap()
 	WorldMapFrame:HandleUserActionToggleSelf();
 end
-	
+
 function OpenWorldMap(mapID)
 	WorldMapFrame:HandleUserActionOpenSelf(mapID);
 end
-	
+
 function OpenQuestLog(mapID)
 	WorldMapFrame:HandleUserActionOpenQuestLog(mapID);
 end

@@ -28,34 +28,6 @@ function GetTextureInfo(obj)
 	end
 end
 
-RAID_CLASS_COLORS = {
-	["HUNTER"] = { r = 0.67, g = 0.83, b = 0.45, colorStr = "ffabd473" },
-	["WARLOCK"] = { r = 0.53, g = 0.53, b = 0.93, colorStr = "ff8788ee" },
-	["PRIEST"] = { r = 1.0, g = 1.0, b = 1.0, colorStr = "ffffffff" },
-	["PALADIN"] = { r = 0.96, g = 0.55, b = 0.73, colorStr = "fff58cba" },
-	["MAGE"] = { r = 0.25, g = 0.78, b = 0.92, colorStr = "ff3fc7eb" },
-	["ROGUE"] = { r = 1.0, g = 0.96, b = 0.41, colorStr = "fffff569" },
-	["DRUID"] = { r = 1.0, g = 0.49, b = 0.04, colorStr = "ffff7d0a" },
-	["SHAMAN"] = { r = 0.0, g = 0.44, b = 0.87, colorStr = "ff0070de" },
-	["WARRIOR"] = { r = 0.78, g = 0.61, b = 0.43, colorStr = "ffc79c6e" },
-	["DEATHKNIGHT"] = { r = 0.77, g = 0.12 , b = 0.23, colorStr = "ffc41f3b" },
-	["MONK"] = { r = 0.0, g = 1.00 , b = 0.59, colorStr = "ff00ff96" },
-	["DEMONHUNTER"] = { r = 0.64, g = 0.19, b = 0.79, colorStr = "ffa330c9" },
-};
-
-function GetClassColor(classFilename)
-	local color = RAID_CLASS_COLORS[classFilename];
-	if color then
-		return color.r, color.g, color.b, color.colorStr;
-	end
-
-	return 1, 1, 1, "ffffffff";
-end
-
-function WrapTextInColorCode(text, colorHexString)
-	return ("|c%s%s|r"):format(colorHexString, text);
-end
-
 CLASS_ICON_TCOORDS = {
 	["WARRIOR"]		= {0, 0.25, 0, 0.25},
 	["MAGE"]		= {0.25, 0.49609375, 0, 0.25},
@@ -237,6 +209,11 @@ function FindInTableIf(tbl, pred)
 	return nil;
 end
 
+function ExtractHyperlinkString(linkString)
+	local preString, hyperlinkString, postString = linkString:match("^(.*)|H(.+)|h(.*)$");
+	return preString ~= nil, preString, hyperlinkString, postString;
+end
+
 function GetItemInfoFromHyperlink(link)
 	local hyperlink = link:match("|Hitem:.-|h");
 	if (hyperlink) then
@@ -365,6 +342,10 @@ end
 
 function FrameDeltaLerp(startValue, endValue, amount)
 	return DeltaLerp(startValue, endValue, amount, GetTickTime());
+end
+
+function RandomFloatInRange(minValue, maxValue)
+	return Lerp(minValue, maxValue, math.random());
 end
 
 function GetNavigationButtonEnabledStates(count, index)
@@ -559,9 +540,10 @@ local function ProcessSmoothStatusBars()
 
 		if IsCloseEnough(bar, newValue, effectiveTargetValue) then
 			g_updatingBars[bar] = nil;
+			bar:SetValue(effectiveTargetValue);
+		else
+			bar:SetValue(newValue);
 		end
-
-		bar:SetValue(newValue);
 	end
 end
 
@@ -598,6 +580,10 @@ function SmoothStatusBarMixin:SetMinMaxSmoothedValue(min, max)
 
 	self.lastSmoothedMin = min;
 	self.lastSmoothedMax = max;
+end
+
+function WrapTextInColorCode(text, colorHexString)
+	return ("|c%s%s|r"):format(colorHexString, text);
 end
 
 ColorMixin = {};
@@ -663,6 +649,43 @@ end
 
 function ColorMixin:WrapTextInColorCode(text)
 	return WrapTextInColorCode(text, self:GenerateHexColor());
+end
+
+RAID_CLASS_COLORS = {
+	["HUNTER"] = CreateColor(0.67, 0.83, 0.45),
+	["WARLOCK"] = CreateColor(0.53, 0.53, 0.93),
+	["PRIEST"] = CreateColor(1.0, 1.0, 1.0),
+	["PALADIN"] = CreateColor(0.96, 0.55, 0.73),
+	["MAGE"] = CreateColor(0.25, 0.78, 0.92),
+	["ROGUE"] = CreateColor(1.0, 0.96, 0.41),
+	["DRUID"] = CreateColor(1.0, 0.49, 0.04),
+	["SHAMAN"] = CreateColor(0.0, 0.44, 0.87),
+	["WARRIOR"] = CreateColor(0.78, 0.61, 0.43),
+	["DEATHKNIGHT"] = CreateColor(0.77, 0.12 , 0.23),
+	["MONK"] = CreateColor(0.0, 1.00 , 0.59),
+	["DEMONHUNTER"] = CreateColor(0.64, 0.19, 0.79),
+};
+
+for k, v in pairs(RAID_CLASS_COLORS) do
+	v.colorStr = v:GenerateHexColor();
+end
+
+function GetClassColor(classFilename)
+	local color = RAID_CLASS_COLORS[classFilename];
+	if color then
+		return color.r, color.g, color.b, color.colorStr;
+	end
+
+	return 1, 1, 1, "ffffffff";
+end
+
+function GetClassColorObj(classFilename)
+	-- TODO: Remove this, convert everything that's using GetClassColor to use the object instead, then begin using that again
+	return RAID_CLASS_COLORS[classFilename];
+end
+
+function GetFactionColor(factionGroupTag)
+	return PLAYER_FACTION_COLORS[PLAYER_FACTION_GROUP[factionGroupTag]];
 end
 
 -- Mix this into a FontString to have it resize until it stops truncating, or gets too small
@@ -857,17 +880,29 @@ function CreateAtlasMarkup(atlasName, height, width, offsetX, offsetY)
 	);
 end
 
+function SetupAtlasesOnRegions(frame, regionsToAtlases, useAtlasSize)
+	for region, atlas in pairs(regionsToAtlases) do
+		if frame[region] then
+			if frame[region]:GetObjectType() == "StatusBar" then
+				frame[region]:SetStatusBarAtlas(atlas);
+			elseif frame[region].SetAtlas then
+				frame[region]:SetAtlas(atlas, useAtlasSize);
+			end
+		end
+	end
+end
+
 function SetupTextureKitOnFrameByID(textureKitID, frame, fmt, setVisibilityOfRegions, useAtlasSize)
 	local textureKit = GetUITextureKitInfo(textureKitID);
 	SetupTextureKitOnFrame(textureKit, frame, fmt, setVisibilityOfRegions, useAtlasSize);
 end
 
-function SetupTextureKitOnFrame(textureKit, frame, fmt, setVisibilityOfRegions, useAtlasSize)
+function SetupTextureKitOnFrame(textureKit, frame, fmt, setVisibility, useAtlasSize)
 	if not frame then
 		return;
 	end
 
-	if setVisibilityOfRegions then
+	if setVisibility then
 		frame:SetShown(textureKit ~= nil);
 	end
 
@@ -913,6 +948,21 @@ end
 function SetupTextureKits(textureKitID, frame, regions, setVisibilityOfRegions, useAtlasSize)
 	local textureKit = GetUITextureKitInfo(textureKitID);
 	SetupTextureKitOnRegions(textureKit, frame, regions, setVisibilityOfRegions, useAtlasSize);
+end
+
+function SetupTextureKitsFromRegionInfo(textureKit, frame, regionInfoList)
+	if not frame or not regionInfoList then
+		return;
+	end
+
+	for region, regionInfo in pairs(regionInfoList) do
+		SetupTextureKitOnFrame(textureKit, frame[region], regionInfo.formatString, regionInfo.setVisibility, regionInfo.useAtlasSize);
+	end
+end
+
+function SetupTextureKitsFromRegionInfoByID(textureKitID, frame, regionInfoList)
+	local textureKit = GetUITextureKitInfo(textureKitID);
+	SetupTextureKitsFromRegionInfo(textureKit, frame, regionInfoList);
 end
 
 CallbackRegistryBaseMixin = {};
@@ -1082,6 +1132,10 @@ end
 
 function FlagsMixin:IsSet(flagOrMask)
 	return bit.band(self.flags, flagOrMask) == flagOrMask;
+end
+
+function FlagsMixin:GetFlags()
+	return self.flags;
 end
 
 DirtyFlagsMixin = CreateFromMixins(FlagsMixin);
@@ -1297,11 +1351,23 @@ function CallMethodOnNearestAncestor(self, methodName, ...)
 	while ancestor and not ancestor[methodName] do
 		ancestor = ancestor:GetParent();
 	end
-	
+
 	if ancestor then
 		ancestor[methodName](ancestor, ...);
 		return true;
 	end
-	
+
 	return false;
+end
+
+function FormateFullDateWithoutYear(messageDate)
+	return FULLDATE_NO_YEAR:format(CALENDAR_WEEKDAY_NAMES[messageDate.weekDay], CALENDAR_FULLDATE_MONTH_NAMES[messageDate.month], messageDate.day);
+end
+
+function AreFullDatesEqual(firstDate, secondDate)
+	return firstDate.month == secondDate.month and firstDate.day == secondDate.day and firstDate.year == secondDate.year;
+end
+
+function GetClampedCurrentExpansionLevel()
+	return math.min(GetClientDisplayExpansionLevel(), math.max(GetAccountExpansionLevel(), GetExpansionLevel()));
 end

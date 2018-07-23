@@ -21,6 +21,20 @@ local Item =
 			},
 		},
 		{
+			Name = "DoesItemExistByID",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemInfo", Type = "string", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "itemExists", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "GetCurrentItemLevel",
 			Type = "Function",
 
@@ -32,6 +46,104 @@ local Item =
 			Returns =
 			{
 				{ Name = "currentItemLevel", Type = "number", Nilable = true },
+			},
+		},
+		{
+			Name = "GetItemGUID",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemLocation", Type = "table", Mixin = "ItemLocationMixin", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "itemGuid", Type = "string", Nilable = false },
+			},
+		},
+		{
+			Name = "GetItemID",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemLocation", Type = "table", Mixin = "ItemLocationMixin", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "itemID", Type = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "GetItemIcon",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemLocation", Type = "table", Mixin = "ItemLocationMixin", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "icon", Type = "number", Nilable = true },
+			},
+		},
+		{
+			Name = "GetItemIconByID",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemInfo", Type = "string", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "icon", Type = "number", Nilable = true },
+			},
+		},
+		{
+			Name = "GetItemInventoryType",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemLocation", Type = "table", Mixin = "ItemLocationMixin", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "inventoryType", Type = "InventoryType", Nilable = true },
+			},
+		},
+		{
+			Name = "GetItemInventoryTypeByID",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemInfo", Type = "string", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "inventoryType", Type = "InventoryType", Nilable = true },
+			},
+		},
+		{
+			Name = "GetItemLink",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemLocation", Type = "table", Mixin = "ItemLocationMixin", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "itemLink", Type = "string", Nilable = true },
 			},
 		},
 		{
@@ -49,12 +161,40 @@ local Item =
 			},
 		},
 		{
+			Name = "GetItemNameByID",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemInfo", Type = "string", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "itemName", Type = "string", Nilable = true },
+			},
+		},
+		{
 			Name = "GetItemQuality",
 			Type = "Function",
 
 			Arguments =
 			{
 				{ Name = "itemLocation", Type = "table", Mixin = "ItemLocationMixin", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "itemQuality", Type = "ItemQuality", Nilable = true },
+			},
+		},
+		{
+			Name = "GetItemQualityByID",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemInfo", Type = "string", Nilable = false },
 			},
 
 			Returns =
@@ -96,7 +236,7 @@ local Item =
 
 			Arguments =
 			{
-				{ Name = "itemID", Type = "number", Nilable = false },
+				{ Name = "itemInfo", Type = "string", Nilable = false },
 			},
 
 			Returns =
@@ -142,7 +282,7 @@ local Item =
 
 			Arguments =
 			{
-				{ Name = "itemID", Type = "number", Nilable = false },
+				{ Name = "itemInfo", Type = "string", Nilable = false },
 			},
 		},
 		{
@@ -267,6 +407,45 @@ local Item =
 	Tables =
 	{
 		{
+			Name = "InventoryType",
+			Type = "Enumeration",
+			NumValues = 29,
+			MinValue = 0,
+			MaxValue = 28,
+			Fields =
+			{
+				{ Name = "IndexNonEquipType", Type = "InventoryType", EnumValue = 0 },
+				{ Name = "IndexHeadType", Type = "InventoryType", EnumValue = 1 },
+				{ Name = "IndexNeckType", Type = "InventoryType", EnumValue = 2 },
+				{ Name = "IndexShoulderType", Type = "InventoryType", EnumValue = 3 },
+				{ Name = "IndexBodyType", Type = "InventoryType", EnumValue = 4 },
+				{ Name = "IndexChestType", Type = "InventoryType", EnumValue = 5 },
+				{ Name = "IndexWaistType", Type = "InventoryType", EnumValue = 6 },
+				{ Name = "IndexLegsType", Type = "InventoryType", EnumValue = 7 },
+				{ Name = "IndexFeetType", Type = "InventoryType", EnumValue = 8 },
+				{ Name = "IndexWristType", Type = "InventoryType", EnumValue = 9 },
+				{ Name = "IndexHandType", Type = "InventoryType", EnumValue = 10 },
+				{ Name = "IndexFingerType", Type = "InventoryType", EnumValue = 11 },
+				{ Name = "IndexTrinketType", Type = "InventoryType", EnumValue = 12 },
+				{ Name = "IndexWeaponType", Type = "InventoryType", EnumValue = 13 },
+				{ Name = "IndexShieldType", Type = "InventoryType", EnumValue = 14 },
+				{ Name = "IndexRangedType", Type = "InventoryType", EnumValue = 15 },
+				{ Name = "IndexCloakType", Type = "InventoryType", EnumValue = 16 },
+				{ Name = "Index2HweaponType", Type = "InventoryType", EnumValue = 17 },
+				{ Name = "IndexBagType", Type = "InventoryType", EnumValue = 18 },
+				{ Name = "IndexTabardType", Type = "InventoryType", EnumValue = 19 },
+				{ Name = "IndexRobeType", Type = "InventoryType", EnumValue = 20 },
+				{ Name = "IndexWeaponmainhandType", Type = "InventoryType", EnumValue = 21 },
+				{ Name = "IndexWeaponoffhandType", Type = "InventoryType", EnumValue = 22 },
+				{ Name = "IndexHoldableType", Type = "InventoryType", EnumValue = 23 },
+				{ Name = "IndexAmmoType", Type = "InventoryType", EnumValue = 24 },
+				{ Name = "IndexThrownType", Type = "InventoryType", EnumValue = 25 },
+				{ Name = "IndexRangedrightType", Type = "InventoryType", EnumValue = 26 },
+				{ Name = "IndexQuiverType", Type = "InventoryType", EnumValue = 27 },
+				{ Name = "IndexRelicType", Type = "InventoryType", EnumValue = 28 },
+			},
+		},
+		{
 			Name = "ItemQuality",
 			Type = "Enumeration",
 			NumValues = 9,
@@ -274,15 +453,15 @@ local Item =
 			MaxValue = 8,
 			Fields =
 			{
-				{ Name = "ItemQualityPoor", Type = "ItemQuality", EnumValue = 0 },
-				{ Name = "ItemQualityStandard", Type = "ItemQuality", EnumValue = 1 },
-				{ Name = "ItemQualityGood", Type = "ItemQuality", EnumValue = 2 },
-				{ Name = "ItemQualitySuperior", Type = "ItemQuality", EnumValue = 3 },
-				{ Name = "ItemQualityEpic", Type = "ItemQuality", EnumValue = 4 },
-				{ Name = "ItemQualityLegendary", Type = "ItemQuality", EnumValue = 5 },
-				{ Name = "ItemQualityArtifact", Type = "ItemQuality", EnumValue = 6 },
-				{ Name = "ItemQualityHeirloom", Type = "ItemQuality", EnumValue = 7 },
-				{ Name = "ItemQualityWoWToken", Type = "ItemQuality", EnumValue = 8 },
+				{ Name = "Poor", Type = "ItemQuality", EnumValue = 0 },
+				{ Name = "Standard", Type = "ItemQuality", EnumValue = 1 },
+				{ Name = "Good", Type = "ItemQuality", EnumValue = 2 },
+				{ Name = "Superior", Type = "ItemQuality", EnumValue = 3 },
+				{ Name = "Epic", Type = "ItemQuality", EnumValue = 4 },
+				{ Name = "Legendary", Type = "ItemQuality", EnumValue = 5 },
+				{ Name = "Artifact", Type = "ItemQuality", EnumValue = 6 },
+				{ Name = "Heirloom", Type = "ItemQuality", EnumValue = 7 },
+				{ Name = "WoWToken", Type = "ItemQuality", EnumValue = 8 },
 			},
 		},
 	},

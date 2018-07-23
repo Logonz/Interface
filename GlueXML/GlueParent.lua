@@ -467,6 +467,8 @@ local glueScreenTags =
 		["LIGHTFORGEDDRAENEI"] = true,
 		["NIGHTBORNE"] = true,
 		["HIGHMOUNTAINTAUREN"] = true,
+		["DARKIRONDWARF"] = true,
+		["MAGHARORC"] = true,
 	},
 };
 
@@ -683,8 +685,7 @@ function SetExpansionLogo(texture, expansionLevel)
 end
 
 function UpgradeAccount()
-	local info = C_StoreSecure.GetProductGroupInfo(WOW_GAMES_CATEGORY_ID);
-	if info then
+	if not IsTrialAccount() and C_StorePublic.DoesGroupHavePurchaseableProducts(WOW_GAMES_CATEGORY_ID) then
 		StoreFrame_SetGamesCategory();
 		ToggleStoreUI();
 	else

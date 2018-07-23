@@ -1,7 +1,15 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
 	<Script file="SecureUIPanelTemplates.lua"/>
-	<EditBox name="InputBoxTemplate" enableMouse="true" virtual="true">
+
+	<EditBox name="InputBoxScriptTemplate" enableMouse="true" virtual="true">
+		<Scripts>
+			<OnEscapePressed function="EditBox_ClearFocus"/>
+			<OnEditFocusLost function="EditBox_ClearHighlight"/>
+			<OnEditFocusGained function="EditBox_HighlightText"/>
+		</Scripts>
+	</EditBox>
+	<EditBox name="InputBoxTemplate" inherits="InputBoxScriptTemplate" virtual="true">
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture parentKey="Left" file="Interface\Common\Common-Input-Border">
@@ -28,14 +36,9 @@
 				</Texture>
 			</Layer>
 		</Layers>
-		<Scripts>
-			<OnEscapePressed function="EditBox_ClearFocus"/>
-			<OnEditFocusLost function="EditBox_ClearHighlight"/>
-			<OnEditFocusGained function="EditBox_HighlightText"/>
-		</Scripts>
 		<FontString inherits="ChatFontNormal"/>
 	</EditBox>
-	
+
 	<Texture name="UIPanelScrollBarButton" virtual="true">
 		<TexCoords left="0.20" right="0.80" top="0.25" bottom="0.75"/>
 	</Texture>
@@ -279,6 +282,16 @@
 		<HighlightFont style="GameFontHighlight"/>
 		<DisabledFont style="GameFontDisable"/>
 		<HighlightTexture inherits="UIPanelButtonHighlightTexture"/>
+	</Button>
+	<Button name="UIPanelButtonNoTooltipResizeToFitTemplate" inherits="UIPanelButtonNoTooltipTemplate,ResizeLayoutFrame" mixin="UIPanelButtonNoTooltipResizeToFitMixin" virtual="true">
+		<KeyValues>
+			<KeyValue key="fixedHeight" value="22" type="number"/>
+			<KeyValue key="minimumWidth" value="40" type="number"/>
+			<KeyValue key="widthPadding" value="20" type="number"/>
+		</KeyValues>
+		<Scripts>
+			<OnLoad method="OnLoad"/>
+		</Scripts>
 	</Button>
 	<Frame name="SelectionFrameTemplate" virtual="true">
 		<KeyValues>

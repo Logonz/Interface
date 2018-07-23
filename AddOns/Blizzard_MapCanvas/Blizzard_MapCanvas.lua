@@ -24,11 +24,16 @@ function MapCanvasMixin:OnUpdate()
 end
 
 function MapCanvasMixin:SetMapID(mapID)
-	if self.mapID ~= mapID then
+	local mapArtID = C_Map.GetMapArtID(mapID) -- phased map art may be different for the same mapID
+	if self.mapID ~= mapID or self.mapArtID ~= mapArtID then
 		self.areDetailLayersDirty = true;
 		self.mapID = mapID; 
+		self.mapArtID = mapArtID;
 		self.expandedMapInsetsByMapID = {};
 		self.ScrollContainer:SetMapID(mapID);
+		if self:IsShown() then
+			self:RefreshDetailLayers();
+		end
 		self:OnMapChanged();
 	end
 end
@@ -700,14 +705,6 @@ function MapCanvasMixin:EvaluateLockReasons()
 	end
 end
 
-function MapCanvasMixin:SetShouldShowSubzones(value)
-	self.shouldShowSubzones = value;
-end
-
-function MapCanvasMixin:ShouldShowSubzones()
-	return self.shouldShowSubzones;
-end
-
 function MapCanvasMixin:GetPinFrameLevelsManager()
 	return self.pinFrameLevelsManager;
 end
@@ -720,15 +717,10 @@ function MapCanvasMixin:ReapplyPinFrameLevels(pinFrameLevelType)
 	end
 end
 
-function MapCanvasMixin:NavigateToMap(mapID)
-	self:SetMapID(mapID);
-	self:RefreshDetailLayers();
-end
-
 function MapCanvasMixin:NavigateToParentMap()
 	local mapInfo = C_Map.GetMapInfo(self:GetMapID());
 	if mapInfo.parentMapID > 0 then
-		self:NavigateToMap(mapInfo.parentMapID);
+		self:SetMapID(mapInfo.parentMapID);
 	end
 end
 
@@ -736,7 +728,7 @@ function MapCanvasMixin:NavigateToCursor()
 	local normalizedCursorX, normalizedCursorY = self:GetNormalizedCursorPosition();
 	local mapInfo = C_Map.GetMapInfoAtPosition(self:GetMapID(), normalizedCursorX, normalizedCursorY);
 	if mapInfo then
-		self:NavigateToMap(mapInfo.mapID);
+		self:SetMapID(mapInfo.mapID);
 	end
 end
 

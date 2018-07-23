@@ -142,6 +142,7 @@ local ArtifactUI =
 				{ Name = "swatchColorB", Type = "number", Nilable = false },
 				{ Name = "modelOpacity", Type = "number", Nilable = false },
 				{ Name = "modelSaturation", Type = "number", Nilable = false },
+				{ Name = "obtainable", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -168,6 +169,7 @@ local ArtifactUI =
 				{ Name = "swatchColorB", Type = "number", Nilable = false },
 				{ Name = "modelOpacity", Type = "number", Nilable = false },
 				{ Name = "modelSaturation", Type = "number", Nilable = false },
+				{ Name = "obtainable", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -623,12 +625,12 @@ local ArtifactUI =
 			},
 		},
 		{
-			Name = "IsArtifactInstabilityInEffect",
+			Name = "IsArtifactDisabled",
 			Type = "Function",
 
 			Returns =
 			{
-				{ Name = "inEffect", Type = "bool", Nilable = false },
+				{ Name = "artifactDisabled", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -638,6 +640,15 @@ local ArtifactUI =
 			Returns =
 			{
 				{ Name = "isAtForge", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "IsEquippedArtifactDisabled",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "artifactDisabled", Type = "bool", Nilable = false },
 			},
 		},
 		{

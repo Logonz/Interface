@@ -15,15 +15,23 @@ function DeathMapDataProviderMixin:RefreshAllData(fromOnShow)
 		corpsePin:SetPosition(corpsePosition:GetXY());
 		corpsePin:Show();
 	end
+
+	--[[ Disabled for now, need a different icon to reduce confusion
 	local deathReleasePosition = C_DeathInfo.GetDeathReleasePosition(mapID);
 	if deathReleasePosition then
 		local deathReleasePin = self:GetMap():AcquirePin("DeathReleasePinTemplate");
 		deathReleasePin:SetPosition(deathReleasePosition:GetXY());
 		deathReleasePin:Show();
 	end	
+	]]
 end
 
 CorpsePinMixin = CreateFromMixins(MapCanvasPinMixin);
+
+function CorpsePinMixin:OnLoad()
+	WorldQuestPinMixin.OnLoad(self);
+	self:SetScalingLimits(1, 0.8, 0.8);
+end
 
 function CorpsePinMixin:OnAcquired()
 	self:UseFrameLevelType("PIN_FRAME_LEVEL_CORPSE");

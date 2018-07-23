@@ -19,6 +19,18 @@ end
 	return playerLocation;
 end
 
+--[[static]] function PlayerLocation:CreateFromCommunityChatData(clubID, streamID, epoch, position)
+	local playerLocation = CreateFromMixins(PlayerLocationMixin);
+	playerLocation:SetCommunityData(clubID, streamID, epoch, position);
+	return playerLocation;
+end
+
+--[[static]] function PlayerLocation:CreateFromCommunityInvitation(clubID, guid)
+	local playerLocation = CreateFromMixins(PlayerLocationMixin);
+	playerLocation:SetCommunityInvitation(clubID, guid);
+	return playerLocation;
+end
+
 --[[static]] function PlayerLocation:CreateFromBattlefieldScoreIndex(battlefieldScoreIndex)
 	local playerLocation = CreateFromMixins(PlayerLocationMixin);
 	playerLocation:SetBattlefieldScoreIndex(battlefieldScoreIndex);
@@ -36,12 +48,24 @@ function PlayerLocationMixin:SetGUID(guid)
 	self:ClearAndSetField("guid", guid);
 end
 
+function PlayerLocationMixin:IsValid()
+	if (self:IsCommunityData()) then
+		return C_Club.CanResolvePlayerLocationFromClubMessageData(self.communityClubID, self.communityStreamID, self.communityEpoch, self.communityPosition);
+	end
+
+	return true;
+end
+
 function PlayerLocationMixin:IsGUID()
 	return self.guid ~= nil;
 end
 
+function PlayerLocationMixin:IsBattleNetGUID()
+	return self.guid and C_AccountInfo.IsGUIDBattleNetAccountType(self.guid);
+end
+
 function PlayerLocationMixin:GetGUID()
-	return self.guid;
+	return self.guid or self.communityClubInviterGUID;
 end
 
 function PlayerLocationMixin:SetUnit(unit)
@@ -94,6 +118,28 @@ function PlayerLocationMixin:GetVoiceID()
 	return self.voiceMemberID, self.voiceChannelID;
 end
 
+function PlayerLocationMixin:SetCommunityData(clubID, streamID, epoch, position)
+	self:Clear();
+	self.communityClubID = clubID;
+	self.communityStreamID = streamID;
+	self.communityEpoch = epoch;
+	self.communityPosition = position;
+end
+
+function PlayerLocationMixin:IsCommunityData()
+	return self.communityClubID ~= nil and self.communityStreamID ~= nil and self.communityEpoch ~= nil and self.communityPosition ~= nil;
+end
+
+function PlayerLocationMixin:SetCommunityInvitation(clubID, guid)
+	self:Clear();
+	self.communityClubID = clubID;
+	self.communityClubInviterGUID = guid;
+end
+
+function PlayerLocationMixin:IsCommunityInvitation()
+	return self.communityClubID ~= nil and self.communityClubInviterGUID ~= nil;
+end
+
 --[[private api]]
 function PlayerLocationMixin:Clear()
 	self.guid = nil;
@@ -102,6 +148,11 @@ function PlayerLocationMixin:Clear()
 	self.battlefieldScoreIndex = nil;
 	self.voiceMemberID = nil;
 	self.voiceChannelID = nil;
+	self.communityClubID = nil;
+	self.communityStreamID = nil;
+	self.communityEpoch = nil;
+	self.communityPosition = nil;
+	self.communityClubInviterGUID = nil;
 end
 
 function PlayerLocationMixin:ClearAndSetField(fieldName, field)

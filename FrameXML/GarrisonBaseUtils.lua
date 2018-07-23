@@ -46,6 +46,7 @@ GarrisonFollowerOptions[LE_FOLLOWER_TYPE_GARRISON_6_0] = {
 	showILevelInFollowerList = true,
 	showILevelOnFollower = false,
 	showILevelOnMission = true,
+	showNumFollowers = true,
 	showSingleMissionCompleteAnimation = false,
 	showSingleMissionCompleteFollower = false,
 	showSpikyBordersOnSpecializationAbilities = false,
@@ -97,6 +98,7 @@ GarrisonFollowerOptions[LE_FOLLOWER_TYPE_SHIPYARD_6_2] = {
 	showILevelInFollowerList = true,
 	showILevelOnFollower = false,
 	showILevelOnMission = true,
+	showNumFollowers = true,
 	showSingleMissionCompleteAnimation = true,
 	showSingleMissionCompleteFollower = true,
 	showSpikyBordersOnSpecializationAbilities = false,
@@ -135,7 +137,7 @@ GarrisonFollowerOptions[LE_FOLLOWER_TYPE_GARRISON_7_0] = {
 	missionAbilityTooltipFrame = "GarrisonFollowerMissionAbilityWithoutCountersTooltip",
 	missionCompleteUseNeutralChest = true,
 	missionFrame = "OrderHallMissionFrame",
-	missionPageAssignFollowerSound = SOUNDKIT.UI_GARRISON_COMMAND_TABLE_SLOT_CHAMPION, 
+	missionPageAssignFollowerSound = SOUNDKIT.UI_GARRISON_COMMAND_TABLE_SLOT_CHAMPION,
 	missionPageAssignTroopSound = SOUNDKIT.UI_GARRISON_COMMAND_TABLE_SLOT_TROOP,
 	missionPageMechanicYOffset = -32,
 	missionPageShowXPInMissionInfo = true,
@@ -148,6 +150,7 @@ GarrisonFollowerOptions[LE_FOLLOWER_TYPE_GARRISON_7_0] = {
 	showILevelInFollowerList = true,
 	showILevelOnFollower = false,
 	showILevelOnMission = true,
+	showNumFollowers = true,
 	showSingleMissionCompleteAnimation = true,
 	showSingleMissionCompleteFollower = false,
 	showSpikyBordersOnSpecializationAbilities = true,
@@ -188,7 +191,7 @@ GarrisonFollowerOptions[LE_FOLLOWER_TYPE_GARRISON_8_0] = {
 	missionAbilityTooltipFrame = "GarrisonFollowerMissionAbilityWithoutCountersTooltip",
 	missionCompleteUseNeutralChest = true,
 	missionFrame = "BFAMissionFrame",
-	missionPageAssignFollowerSound = SOUNDKIT.UI_GARRISON_COMMAND_TABLE_SLOT_CHAMPION, 
+	missionPageAssignFollowerSound = SOUNDKIT.UI_GARRISON_COMMAND_TABLE_SLOT_CHAMPION,
 	missionPageAssignTroopSound = SOUNDKIT.UI_GARRISON_COMMAND_TABLE_SLOT_TROOP,
 	missionPageMechanicYOffset = -32,
 	missionPageShowXPInMissionInfo = true,
@@ -201,12 +204,13 @@ GarrisonFollowerOptions[LE_FOLLOWER_TYPE_GARRISON_8_0] = {
 	showILevelInFollowerList = false,
 	showILevelOnFollower = false,
 	showILevelOnMission = false,
+	showNumFollowers = false,
 	showSingleMissionCompleteAnimation = true,
 	showSingleMissionCompleteFollower = false,
 	showSpikyBordersOnSpecializationAbilities = true,
 	strings = {
-		LANDING_COMPLETE = ORDER_HALL_LANDING_COMPLETE,
-		RETURN_TO_START = ORDER_HALL_MISSION_TOOLTIP_RETURN_TO_START,
+		LANDING_COMPLETE = BFA_LANDING_COMPLETE,
+		RETURN_TO_START = BFA_MISSION_TOOLTIP_RETURN_TO_START,
 		CONFIRM_EQUIPMENT = GARRISON_FOLLOWER_CONFIRM_EQUIPMENT,
 		CONFIRM_EQUIPMENT_REPLACEMENT = GARRISON_FOLLOWER_CONFIRM_EQUIPMENT_REPLACEMENT,
 		TRAITS_LABEL = ORDER_HALL_EQUIPMENT_SLOTS,
@@ -264,6 +268,9 @@ function ShowGarrisonLandingPage(garrTypeID)
 	elseif (garrTypeID == LE_GARRISON_TYPE_7_0) then
 		GarrisonLandingPage.Report.Title:SetText(ORDER_HALL_LANDING_PAGE_TITLE);
 		GarrisonLandingPage.FollowerList:Initialize(LE_FOLLOWER_TYPE_GARRISON_7_0);
+	elseif (garrTypeID == LE_GARRISON_TYPE_8_0) then
+		GarrisonLandingPage.Report.Title:SetText(GARRISON_TYPE_8_0_LANDING_PAGE_TITLE);
+		GarrisonLandingPage.FollowerList:Initialize(LE_FOLLOWER_TYPE_GARRISON_8_0);
 	else
 		return;
 	end
@@ -278,13 +285,13 @@ function ShowGarrisonLandingPage(garrTypeID)
 end
 
 function DoesFollowerMatchCurrentGarrisonType(followerType)
-	if followerType == LE_FOLLOWER_TYPE_GARRISON_7_0 then
-		return C_Garrison.GetLandingPageGarrisonType() == LE_GARRISON_TYPE_7_0;
-	elseif followerType == LE_FOLLOWER_TYPE_GARRISON_6_0 or followerType == LE_FOLLOWER_TYPE_SHIPYARD_6_2 then
-		return C_Garrison.GetLandingPageGarrisonType() == LE_GARRISON_TYPE_6_0;
+	local followerOptions = GarrisonFollowerOptions[followerType];
+	if not followerOptions then
+		GMError("Unknown follower type");
+		return false;
 	end
 
-	return false;
+	return followerOptions.garrisonType == C_Garrison.GetLandingPageGarrisonType();
 end
 
 ---------------------------------------------------------------------------------
@@ -303,7 +310,7 @@ end
 
 function GarrisonFollowerPortraitMixin:SetQuality(quality)
 	self.quality = quality;
-	
+
 	if (quality == LE_GARR_FOLLOWER_QUALITY_TITLE) then
 		self.LevelBorder:SetAtlas("legionmission-portraitring_levelborder_epicplus", true);
 		self.PortraitRing:SetAtlas("legionmission-portraitring-epicplus", true);

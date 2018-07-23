@@ -19,54 +19,59 @@ function UIWidgetTemplateIconTextAndCurrenciesMixin:Setup(widgetInfo)
 
 	SetupTextureKits(widgetInfo.textureKitID, self, textureKitRegions);
 	self.Text:SetText(widgetInfo.text);
-	local textColor = widgetInfo.enabledState;
-	if widgetInfo.enabledState == Enum.TextColorState.Enabled then
-		textColor = Enum.TextColorState.Highlight;
+	local enabledState = widgetInfo.enabledState;
+	if widgetInfo.enabledState == Enum.WidgetEnabledState.Enabled then
+		enabledState = Enum.WidgetEnabledState.Highlight;
 	end
-	self.Text:SetColorState(textColor);
+	self.Text:SetEnabledState(enabledState);
 
-	local disabled = (widgetInfo.enabledState == Enum.TextColorState.Disabled);
+	local disabled = (enabledState == Enum.WidgetEnabledState.Disabled);
 	self.Icon:SetDesaturated(disabled);
 
 	local previousCurrencyFrame;
 	local firstCurrencyFrame;
 
+	local currencyHeight = 0;
 	for index, currencyInfo in ipairs(widgetInfo.currencies) do
 		local currencyFrame = self.currencyPool:Acquire();
 		currencyFrame:Show();
 
-		currencyFrame:Setup(currencyInfo, disabled);
+		currencyFrame:Setup(currencyInfo, enabledState);
 
 		if previousCurrencyFrame then
 			currencyFrame:SetPoint("TOPLEFT", previousCurrencyFrame, "TOPRIGHT", 10, 0);
 		else
-			currencyFrame:SetPoint("BOTTOMLEFT", self.Icon, "BOTTOMRIGHT", 10, 0);
+			currencyFrame:SetPoint("TOPLEFT", self.Text, "BOTTOMLEFT", 0, -2);
 			firstCurrencyFrame = currencyFrame;
 		end
 
 		previousCurrencyFrame = currencyFrame;
+
+		currencyHeight = math.max(currencyHeight, currencyFrame:GetHeight() + 2);
 	end
 
-	local extraHeight = 0;
-
+	local descHeight = 0;
 	local showDescription = (widgetInfo.descriptionShownState == Enum.WidgetShownState.Shown) and widgetInfo.description;
 	if showDescription then
 		self.Description:SetText(widgetInfo.description);
-		self.Description:SetColorState(widgetInfo.descriptionColorState);
+		self.Description:SetEnabledState(widgetInfo.descriptionEnabledState);
 		self.Description:Show();
 
 		self.Description:ClearAllPoints();
 		if firstCurrencyFrame then
 			self.Description:SetPoint("TOPLEFT", firstCurrencyFrame, "BOTTOMLEFT", 0, -2);
-			extraHeight = self.Description:GetHeight();
 		else
 			self.Description:SetPoint("TOPLEFT", self.Text, "BOTTOMLEFT", 0, -2);
 		end
+
+		descHeight = self.Description:GetStringHeight() + 2;
 	else
 		self.Description:Hide();
 	end
 
-	self:SetHeight(32 + extraHeight);
+	local otherHeight = self.Text:GetStringHeight() + currencyHeight + descHeight;
+
+	self:SetHeight(math.max(self.Icon:GetHeight(), otherHeight));
 end
 
 function UIWidgetTemplateIconTextAndCurrenciesMixin:OnLoad()

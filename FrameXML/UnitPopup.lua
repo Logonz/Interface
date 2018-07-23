@@ -46,7 +46,6 @@ UnitPopupButtons = {
 	["BN_SUGGEST_INVITE"] = { text = SUGGEST_INVITE, },
 	["BN_REQUEST_INVITE"] = { text = REQUEST_INVITE, },
 	["BN_TARGET"] = { text = TARGET, },
-	["BLOCK_COMMUNICATION"] = { text = BLOCK_COMMUNICATION, },
 	["VOTE_TO_KICK"] = { text = VOTE_TO_KICK, },
 	["PROMOTE"] = { text = PARTY_PROMOTE, },
 	["PROMOTE_GUIDE"] = { text = PARTY_PROMOTE_GUIDE, },
@@ -74,7 +73,6 @@ UnitPopupButtons = {
 	["REPORT_PLAYER"] = { text = REPORT_PLAYER_FOR, nested = 1 },
 	["REPORT_SPAM"]	= { text = REPORT_SPAMMING, },
 	["REPORT_BAD_LANGUAGE"] = { text = REPORT_BAD_LANGUAGE, },
-	["REPORT_BAD_LANGUAGE_VOICE"] = { text = REPORT_BAD_LANGUAGE_VOICE, },
 	["REPORT_BAD_NAME"] = { text = REPORT_BAD_NAME, },
 	["REPORT_BAD_GUILD_NAME"] = { text = REPORT_BAD_GUILD_NAME, },
 	["REPORT_CHEATING"] = { text = REPORT_CHEATING, },
@@ -94,9 +92,9 @@ UnitPopupButtons = {
 	["LEGACY_RAID_DIFFICULTY1"] = { text = RAID_DIFFICULTY1, checkable = 1, difficultyID = 3 },
 	["LEGACY_RAID_DIFFICULTY2"] = { text = RAID_DIFFICULTY2, checkable = 1, difficultyID = 4 },
 
-	["PVP_FLAG"] = { text = PVP_FLAG, nested = 1 },
-	["PVP_ENABLE"] = { text = ENABLE, checkable = 1, checkable = 1 },
-	["PVP_DISABLE"] = { text = DISABLE, checkable = 1, checkable = 1 },
+	["PVP_FLAG"] = { text = PVP_FLAG, nested = 1, tooltipWhileDisabled = true, noTooltipWhileEnabled = true, tooltipOnButton = true },
+	["PVP_ENABLE"] = { text = ENABLE, checkable = 1 },
+	["PVP_DISABLE"] = { text = DISABLE, checkable = 1 },
 
 	["ITEM_QUALITY2_DESC"] = { text = ITEM_QUALITY2_DESC, color = ITEM_QUALITY_COLORS[2], checkable = 1 },
 	["ITEM_QUALITY3_DESC"] = { text = ITEM_QUALITY3_DESC, color = ITEM_QUALITY_COLORS[3], checkable = 1 },
@@ -112,10 +110,6 @@ UnitPopupButtons = {
 	["OPT_OUT_LOOT_TITLE"] = { text = OPT_OUT_LOOT_TITLE, nested = 1, tooltipText = NEWBIE_TOOLTIP_UNIT_OPT_OUT_LOOT },
 	["OPT_OUT_LOOT_ENABLE"] = { text = YES, checkable = 1 },
 	["OPT_OUT_LOOT_DISABLE"] = { text = NO, checkable = 1 },
-
-	["BN_REPORT"] = { text = BNET_REPORT, nested = 1 },
-	["BN_REPORT_THREAT"] = { text = BNET_REPORT_THREAT, },
-	["BN_REPORT_NAME"] = { text = BNET_REPORT_NAME, },
 
 	["RAID_LEADER"] = { text = SET_RAID_LEADER, },
 	["RAID_PROMOTE"] = { text = SET_RAID_ASSISTANT, },
@@ -187,22 +181,17 @@ UnitPopupButtons = {
 	["GARRISON_VISIT"] = { text = GARRISON_VISIT_LEADER, },
 
 	-- Voice Chat
-	["VOICE_CHAT"] = { text = VOICE_CHAT, nested = 1, IsDisabledFn = function()
-		if not C_VoiceChat.IsEnabled() or C_VoiceChat.GetCurrentVoiceChatConnectionStatusCode() ~= Enum.VoiceChatStatusCode.Success then
-			return true;
-		end
-	end, },
+	["VOICE_CHAT"] = { text = VOICE_CHAT, nested = 1, },
 	["VOICE_CHAT_MICROPHONE_VOLUME"] = { customFrame = UnitPopupVoiceMicrophoneVolume, },
 	["VOICE_CHAT_SPEAKER_VOLUME"] = { customFrame = UnitPopupVoiceSpeakerVolume, },
 	["VOICE_CHAT_USER_VOLUME"] = { customFrame = UnitPopupVoiceUserVolume, },
-	["VOICE_CHAT_COMMUNICATIONS_MODE_OPEN_MIC"] = { text = OPEN_MIC, checkable = 1, },
-	["VOICE_CHAT_COMMUNICATIONS_MODE_PUSH_TO_TALK"] = { text = PUSH_TO_TALK, checkable = 1, },
 	["VOICE_CHAT_SETTINGS"] = { text = VOICE_CHAT_SETTINGS, },
 
 	-- Community Member
 	["COMMUNITIES_LEAVE"] = { text = function(dropdownMenu)
 			return dropdownMenu.clubInfo.clubType == Enum.ClubType.Character and COMMUNITIES_LIST_DROP_DOWN_LEAVE_CHARACTER_COMMUNITY or COMMUNITIES_LIST_DROP_DOWN_LEAVE_COMMUNITY;
 		end },
+	["COMMUNITIES_BATTLETAG_FRIEND"] = { text = COMMUNITY_MEMBER_LIST_DROP_DOWN_BATTLETAG_FRIEND },
 	["COMMUNITIES_KICK"] = { text = COMMUNITY_MEMBER_LIST_DROP_DOWN_REMOVE },
 	["COMMUNITIES_MEMBER_NOTE"] = { text = COMMUNITY_MEMBER_LIST_DROP_DOWN_SET_NOTE },
 	["COMMUNITIES_ROLE"] = { text = COMMUNITY_MEMBER_LIST_DROP_DOWN_ROLES, nested = 1 },
@@ -213,6 +202,13 @@ UnitPopupButtons = {
 	["COMMUNITIES_FAVORITE"] = { text = function(dropdownMenu)
 			return dropdownMenu.clubInfo.favoriteTimeStamp and COMMUNITIES_LIST_DROP_DOWN_UNFAVORITE or COMMUNITIES_LIST_DROP_DOWN_FAVORITE;
 		end },
+	["COMMUNITIES_SETTINGS"] = { text = COMMUNITIES_LIST_DROP_DOWN_COMMUNITIES_SETTINGS, },
+	["COMMUNITIES_NOTIFICATION_SETTINGS"] = { text = COMMUNITIES_LIST_DROP_DOWN_COMMUNITIES_NOTIFICATION_SETTINGS, },	
+	["COMMUNITIES_CLEAR_UNREAD_NOTIFICATIONS"] = { text = COMMUNITIES_LIST_DROP_DOWN_CLEAR_UNREAD_NOTIFICATIONS, },
+	["COMMUNITIES_INVITE"] = { text = COMMUNITIES_LIST_DROP_DOWN_INVITE, },
+
+	-- Community message line
+	["DELETE_COMMUNITIES_MESSAGE"] = { text = COMMUNITY_MESSAGE_DROP_DOWN_DELETE, },
 };
 
 -- First level menus
@@ -226,38 +222,38 @@ UnitPopupMenus = {
 	["PLAYER"] = { "RAID_TARGET_ICON", "SET_FOCUS", "ADD_FRIEND", "ADD_FRIEND_MENU", "INTERACT_SUBSECTION_TITLE", "RAF_SUMMON", "RAF_GRANT_LEVEL", "INVITE", "SUGGEST_INVITE", "REQUEST_INVITE", "WHISPER", "INSPECT", "ACHIEVEMENTS", "TRADE", "FOLLOW", "DUEL", "PET_BATTLE_PVP_DUEL", "OTHER_SUBSECTION_TITLE", "VOICE_CHAT", "MOVE_PLAYER_FRAME", "MOVE_TARGET_FRAME", "REPORT_PLAYER", "CANCEL" },
 	["RAID_PLAYER"] = { "RAID_TARGET_ICON", "SET_FOCUS", "ADD_FRIEND", "ADD_FRIEND_MENU", "INTERACT_SUBSECTION_TITLE", "RAF_SUMMON", "RAF_GRANT_LEVEL", "RAID_LEADER", "RAID_PROMOTE", "RAID_DEMOTE", "WHISPER", "INSPECT", "ACHIEVEMENTS", "TRADE", "FOLLOW", "DUEL", "PET_BATTLE_PVP_DUEL", "OTHER_SUBSECTION_TITLE", "VOICE_CHAT", "SELECT_ROLE", "MOVE_PLAYER_FRAME", "MOVE_TARGET_FRAME", "REPORT_PLAYER", "PVP_REPORT_AFK", "VOTE_TO_KICK", "RAID_REMOVE", "CANCEL" },
 	["RAID"] = { "SET_FOCUS", "INTERACT_SUBSECTION_TITLE", "RAID_LEADER",  "RAID_PROMOTE", "RAID_DEMOTE", "RAID_MAINTANK", "RAID_MAINASSIST", "OTHER_SUBSECTION_TITLE", "VOICE_CHAT", "MOVE_PLAYER_FRAME", "MOVE_TARGET_FRAME", "REPORT_PLAYER", "PVP_REPORT_AFK", "VOTE_TO_KICK", "RAID_REMOVE", "CANCEL" },
-	["FRIEND"] = { "POP_OUT_CHAT", "TARGET", "SET_NOTE", "INTERACT_SUBSECTION_TITLE", "INVITE", "SUGGEST_INVITE", "REQUEST_INVITE", "WHISPER", "OTHER_SUBSECTION_TITLE", "IGNORE", "REMOVE_FRIEND", "REPORT_PLAYER", "PVP_REPORT_AFK", "CANCEL" },
+	["FRIEND"] = { "POP_OUT_CHAT", "TARGET", "SET_NOTE", "INTERACT_SUBSECTION_TITLE", "INVITE", "SUGGEST_INVITE", "REQUEST_INVITE", "WHISPER", "OTHER_SUBSECTION_TITLE", "DELETE_COMMUNITIES_MESSAGE", "IGNORE", "REMOVE_FRIEND", "REPORT_PLAYER", "PVP_REPORT_AFK", "CANCEL" },
 	["FRIEND_OFFLINE"] = { "SET_NOTE", "OTHER_SUBSECTION_TITLE", "IGNORE", "REMOVE_FRIEND", "CANCEL" },
-	["BN_FRIEND"] = { "POP_OUT_CHAT", "BN_TARGET", "BN_SET_NOTE", "BN_VIEW_FRIENDS", "INTERACT_SUBSECTION_TITLE", "BN_INVITE", "BN_SUGGEST_INVITE", "BN_REQUEST_INVITE", "WHISPER", "OTHER_SUBSECTION_TITLE", "BLOCK_COMMUNICATION", "BN_REMOVE_FRIEND", "BN_REPORT", "CANCEL" },
-	["BN_FRIEND_OFFLINE"] = { "BN_SET_NOTE", "BN_VIEW_FRIENDS", "OTHER_SUBSECTION_TITLE", "BN_REMOVE_FRIEND", "BN_REPORT", "CANCEL" },
+	["BN_FRIEND"] = { "POP_OUT_CHAT", "BN_TARGET", "BN_SET_NOTE", "BN_VIEW_FRIENDS", "INTERACT_SUBSECTION_TITLE", "BN_INVITE", "BN_SUGGEST_INVITE", "BN_REQUEST_INVITE", "WHISPER", "OTHER_SUBSECTION_TITLE", "DELETE_COMMUNITIES_MESSAGE", "BN_REMOVE_FRIEND", "REPORT_PLAYER", "CANCEL" },
+	["BN_FRIEND_OFFLINE"] = { "BN_SET_NOTE", "BN_VIEW_FRIENDS", "OTHER_SUBSECTION_TITLE", "BN_REMOVE_FRIEND", "REPORT_PLAYER", "CANCEL" },
 	["GUILD"] = { "TARGET", "GUILD_BATTLETAG_FRIEND", "INTERACT_SUBSECTION_TITLE", "INVITE", "SUGGEST_INVITE", "REQUEST_INVITE", "WHISPER", "GUILD_PROMOTE", "OTHER_SUBSECTION_TITLE", "VOICE_CHAT", "IGNORE", "GUILD_LEAVE", "CANCEL" },
 	["GUILD_OFFLINE"] = { "GUILD_BATTLETAG_FRIEND", "INTERACT_SUBSECTION_TITLE", "GUILD_PROMOTE", "OTHER_SUBSECTION_TITLE", "IGNORE", "GUILD_LEAVE", "CANCEL" },
 	["RAID_TARGET_ICON"] = { "RAID_TARGET_8", "RAID_TARGET_7", "RAID_TARGET_6", "RAID_TARGET_5", "RAID_TARGET_4", "RAID_TARGET_3", "RAID_TARGET_2", "RAID_TARGET_1", "RAID_TARGET_NONE" },
 	["SELECT_ROLE"] = { "SET_ROLE_TANK", "SET_ROLE_HEALER", "SET_ROLE_DAMAGER", "SET_ROLE_NONE" },
-	["CHAT_ROSTER"] = { "VOICE_CHAT_MICROPHONE_VOLUME", "VOICE_CHAT_SPEAKER_VOLUME", "VOICE_CHAT_USER_VOLUME", "SUBSECTION_SEPARATOR", "VOICE_CHAT_COMMUNICATIONS_MODE_OPEN_MIC", "VOICE_CHAT_COMMUNICATIONS_MODE_PUSH_TO_TALK", "SUBSECTION_SEPARATOR", "INTERACT_SUBSECTION_TITLE", "TARGET", "WHISPER", "CHAT_OWNER", "CHAT_PROMOTE", "CHAT_DEMOTE", "SUBSECTION_SEPARATOR", "OTHER_SUBSECTION_TITLE", "REPORT_PLAYER", "VOICE_CHAT_SETTINGS", "CLOSE" },
+	["CHAT_ROSTER"] = { "VOICE_CHAT_MICROPHONE_VOLUME", "VOICE_CHAT_SPEAKER_VOLUME", "VOICE_CHAT_USER_VOLUME", "SUBSECTION_SEPARATOR", "INTERACT_SUBSECTION_TITLE", "TARGET", "WHISPER", "CHAT_OWNER", "CHAT_PROMOTE", "CHAT_DEMOTE", "SUBSECTION_SEPARATOR", "OTHER_SUBSECTION_TITLE", "REPORT_PLAYER", "VOICE_CHAT_SETTINGS", "CLOSE" },
 	["VEHICLE"] = { "RAID_TARGET_ICON", "SET_FOCUS", "OTHER_SUBSECTION_TITLE", "VEHICLE_LEAVE", "MOVE_PLAYER_FRAME", "MOVE_TARGET_FRAME", "CANCEL" },
 	["TARGET"] = { "RAID_TARGET_ICON", "SET_FOCUS", "ADD_FRIEND", "ADD_FRIEND_MENU", "OTHER_SUBSECTION_TITLE", "VOICE_CHAT", "MOVE_PLAYER_FRAME", "MOVE_TARGET_FRAME", "CANCEL" },
 	["ARENAENEMY"] = { "SET_FOCUS", "OTHER_SUBSECTION_TITLE", "CANCEL" },
 	["FOCUS"] = { "RAID_TARGET_ICON", "CLEAR_FOCUS", "OTHER_SUBSECTION_TITLE", "VOICE_CHAT", "LARGE_FOCUS", "MOVE_FOCUS_FRAME", "CANCEL" },
 	["BOSS"] = { "RAID_TARGET_ICON", "SET_FOCUS", "OTHER_SUBSECTION_TITLE", "CANCEL" },
 	["WORLD_STATE_SCORE"] = { "REPORT_PLAYER", "PVP_REPORT_AFK", "CANCEL" },
-	["COMMUNITIES_WOW_MEMBER"] = { "INVITE", "SUGGEST_INVITE", "REQUEST_INVITE", "WHISPER", "IGNORE", "COMMUNITIES_LEAVE", "COMMUNITIES_KICK", "COMMUNITIES_MEMBER_NOTE", "COMMUNITIES_ROLE" },
-	["COMMUNITIES_MEMBER"] = { "COMMUNITIES_LEAVE", "COMMUNITIES_KICK", "COMMUNITIES_MEMBER_NOTE", "COMMUNITIES_ROLE" },
-	["COMMUNITIES_COMMUNITY"] = { "COMMUNITIES_FAVORITE", "COMMUNITIES_LEAVE" },
+	["COMMUNITIES_WOW_MEMBER"] = { "ADD_FRIEND_MENU", "SUBSECTION_SEPARATOR", "VOICE_CHAT_MICROPHONE_VOLUME", "VOICE_CHAT_SPEAKER_VOLUME", "VOICE_CHAT_USER_VOLUME", "SUBSECTION_SEPARATOR", "INVITE", "SUGGEST_INVITE", "REQUEST_INVITE", "WHISPER", "IGNORE", "COMMUNITIES_LEAVE", "COMMUNITIES_KICK", "COMMUNITIES_MEMBER_NOTE", "COMMUNITIES_ROLE", "OTHER_SUBSECTION_TITLE", "REPORT_PLAYER" },
+	["COMMUNITIES_GUILD_MEMBER"] = { "VOICE_CHAT_MICROPHONE_VOLUME", "VOICE_CHAT_SPEAKER_VOLUME", "VOICE_CHAT_USER_VOLUME", "SUBSECTION_SEPARATOR", "INVITE", "SUGGEST_INVITE", "REQUEST_INVITE", "WHISPER", "IGNORE", "OTHER_SUBSECTION_TITLE", "GUILD_PROMOTE", "GUILD_LEAVE", "REPORT_PLAYER" },
+	["COMMUNITIES_MEMBER"] = { "COMMUNITIES_BATTLETAG_FRIEND", "SUBSECTION_SEPARATOR", "VOICE_CHAT_MICROPHONE_VOLUME", "VOICE_CHAT_SPEAKER_VOLUME", "VOICE_CHAT_USER_VOLUME", "SUBSECTION_SEPARATOR", "COMMUNITIES_LEAVE", "COMMUNITIES_KICK", "COMMUNITIES_MEMBER_NOTE", "COMMUNITIES_ROLE", "OTHER_SUBSECTION_TITLE", "REPORT_PLAYER"  },
+	["COMMUNITIES_COMMUNITY"] = { "COMMUNITIES_CLEAR_UNREAD_NOTIFICATIONS", "COMMUNITIES_INVITE", "COMMUNITIES_SETTINGS", "COMMUNITIES_NOTIFICATION_SETTINGS", "COMMUNITIES_FAVORITE", "COMMUNITIES_LEAVE" },
 
 	-- Second level menus
 	["ADD_FRIEND_MENU"] = { "BATTLETAG_FRIEND", "CHARACTER_FRIEND" },
 	["PVP_FLAG"] = { "PVP_ENABLE", "PVP_DISABLE"},
 	["SELECT_LOOT_SPECIALIZATION"] = { "LOOT_SPECIALIZATION_DEFAULT","LOOT_SPECIALIZATION_SPEC1", "LOOT_SPECIALIZATION_SPEC2", "LOOT_SPECIALIZATION_SPEC3", "LOOT_SPECIALIZATION_SPEC4"},
 	["OPT_OUT_LOOT_TITLE"] = { "OPT_OUT_LOOT_ENABLE", "OPT_OUT_LOOT_DISABLE"},
-	["REPORT_PLAYER"] = { "REPORT_SPAM", "REPORT_BAD_LANGUAGE", "REPORT_BAD_LANGUAGE_VOICE", "REPORT_BAD_NAME", "REPORT_BAD_GUILD_NAME", "REPORT_CHEATING" },
+	["REPORT_PLAYER"] = { "REPORT_SPAM", "REPORT_BAD_LANGUAGE", "REPORT_BAD_NAME", "REPORT_BAD_GUILD_NAME", "REPORT_CHEATING" },
 	["DUNGEON_DIFFICULTY"] = { "DUNGEON_DIFFICULTY1", "DUNGEON_DIFFICULTY2", "DUNGEON_DIFFICULTY3" },
 	["RAID_DIFFICULTY"] = { "RAID_DIFFICULTY1", "RAID_DIFFICULTY2", "RAID_DIFFICULTY3", "LEGACY_RAID_SUBSECTION_TITLE", "LEGACY_RAID_DIFFICULTY1", "LEGACY_RAID_DIFFICULTY2" },
-	["BN_REPORT"] = { "BN_REPORT_NAME" },
 	["MOVE_PLAYER_FRAME"] = { "UNLOCK_PLAYER_FRAME", "LOCK_PLAYER_FRAME", "RESET_PLAYER_FRAME_POSITION", "PLAYER_FRAME_SHOW_CASTBARS" },
 	["MOVE_TARGET_FRAME"] = { "UNLOCK_TARGET_FRAME", "LOCK_TARGET_FRAME", "RESET_TARGET_FRAME_POSITION" , "TARGET_FRAME_BUFFS_ON_TOP"},
 	["MOVE_FOCUS_FRAME"] = { "UNLOCK_FOCUS_FRAME", "LOCK_FOCUS_FRAME", "FOCUS_FRAME_BUFFS_ON_TOP"},
-	["VOICE_CHAT"] = { "VOICE_CHAT_MICROPHONE_VOLUME", "VOICE_CHAT_SPEAKER_VOLUME", "VOICE_CHAT_USER_VOLUME", "VOICE_CHAT_COMMUNICATIONS_MODE_OPEN_MIC", "VOICE_CHAT_COMMUNICATIONS_MODE_PUSH_TO_TALK", },
+	["VOICE_CHAT"] = { "VOICE_CHAT_MICROPHONE_VOLUME", "VOICE_CHAT_SPEAKER_VOLUME", "VOICE_CHAT_USER_VOLUME" },
 	["COMMUNITIES_ROLE"] = { "COMMUNITIES_ROLE_OWNER", "COMMUNITIES_ROLE_LEADER", "COMMUNITIES_ROLE_MODERATOR", "COMMUNITIES_ROLE_MEMBER" },
 };
 
@@ -283,7 +279,7 @@ end
 local g_mostRecentPopupMenu;
 
 function UnitPopup_HasVisibleMenu()
-	return g_mostRecentPopupMenu and g_mostRecentPopupMenu:IsVisible();
+	return g_mostRecentPopupMenu == UIDROPDOWNMENU_OPEN_MENU;
 end
 
 function UnitPopup_ShowMenu (dropdownMenu, which, unit, name, userData)
@@ -583,7 +579,7 @@ end
 
 function UnitPopup_AddDropDownTitle(unit, name, userData)
 	if ( unit or name ) then
-		info = UIDropDownMenu_CreateInfo();
+		local info = UIDropDownMenu_CreateInfo();
 
 		local titleText = name;
 		if not titleText and unit then
@@ -632,20 +628,27 @@ function UnitPopup_GetOverrideIsChecked(command, currentIsChecked, dropdownMenu)
 		if GetCVarBool("fullSizeFocusFrame") then
 			return true;
 		end
-	elseif command == "VOICE_CHAT_COMMUNICATIONS_MODE_OPEN_MIC" then
-		if C_VoiceChat.GetCommunicationMode() == Enum.CommunicationMode.OpenMic then
-			return true;
-		end
-	elseif command == "VOICE_CHAT_COMMUNICATIONS_MODE_PUSH_TO_TALK" then
-		if C_VoiceChat.GetCommunicationMode() == Enum.CommunicationMode.PushToTalk then
-			return true;
-		end
 	elseif commandToRoleId[command] ~= nil  then
 		return dropdownMenu.clubMemberInfo.role == commandToRoleId[command];
 	end
 
 	-- If there was no override, use the current value
 	return currentIsChecked;
+end
+
+function UnitPopup_UpdateButtonInfo(info)
+	if info.value == "PVP_FLAG" then
+		if C_PvP.IsWarModeActive() or (TALENT_WAR_MODE_BUTTON and TALENT_WAR_MODE_BUTTON:GetWarModeDesired()) then
+			info.hasArrow = nil;
+			info.tooltipTitle = PVP_LABEL_WAR_MODE;
+			info.tooltipInstruction = PVP_WAR_MODE_ENABLED;
+			if (not C_PvP.CanToggleWarMode()) then
+				info.tooltipWarning = UnitFactionGroup("player") == PLAYER_FACTION_GROUP[0] and PVP_WAR_MODE_NOT_NOW_HORDE or PVP_WAR_MODE_NOT_NOW_ALLIANCE;
+			end
+		else
+			info.hasArrow = true;
+		end
+	end
 end
 
 function UnitPopup_AddDropDownButton(info, dropdownMenu, cntButton, buttonIndex, level)
@@ -716,6 +719,8 @@ function UnitPopup_AddDropDownButton(info, dropdownMenu, cntButton, buttonIndex,
 		-- NOTE: UnitPopup_AddDropDownButton is called for both level 1 and 2 buttons, level 2 buttons already
 		-- had a disable mechanism, so only set disabled to nil for level 1 buttons.
 		-- All buttons can define IsDisabledFn to override behavior.
+		-- NOTE: There are issues when both 'nested' and 'disabled' are true, the label on the menu won't respect
+		-- the disabled state, but the arrow will.  Should fix this at some point.
 		if cntButton.IsDisabledFn then
 			info.disabled = cntButton.IsDisabledFn();
 		else
@@ -738,11 +743,21 @@ function UnitPopup_AddDropDownButton(info, dropdownMenu, cntButton, buttonIndex,
 		info.customFrame:SetContextData(dropdownMenu);
 	end
 
+	info.tooltipWhileDisabled = cntButton.tooltipWhileDisabled;
+	info.noTooltipWhileEnabled = cntButton.noTooltipWhileEnabled;
+	info.tooltipOnButton = cntButton.tooltipOnButton;
+	info.tooltipInstruction = cntButton.tooltipInstruction;
+	info.tooltipWarning = cntButton.tooltipWarning;
+
+	UnitPopup_UpdateButtonInfo(info);
+
 	UIDropDownMenu_AddButton(info, level);
 end
 
 local function UnitPopup_GetGUID(menu)
-	if menu.unit then
+	if menu.guid then
+		return menu.guid;
+	elseif menu.unit then
 		return UnitGUID(menu.unit);
 	elseif type(menu.userData) == "table" and menu.userData.guid then
 		return menu.userData.guid;
@@ -752,6 +767,10 @@ end
 local function UnitPopup_TryCreatePlayerLocation(menu, guid)
 	if menu.battlefieldScoreIndex then
 		return PlayerLocation:CreateFromBattlefieldScoreIndex(menu.battlefieldScoreIndex);
+	elseif menu.communityClubID and menu.communityStreamID and menu.communityEpoch and menu.communityPosition then
+		return PlayerLocation:CreateFromCommunityChatData(menu.communityClubID, menu.communityStreamID, menu.communityEpoch, menu.communityPosition);
+	elseif menu.communityClubID and not menu.communityStreamID then
+		return PlayerLocation:CreateFromCommunityInvitation(menu.communityClubID, guid);
 	elseif menu.lineID then
 		return PlayerLocation:CreateFromChatLineID(menu.lineID);
 	elseif menu.unit then
@@ -789,17 +808,19 @@ local function UnitPopup_IsPlayerOffline(menu)
 	return false;
 end
 
-local function CanKickClubMember(clubPrivileges, memberInfo)
-	return tContains(clubPrivileges.kickableRoleIds, memberInfo.role);
+local function UnitPopup_IsPlayerMobile(menu)
+	if menu.clubMemberInfo then
+		local presence = menu.clubMemberInfo.presence;
+		if presence == Enum.ClubMemberPresence.Offline or presence == Enum.ClubMemberPresence.Unknown then
+			return true;
+		end
+	end
+
+	return false;
 end
 
 local function UnitPopup_GetIsLocalPlayer(menu)
-	-- NOTE: should have already arrived at unit/guid/playerLocation before calling this.
-	if menu.voiceMemberID and C_VoiceChat.IsMemberLocalPlayer(menu.voiceMemberID, menu.voiceChannelID) then
-		return true;
-	end
-
-	if menu.guid and UnitGUID("player") == menu.guid then
+	if menu.isSelf or menu.guid and C_AccountInfo.IsGUIDRelatedToLocalAccount(menu.guid) then
 		return true;
 	end
 
@@ -845,7 +866,8 @@ function UnitPopup_HideButtons ()
 				shown = false;
 			end
 		elseif ( value == "ADD_FRIEND_MENU" ) then
-			if ( not haveBattleTag or not isPlayer ) then
+			local hasClubInfo = dropdownMenu.clubInfo ~= nil and dropdownMenu.clubMemberInfo ~= nil;
+			if ( not haveBattleTag or (not isPlayer and not hasClubInfo) ) then
 				shown = false;
 			end
 		elseif ( value == "GUILD_BATTLETAG_FRIEND" ) then
@@ -912,7 +934,7 @@ function UnitPopup_HideButtons ()
 				whisperIsLocalPlayer = (dropdownMenu.name == playerName and dropdownMenu.server == playerServer);
 			end
 
-			if whisperIsLocalPlayer or isOffline or ( dropdownMenu.unit and (not canCoop or not isPlayer) ) then
+			if whisperIsLocalPlayer or isOffline or ( dropdownMenu.unit and (not canCoop or not isPlayer)) or (dropdownMenu.bnetIDAccount and not BNIsFriend(dropdownMenu.bnetIDAccount)) then
 				shown = false;
 			end
 		elseif ( value == "DUEL" ) then
@@ -951,34 +973,16 @@ function UnitPopup_HideButtons ()
 			if ( not dropdownMenu.friendsList ) then
 				shown = false;
 			end
-		elseif ( value == "BLOCK_COMMUNICATION" ) then
-			-- only show it for bnetIDAccounts that are not friends
-			if ( dropdownMenu.bnetIDAccount and BNFeaturesEnabledAndConnected()) then
-				local bnetIDAccount, accountName, battleTag, isBattleTag, characterName, bnetIDGameAccount, client, isOnline, lastOnline, isAFK, isDND, broadcastText, noteText, isFriend = BNGetFriendInfoByID(dropdownMenu.bnetIDAccount);
-				if ( isFriend ) then
-					shown = false;
-				end
-			else
-				shown = false;
-			end
-		elseif ( value == "BN_REPORT" ) then
-			if ( not dropdownMenu.bnetIDAccount or not BNFeaturesEnabledAndConnected() ) then
-				shown = false;
-			end
 		elseif ( value == "REPORT_PLAYER" ) then
-			if not playerLocation or not C_ChatInfo.CanReportPlayer(playerLocation) then
+			if not playerLocation or not playerLocation:IsValid() or not C_ChatInfo.CanReportPlayer(playerLocation) then
 				shown = false;
 			end
 		elseif ( value == "REPORT_SPAM" ) then
-			if not playerLocation or not playerLocation:IsChatLineID() then
+			if not playerLocation:IsChatLineID() and not playerLocation:IsCommunityInvitation() then
 				shown = false;
 			end
-		elseif ( value == "REPORT_BAD_LANGUAGE" ) then
-			if not playerLocation or not playerLocation:IsChatLineID() then
-				shown = false;
-			end
-		elseif ( value == "REPORT_BAD_LANGUAGE_VOICE" ) then
-			if not playerLocation then
+		elseif ( value == "REPORT_CHEATING" or value == "REPORT_BATTLE_PET" or value == "REPORT_PET" ) then
+			if dropdownMenu.bnetIDAccount or not playerLocation or playerLocation:IsBattleNetGUID() then
 				shown = false;
 			end
 		elseif ( value == "POP_OUT_CHAT" ) then
@@ -995,7 +999,7 @@ function UnitPopup_HideButtons ()
 			end
 		elseif ( value == "BN_TARGET" ) then
 			-- We don't want to show a menu option that will end up being blocked
-			if ( not dropdownMenu.bnetIDAccount or InCombatLockdown() or not issecure() ) then
+			if ( not dropdownMenu.bnetIDAccount or not BNIsFriend(dropdownMenu.bnetIDAccount) or InCombatLockdown() or not issecure() ) then
 				shown = false;
 			end
 		elseif ( value == "PROMOTE" ) then
@@ -1244,42 +1248,40 @@ function UnitPopup_HideButtons ()
 				shown = false;
 			end
 		elseif ( value == "VOICE_CHAT" ) then
-			if not isLocalPlayer and not C_VoiceChat.IsPlayerUsingVoice(playerLocation) then
+			if not C_VoiceChat.CanPlayerUseVoiceChat() or not isLocalPlayer and not C_VoiceChat.IsPlayerUsingVoice(playerLocation) then
 				shown = false;
 			end
 		elseif value == "VOICE_CHAT_MICROPHONE_VOLUME" then
-			if not isLocalPlayer then
+			if not C_VoiceChat.CanPlayerUseVoiceChat() or not isLocalPlayer then
 				shown = false;
 			end
 		elseif value == "VOICE_CHAT_SPEAKER_VOLUME" then
-			if not isLocalPlayer then
-				shown = false;
-			end
-		elseif value == "VOICE_CHAT_COMMUNICATIONS_MODE_OPEN_MIC" then
-			if not isLocalPlayer then
-				shown = false;
-			end
-		elseif value == "VOICE_CHAT_COMMUNICATIONS_MODE_PUSH_TO_TALK" then
-			if not isLocalPlayer then
+			if not C_VoiceChat.CanPlayerUseVoiceChat() or not isLocalPlayer then
 				shown = false;
 			end
 		elseif value == "VOICE_CHAT_SETTINGS" then
-			if not isLocalPlayer then
+			if not C_VoiceChat.CanPlayerUseVoiceChat() or not isLocalPlayer then
 				shown = false;
 			end
 		elseif value == "VOICE_CHAT_USER_VOLUME" then
-			if isLocalPlayer or not C_VoiceChat.IsPlayerUsingVoice(playerLocation) then
+			if not C_VoiceChat.CanPlayerUseVoiceChat() or isLocalPlayer or not C_VoiceChat.IsPlayerUsingVoice(playerLocation) then
 				shown = false;
 			end
 		elseif value == "COMMUNITIES_LEAVE" then
 			if dropdownMenu.clubInfo == nil or dropdownMenu.clubMemberInfo == nil or not dropdownMenu.clubMemberInfo.isSelf then
 				shown = false;
 			end
+		elseif value == "COMMUNITIES_BATTLETAG_FRIEND" then
+			if dropdownMenu.clubInfo == nil
+				or dropdownMenu.clubMemberInfo == nil
+				or dropdownMenu.clubMemberInfo.isSelf then
+				shown = false;
+			end
 		elseif value == "COMMUNITIES_KICK" then
 			if dropdownMenu.clubInfo == nil
 				or dropdownMenu.clubMemberInfo == nil
 				or dropdownMenu.clubMemberInfo.isSelf
-				or not CanKickClubMember(dropdownMenu.clubPrivileges, dropdownMenu.clubMemberInfo) then
+				or not CommunitiesUtil.CanKickClubMember(dropdownMenu.clubPrivileges, dropdownMenu.clubMemberInfo) then
 				shown = false;
 			end
 		elseif value == "COMMUNITIES_MEMBER_NOTE" then
@@ -1291,6 +1293,52 @@ function UnitPopup_HideButtons ()
 			end
 		elseif value == "COMMUNITIES_ROLE" then
 			if not dropdownMenu.clubAssignableRoles or #dropdownMenu.clubAssignableRoles == 0 then
+				shown = false;
+			end
+		elseif value == "DELETE_COMMUNITIES_MESSAGE" then
+			local clubId = dropdownMenu.communityClubID;
+			local streamId = dropdownMenu.communityStreamID;
+			if clubId and streamId and dropdownMenu.communityEpoch and dropdownMenu.communityPosition then
+				local messageId = { epoch = dropdownMenu.communityEpoch, position = dropdownMenu.communityPosition };
+				local function CanDestroyMessage(clubId, streamId, messageId)
+					local messageInfo = C_Club.GetMessageInfo(clubId, streamId, messageId);
+					if not messageInfo or messageInfo.destroyed then
+						return false;
+					end
+					
+					local privileges = C_Club.GetClubPrivileges(clubId);
+					if not messageInfo.author.isSelf and not privileges.canDestroyOtherMessage then
+						return false;
+					elseif messageInfo.author.isSelf and not privileges.canDestroyOwnMessage then
+						return false;
+					end
+					
+					return true;
+				end
+				
+				if not CanDestroyMessage(clubId, streamId, messageId) then
+					shown = false;
+				end
+			else
+				shown = false;
+			end
+		elseif value == "COMMUNITIES_INVITE" then
+			if dropdownMenu.clubInfo then
+				local privileges = C_Club.GetClubPrivileges(dropdownMenu.clubInfo.clubId);
+				if not privileges.canSendInvitation then
+					shown = false;
+				end
+			else
+				shown = false;
+			end
+		elseif value == "COMMUNITIES_SETTINGS" then
+			if dropdownMenu.clubInfo then
+				local privileges = C_Club.GetClubPrivileges(dropdownMenu.clubInfo.clubId);
+				local hasCommunitySettingsPrivilege = privileges.canSetName or privileges.canSetDescription or privileges.canSetAvatar or privileges.canSetBroadcast;
+				if not hasCommunitySettingsPrivilege then
+					shown = false;
+				end
+			else
 				shown = false;
 			end
 		elseif commandToRoleId[value] ~= nil then
@@ -1363,6 +1411,10 @@ function UnitPopup_OnUpdate (elapsed)
 						end
 					elseif ( value == "INSTANCE_LEAVE" ) then
 						if ( not inParty ) then
+							enable = false;
+						end
+					elseif (value == "PVP_FLAG" or value == "PVP_ENABLE" or value == "PVP_DISABLE") then
+						if ( C_PvP.IsWarModeActive() or (TALENT_WAR_MODE_BUTTON and TALENT_WAR_MODE_BUTTON:GetWarModeDesired()) ) then
 							enable = false;
 						end
 					elseif ( value == "UNINVITE" ) then
@@ -1486,12 +1538,14 @@ function UnitPopup_OnUpdate (elapsed)
 							enable = false;
 						end
 					elseif ( value == "CHARACTER_FRIEND" ) then
-						if ( not UnitCanCooperate("player", UIDROPDOWNMENU_INIT_MENU.unit) ) then
-							enable = false;
-						else
-							-- disable if player is from another realm or already on friends list
-							if ( not UnitIsSameServer(UIDROPDOWNMENU_INIT_MENU.unit) or GetFriendInfo(UnitName(UIDROPDOWNMENU_INIT_MENU.unit)) ) then
+						if ( UIDROPDOWNMENU_INIT_MENU.unit ~= nil ) then
+							if ( not UnitCanCooperate("player", UIDROPDOWNMENU_INIT_MENU.unit) ) then
 								enable = false;
+							else
+								-- disable if player is from another realm or already on friends list
+								if ( not UnitIsSameServer(UIDROPDOWNMENU_INIT_MENU.unit) or GetFriendInfo(UnitName(UIDROPDOWNMENU_INIT_MENU.unit)) ) then
+									enable = false;
+								end
 							end
 						end
 					end
@@ -1559,14 +1613,13 @@ function UnitPopup_OnClick (self)
 	elseif ( button == "IGNORE" ) then
 		AddOrDelIgnore(fullname);
 	elseif ( button == "REPORT_SPAM" ) then
-		StaticPopup_Show("CONFIRM_REPORT_SPAM_CHAT", fullname, nil, dropdownFrame.playerLocation);
+		PlayerReportFrame:InitiateReport(PLAYER_REPORT_TYPE_SPAM, fullname, dropdownFrame.playerLocation)
 	elseif ( button == "REPORT_BAD_LANGUAGE" ) then
-		StaticPopup_Show("CONFIRM_REPORT_BAD_LANGUAGE_CHAT", fullname, nil, dropdownFrame.playerLocation);
-	elseif ( button == "REPORT_BAD_LANGUAGE_VOICE" ) then
-		StaticPopup_Show("CONFIRM_REPORT_BAD_LANGUAGE_VOICE", fullname, nil, dropdownFrame.playerLocation);
-	elseif ( button == "REPORT_BAD_NAME" or button == "REPORT_BAD_GUILD_NAME" ) then
-		local reportType = button == "REPORT_BAD_NAME" and PLAYER_REPORT_TYPE_BAD_PLAYER_NAME or PLAYER_REPORT_TYPE_BAD_GUILD_NAME;
-		C_ChatInfo.ReportPlayer(reportType, dropdownFrame.playerLocation);
+		PlayerReportFrame:InitiateReport(PLAYER_REPORT_TYPE_LANGUAGE, fullname, dropdownFrame.playerLocation)
+	elseif ( button == "REPORT_BAD_NAME" ) then
+		PlayerReportFrame:InitiateReport(PLAYER_REPORT_TYPE_BAD_PLAYER_NAME, fullname, dropdownFrame.playerLocation)
+	elseif ( button == "REPORT_BAD_GUILD_NAME" ) then
+		PlayerReportFrame:InitiateReport(PLAYER_REPORT_TYPE_BAD_GUILD_NAME, fullname, dropdownFrame.playerLocation)
 	elseif ( button == "REPORT_PET" ) then
 		SetPendingReportPetTarget(unit);
 		StaticPopup_Show("CONFIRM_REPORT_PET_NAME", fullname);
@@ -1617,8 +1670,6 @@ function UnitPopup_OnClick (self)
 		if ( characterName ) then
 			TargetUnit(characterName);
 		end
-	elseif ( button == "BLOCK_COMMUNICATION" ) then
-		BNSetBlocked(dropdownFrame.bnetIDAccount, true);
 	elseif ( button == "PROMOTE" or button == "PROMOTE_GUIDE" ) then
 		PromoteToLeader(unit, 1);
 	elseif ( button == "GUILD_PROMOTE" ) then
@@ -1765,8 +1816,6 @@ function UnitPopup_OnClick (self)
 		else
 			PlayerFrame_DetachCastBar();
 		end
-	elseif ( strsub(button, 1, 10) == "BN_REPORT_" ) then
-		BNet_InitiateReport(dropdownFrame.bnetIDAccount, strsub(button, 11));
 	elseif ( strsub(button, 1, 9) == "SET_ROLE_" ) then
 		UnitSetRole(dropdownFrame.unit, strsub(button, 10));
 	elseif ( button == "ADD_FRIEND" or button == "CHARACTER_FRIEND" ) then
@@ -1775,6 +1824,8 @@ function UnitPopup_OnClick (self)
 		local _, battleTag = BNGetInfo();
 		if ( not battleTag ) then
 			StaticPopupSpecial_Show(CreateBattleTagFrame);
+		elseif ( clubInfo ~= nil and clubMemberInfo ~= nil ) then
+			C_Club.SendBattleTagFriendRequest(clubInfo.clubId, clubMemberInfo.memberId);
 		else
 			BNCheckBattleTagInviteToUnit(unit);
 		end
@@ -1789,10 +1840,6 @@ function UnitPopup_OnClick (self)
 		CloseDropDownMenus();
 	elseif ( button == "GARRISON_VISIT" ) then
 		C_Garrison.SetUsingPartyGarrison( not C_Garrison.IsUsingPartyGarrison());
-	elseif ( button == "VOICE_CHAT_COMMUNICATIONS_MODE_OPEN_MIC" ) then
-		C_VoiceChat.SetCommunicationMode(Enum.CommunicationMode.OpenMic);
-	elseif ( button == "VOICE_CHAT_COMMUNICATIONS_MODE_PUSH_TO_TALK" ) then
-		C_VoiceChat.SetCommunicationMode(Enum.CommunicationMode.PushToTalk);
 	elseif ( button == "VOICE_CHAT_SETTINGS" ) then
 		ChannelFrame:ToggleVoiceSettings();
 	elseif ( button == "COMMUNITIES_LEAVE" ) then
@@ -1803,12 +1850,35 @@ function UnitPopup_OnClick (self)
 		else
 			StaticPopup_Show("CONFIRM_LEAVE_COMMUNITY", nil, nil, clubInfo);
 		end
+	elseif ( button == "COMMUNITIES_BATTLETAG_FRIEND" ) then
+		C_Club.SendBattleTagFriendRequest(clubInfo.clubId, clubMemberInfo.memberId);
 	elseif ( button == "COMMUNITIES_KICK" ) then
 		StaticPopup_Show("CONFIRM_REMOVE_COMMUNITY_MEMBER", nil, nil, { clubType = clubInfo.clubType, name = clubMemberInfo.name, clubId = clubInfo.clubId, memberId = clubMemberInfo.memberId });
 	elseif ( button == "COMMUNITIES_MEMBER_NOTE" ) then
 		StaticPopup_Show("SET_COMMUNITY_MEMBER_NOTE", clubMemberInfo.name, nil, { clubId = clubInfo.clubId, memberId = clubMemberInfo.memberId });
 	elseif ( button == "COMMUNITIES_FAVORITE" ) then
 		CommunitiesFrame.CommunitiesList:SetFavorite(clubInfo.clubId, clubInfo.favoriteTimeStamp == nil);
+	elseif ( button == "COMMUNITIES_INVITE" ) then
+		local streams = C_Club.GetStreams(clubInfo.clubId);
+		local defaultStreamId = #streams > 0 and streams[1] or nil;
+		for i, stream in ipairs(streams) do
+			if stream.streamType == Enum.ClubStreamType.General or stream.streamType == Enum.ClubStreamType.Guild then
+				defaultStreamId = stream.streamId;
+				break;
+			end
+		end
+		
+		if defaultStreamId then
+			CommunitiesUtil.OpenInviteDialog(clubInfo.clubId, defaultStreamId);
+		end
+	elseif ( button == "COMMUNITIES_SETTINGS" ) then
+		OpenCommunitiesSettingsDialog(clubInfo.clubId);
+	elseif ( button == "COMMUNITIES_NOTIFICATION_SETTINGS" ) then
+		CommunitiesFrame:ShowNotificationSettingsDialog(clubInfo.clubId);
+	elseif ( button == "COMMUNITIES_CLEAR_UNREAD_NOTIFICATIONS" ) then
+		CommunitiesUtil.ClearAllUnreadNotifications(clubInfo.clubId);
+	elseif ( button == "DELETE_COMMUNITIES_MESSAGE" ) then
+		C_Club.DestroyMessage(dropdownFrame.communityClubID, dropdownFrame.communityStreamID, { epoch = dropdownFrame.communityEpoch, position = dropdownFrame.communityPosition });
 	elseif ( commandToRoleId[button] ~= nil ) then
 		C_Club.AssignMemberRole(clubInfo.clubId, clubMemberInfo.memberId, commandToRoleId[button]);
 	end

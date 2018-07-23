@@ -5,8 +5,7 @@ function HonorBarMixin:GetPriority()
 end
 
 function HonorBarMixin:ShouldBeVisible()
-	local level = UnitLevel("player");
-	return level >= MAX_PLAYER_LEVEL and (IsWatchingHonorAsXP() or InActiveBattlefield() or IsInActiveWorldPVP());
+	return IsWatchingHonorAsXP() or InActiveBattlefield() or IsInActiveWorldPVP();
 end
 
 function HonorBarMixin:Update()
@@ -14,22 +13,12 @@ function HonorBarMixin:Update()
 	local maxHonor = UnitHonorMax("player");
 
 	local level = UnitHonorLevel("player");
-	local levelmax = GetMaxPlayerHonorLevel();
 	
-	if ( level == levelmax ) then
-		self:SetBarValues(1, 0, 1, level);
-	else
-		self:SetBarValues(current, 0, maxHonor, level);
-	end
+
+	self:SetBarValues(current, 0, maxHonor, level);
 	
-	HonorExhaustionTick_Update(self.ExhaustionTick);
 	
-	local exhaustionStateID = GetHonorRestState();
-	if ( exhaustionStateID == 1 ) then
-		self:SetBarColor(1.0, 0.71, 0);
-	else
-		self:SetBarColor(1.0, 0.24, 0);
-	end
+	self:SetBarColor(1.0, 0.24, 0);
 end
 
 function HonorBarMixin:UpdateOverlayFrameText()
@@ -40,8 +29,6 @@ function HonorBarMixin:UpdateOverlayFrameText()
 		return;
 	end
 
-	local level = UnitHonorLevel("player");
-	local levelmax = GetMaxPlayerHonorLevel();
 	self:SetBarText(HONOR_BAR:format(current, maxHonor));
 end
 
@@ -54,7 +41,6 @@ function HonorBarMixin:OnLoad()
 	self.StatusBar:SetOnAnimatedValueChangedCallback(function() self:UpdateOverlayFrameText() end);
 	self.StatusBar.OnFinishedCallback = function(...)
 		self.StatusBar:OnAnimFinished(...);
-		HonorExhaustionTick_Update(self.ExhaustionTick);
 	end
 	self.priority = 2; 
 end
@@ -72,17 +58,17 @@ function HonorBarMixin:OnEvent(event, ...)
 end
 
 function HonorBarMixin:UpdateTick() 
-	HonorExhaustionTick_Update(self.ExhaustionTick);
+	return;
 end
 
 function HonorBarMixin:OnShow() 
-	HonorExhaustionTick_Update(self.ExhaustionTick);
+	return;
 end
 
 function HonorBarMixin:OnEnter()
 	self:UpdateOverlayFrameText();
 	self:ShowText(); 
-	HonorExhaustionTick_Update(self.ExhaustionTick);
+	return;
 end
 
 function HonorBarMixin:OnLeave()

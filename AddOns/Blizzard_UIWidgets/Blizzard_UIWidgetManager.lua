@@ -1,5 +1,11 @@
 local TIMER_UPDATE_FREQUENCY_SECONDS = 1;
 
+local WIDGET_DEBUG_TEXTURE_SHOW = false;
+local WIDGET_DEBUG_TEXTURE_COLOR = CreateColor(0.1, 1.0, 0.1, 0.6);
+local WIDGET_CONTAINER_DEBUG_TEXTURE_SHOW = false;
+local WIDGET_CONTAINER_DEBUG_TEXTURE_COLOR = CreateColor(1.0, 0.1, 0.1, 0.6);
+local WIDGET_DEBUG_CUSTOM_TEXTURE_COLOR = CreateColor(1.0, 1.0, 0.0, 0.6);
+
 UIWidgetManagerMixin = {}
 
 function UIWidgetManagerMixin:OnLoad()
@@ -59,7 +65,9 @@ function UIWidgetManagerMixin:GetWidgetFromPools(templateInfo, parent)
 			self.widgetPools:CreatePool(templateInfo.frameType, parent, templateInfo.frameTemplate, ResetWidget);
 		end
 
-		return self.widgetPools:Acquire(templateInfo.frameTemplate);
+		local widgetFrame = self.widgetPools:Acquire(templateInfo.frameTemplate);
+		widgetFrame:SetParent(parent);
+		return widgetFrame;
 	end
 end
 
@@ -147,6 +155,7 @@ function UIWidgetManagerMixin:CreateWidget(widgetID, widgetSetID, widgetType)
 		widgetFrame.hasTimer = false;
 		widgetFrame.orderIndex = nil;
 		widgetFrame.widgetTag = nil;
+		widgetFrame:EnableMouse(true);
 
 		self.widgetIdToFrame[widgetID] = widgetFrame;
 		self.widgetSetFrames[widgetSetID][widgetID] = widgetFrame;
@@ -251,6 +260,7 @@ function UIWidgetManagerMixin:ProcessWidget(widgetID, widgetSetID, widgetType)
 
 				-- If this is a widget with a timer, update the timer list
 				if widgetInfo.hasTimer then
+					widgetFrame.hasTimer = true;
 					self:UpdateTimerList(widgetID, widgetFrame);
 				end
 
@@ -272,6 +282,18 @@ function UIWidgetManagerMixin:ProcessWidget(widgetID, widgetSetID, widgetType)
 
 		-- Run the Setup function on the widget (could change the orderIndex)
 		widgetFrame:Setup(widgetInfo);
+
+		if WIDGET_DEBUG_TEXTURE_SHOW then
+			if not widgetFrame._debugBGTex then
+				widgetFrame._debugBGTex = widgetFrame:CreateTexture()
+				widgetFrame._debugBGTex:SetColorTexture(WIDGET_DEBUG_TEXTURE_COLOR:GetRGBA());
+				widgetFrame._debugBGTex:SetAllPoints(widgetFrame);
+			end
+
+			if widgetFrame.CustomDebugSetup then
+				widgetFrame:CustomDebugSetup(WIDGET_DEBUG_CUSTOM_TEXTURE_COLOR);
+			end
+		end
 
 		if isNewWidget and widgetFrame.OnAcquired then
 			widgetFrame:OnAcquired(widgetInfo)
@@ -325,10 +347,10 @@ function DefaultWidgetLayout(widgetContainer, sortedWidgets)
 
 	for index, widgetFrame in ipairs(sortedWidgets) do
 		if ( index == 1 ) then
-			widgetFrame:SetPoint("TOP");
+			widgetFrame:SetPoint("TOP", widgetContainer, "TOP", 0, 0);
 		else
 			local relative = sortedWidgets[index - 1];
-			widgetFrame:SetPoint("TOP", relative, "BOTTOM");
+			widgetFrame:SetPoint("TOP", relative, "BOTTOM", 0, 0);
 		end
 
 		widgetsHeight = widgetsHeight + widgetFrame:GetHeight();
@@ -354,6 +376,14 @@ function UIWidgetManagerMixin:RegisterWidgetSetContainer(widgetSetID, widgetCont
 		return;
 	end
 
+	if WIDGET_CONTAINER_DEBUG_TEXTURE_SHOW then
+		if not widgetContainer._debugBGTex then
+			widgetContainer._debugBGTex = widgetContainer:CreateTexture()
+			widgetContainer._debugBGTex:SetColorTexture(WIDGET_CONTAINER_DEBUG_TEXTURE_COLOR:GetRGBA());
+			widgetContainer._debugBGTex:SetAllPoints(widgetContainer);
+		end
+	end
+
 	self.registeredWidgetSetContainers[widgetSetID] = { widgetContainer = widgetContainer, layoutFunc = widgetLayoutFunction or DefaultWidgetLayout, initFunc = widgetInitFunction };
 	self.widgetSetFrames[widgetSetID] = {};
 
@@ -363,7 +393,9 @@ end
 function UIWidgetManagerMixin:UnregisterWidgetSetContainer(widgetSetID, widgetContainer)
 	if self.registeredWidgetSetContainers[widgetSetID] and self.registeredWidgetSetContainers[widgetSetID].widgetContainer == widgetContainer then
 		self:RemoveAllWidgetsInWidgetSet(widgetSetID);
+		self:UpdateWidgetSetContainerLayout(widgetSetID);
 		self.registeredWidgetSetContainers[widgetSetID] = nil;
+		self.layoutUpdateSetsPending[widgetSetID] = nil;
 	end
 end
 

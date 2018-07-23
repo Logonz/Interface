@@ -1,7 +1,7 @@
 UIWidgetTopCenterContainerMixin = {}
 
 local function WidgetsLayout(widgetContainer, sortedWidgets)
-	local widgetsHeight = 0;
+	local widgetsHeight = 1; --Need to keep this at least height 1 because other frames anchor to it and trying to anchor to a frame of height 0 is undefined
 
 	local maxIconWidgetWidth = 0;
 	local iconAndTextWidgets = {};
@@ -16,10 +16,10 @@ local function WidgetsLayout(widgetContainer, sortedWidgets)
 		end
 
 		if ( index == 1 ) then
-			widgetFrame:SetPoint("TOP");
+			widgetFrame:SetPoint("TOP", widgetContainer, "TOP", 0, 0);
 		else
 			local relative = sortedWidgets[index - 1];
-			widgetFrame:SetPoint("TOP", relative, "BOTTOM");
+			widgetFrame:SetPoint("TOP", relative, "BOTTOM", 0, 0);
 		end
 
 		widgetsHeight = widgetsHeight + widgetFrame:GetHeight();

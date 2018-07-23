@@ -39,6 +39,15 @@ local ChatInfo =
 			},
 		},
 		{
+			Name = "GetNumActiveChannels",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "numChannels", Type = "number", Nilable = false },
+			},
+		},
+		{
 			Name = "GetRegisteredAddonMessagePrefixes",
 			Type = "Function",
 
@@ -275,6 +284,23 @@ local ChatInfo =
 			Name = "ChatMsgAddon",
 			Type = "Event",
 			LiteralName = "CHAT_MSG_ADDON",
+			Payload =
+			{
+				{ Name = "prefix", Type = "string", Nilable = false },
+				{ Name = "text", Type = "string", Nilable = false },
+				{ Name = "channel", Type = "string", Nilable = false },
+				{ Name = "sender", Type = "string", Nilable = false },
+				{ Name = "target", Type = "string", Nilable = false },
+				{ Name = "zoneChannelID", Type = "number", Nilable = false },
+				{ Name = "localID", Type = "number", Nilable = false },
+				{ Name = "name", Type = "string", Nilable = false },
+				{ Name = "instanceID", Type = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "ChatMsgAddonLogged",
+			Type = "Event",
+			LiteralName = "CHAT_MSG_ADDON_LOGGED",
 			Payload =
 			{
 				{ Name = "prefix", Type = "string", Nilable = false },

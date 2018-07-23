@@ -30,15 +30,30 @@ Import("COMMUNITIES_CREATE_DIALOG_BATTLE_NET_LABEL");
 Import("COMMUNITIES_CREATE_DIALOG_ICON_SELECTION_BUTTON");
 Import("COMMUNITIES_CREATE_DIALOG_AVATAR_PICKER_INSTRUCTIONS");
 Import("COMMUNITIES_CREATE_DIALOG_NAME_INSTRUCTIONS");
+Import("COMMUNITIES_CREATE_DIALOG_NAME_INSTRUCTIONS_BATTLE_NET");
 Import("COMMUNITIES_CREATE_DIALOG_DESCRIPTION_INSTRUCTIONS");
+Import("COMMUNITIES_CREATE_DIALOG_DESCRIPTION_INSTRUCTIONS_BATTLE_NET");
 Import("COMMUNITIES_CREATE_COMMUNITY");
+Import("COMMUNITIES_CREATE_GROUP");
 Import("COMMUNITIES_CREATE_DIALOG_TYPE_LABEL");
+Import("COMMUNITIES_SETTINGS_NAME_LABEL");
 Import("COMMUNITIES_CREATE_DIALOG_NAME_LABEL");
+Import("COMMUNITIES_CREATE_DIALOG_NAME_LABEL_BATTLE_NET");
 Import("COMMUNITIES_CREATE_DIALOG_DESCRIPTION_LABEL");
+Import("COMMUNITIES_CREATE_DIALOG_DESCRIPTION_LABEL_BATTLE_NET");
 Import("COMMUNITIES_CREATE_DIALOG_ICON_LABEL");
+Import("COMMUNITIES_CREATE_DIALOG_SHORT_NAME_LABEL");
+Import("COMMUNITIES_CREATE_DIALOG_SHORT_NAME_INSTRUCTIONS");
+Import("COMMUNITIES_CREATE_DIALOG_SHORT_NAME_INSTRUCTIONS_TOOLTIP");
+Import("COMMUNITIES_CREATE_DIALOG_SHORT_NAME_INSTRUCTIONS_CHARACTER");
+Import("COMMUNITIES_CREATE_DIALOG_NAME_AND_SHORT_NAME_ERROR");
+Import("COMMUNITIES_CREATE_DIALOG_NAME_ERROR");
+Import("COMMUNITIES_CREATE_DIALOG_SHORT_NAME_ERROR");
+Import("COMMUNITY_TYPE_UNAVAILABLE");
 Import("CANCEL");
 Import("FEATURE_NOT_AVAILBLE_PANDAREN");
 Import("OKAY");
+Import("RED_FONT_COLOR");
 
 Import("C_Club");
 Import("CreateFrame");
@@ -59,7 +74,7 @@ function CommunitiesAddDialogMixin:OnShow()
 	self.CreateWoWCommunityLabel:SetText(COMMUNITIES_ADD_DIALOG_CREATE_WOW_LABEL:format(localizedFactionName));
 	self.CreateWoWCommunityDescription:SetText(COMMUNITIES_ADD_DIALOG_CREATE_WOW_DESCRIPTION:format(localizedFactionName));
 	
-	self.CreateWoWCommunityButton:Enable();
+	self.CreateWoWCommunityButton:SetEnabled(C_Club.ShouldAllowClubType(Enum.ClubType.Character));
 	self.CreateWoWCommunityButton.FactionIcon:Show();
 	if factionTag == "Horde" then
 		self.CreateWoWCommunityButton.FactionIcon:SetAtlas("communities-create-button-wow-horde", true);
@@ -71,6 +86,8 @@ function CommunitiesAddDialogMixin:OnShow()
 		self.CreateWoWCommunityLabel:SetText(COMMUNITIES_ADD_DIALOG_CREATE_WOW_LABEL_NO_FACTION);
 		self.CreateWoWCommunityDescription:SetText(COMMUNITIES_ADD_DIALOG_CREATE_WOW_DESCRIPTION_NO_FACTION);
 	end
+	
+	self.CreateBattleNetGroupButton:SetEnabled(C_Club.ShouldAllowClubType(Enum.ClubType.BattleNet));
 end
 
 function CommunitiesAddDialogMixin:OnAttributeChanged(name, value)
@@ -88,6 +105,7 @@ CommunitiesCreateDialogMixin = {};
 
 function CommunitiesCreateDialogMixin:ClearText()
 	self.NameBox:SetText("");
+	self.ShortNameBox:SetText("");
 	self.DescriptionFrame.EditBox:SetText("");
 end
 
@@ -103,7 +121,13 @@ end
 
 function CommunitiesCreateDialogMixin:SetClubType(clubType)
 	self.clubType = clubType;
-	self.IconPreviewRing:SetAtlas(clubType == Enum.ClubType.BattleNet and "communities-ring-blue" or "communities-ring-gold");
+	local isBnet = clubType == Enum.ClubType.BattleNet;
+	self.IconPreviewRing:SetAtlas(isBnet and "communities-ring-blue" or "communities-ring-gold");
+	self.NameBox.Instructions:SetText(isBnet and COMMUNITIES_CREATE_DIALOG_NAME_INSTRUCTIONS_BATTLE_NET or COMMUNITIES_CREATE_DIALOG_NAME_INSTRUCTIONS);
+	self.ShortNameBox.Instructions:SetText(isBnet and COMMUNITIES_CREATE_DIALOG_SHORT_NAME_INSTRUCTIONS or COMMUNITIES_CREATE_DIALOG_SHORT_NAME_INSTRUCTIONS_CHARACTER);
+	self.DescriptionLabel:SetText(isBnet and COMMUNITIES_CREATE_DIALOG_DESCRIPTION_LABEL_BATTLE_NET or COMMUNITIES_CREATE_DIALOG_DESCRIPTION_LABEL);
+	self.DescriptionFrame.EditBox.Instructions:SetText(isBnet and COMMUNITIES_CREATE_DIALOG_DESCRIPTION_INSTRUCTIONS_BATTLE_NET or COMMUNITIES_CREATE_DIALOG_DESCRIPTION_INSTRUCTIONS);
+	self.CreateButton:SetText(isBnet and COMMUNITIES_CREATE_GROUP or COMMUNITIES_CREATE_COMMUNITY);
 	local avatarIdList = C_Club.GetAvatarIdList(clubType);
 	if avatarIdList then
 		self:SetAvatarId(avatarIdList[math.random(1, #avatarIdList)]);
@@ -141,13 +165,29 @@ end
 
 function CommunitiesCreateDialogMixin:CreateCommunity()
 	local name = self.NameBox:GetText();
+	local shortName = self.ShortNameBox:GetText();
 	local description = self.DescriptionFrame.EditBox:GetText();
-	C_Club.CreateClub(name, description, self:GetClubType(), self:GetAvatarId());
+	C_Club.CreateClub(name, shortName, description, self:GetClubType(), self:GetAvatarId());
+end
+
+function CommunitiesCreateDialogMixin:UpdateCreateButton()
+	local name = self.NameBox:GetText();
+	local nameIsValid = C_Club.ValidateText(self:GetClubType(), name, Enum.ClubFieldType.ClubName) == Enum.ValidateNameResult.NameSuccess;
+	local shortName = self.ShortNameBox:GetText();
+	local shortNameIsValid = C_Club.ValidateText(self:GetClubType(), shortName, Enum.ClubFieldType.ClubShortName) == Enum.ValidateNameResult.NameSuccess;
+	self.CreateButton:SetEnabled(nameIsValid and shortNameIsValid);
+	if self.CreateButton:IsMouseOver() then
+		CommunitiesCreateDialogCreateButton_OnEnter(self.CreateButton);
+	end
 end
 
 function CommunitiesAddDialogWoWButton_OnEnter(self)
 	if not self:IsEnabled() then
-		Outbound.ShowGameTooltip(FEATURE_NOT_AVAILBLE_PANDAREN, self:GetRight(), self:GetTop());
+		if not C_Club.ShouldAllowClubType(Enum.ClubType.Character) then
+			Outbound.ShowGameTooltip(COMMUNITY_TYPE_UNAVAILABLE, self:GetRight(), self:GetTop());
+		else
+			Outbound.ShowGameTooltip(FEATURE_NOT_AVAILBLE_PANDAREN, self:GetRight(), self:GetTop());
+		end
 	end
 end
 
@@ -161,6 +201,12 @@ function CommunitiesAddDialogWoWButton_OnClick(self)
 	CommunitiesCreateDialog:ClearText();
 	CommunitiesCreateDialog:Show();
 	PlaySound(SOUNDKIT.GS_TITLE_OPTION_OK);
+end
+
+function CommunitiesAddDialogBattleNetButton_OnEnter(self)
+	if not self:IsEnabled() then
+		Outbound.ShowGameTooltip(COMMUNITY_TYPE_UNAVAILABLE, self:GetRight(), self:GetTop());
+	end
 end
 
 function CommunitiesAddDialogBattleNetButton_OnClick(self)
@@ -198,4 +244,29 @@ function CommunitiesCreateDialogCreateButton_OnClick(self)
 	CommunitiesCreateDialog:CreateCommunity();
 	CommunitiesCreateDialog:Hide();
 	PlaySound(SOUNDKIT.GS_TITLE_OPTION_OK);
+end
+
+function CommunitiesCreateDialogCreateButton_OnEnter(self)
+	local createDialog = self:GetParent();
+	local name = createDialog.NameBox:GetText();
+	local nameErrorCode = C_Club.GetCommunityNameResultText(C_Club.ValidateText(createDialog:GetClubType(), name, Enum.ClubFieldType.ClubName));
+	local shortName = createDialog.ShortNameBox:GetText();
+	local shortNameErrorCode = C_Club.GetCommunityNameResultText(C_Club.ValidateText(createDialog:GetClubType(), shortName, Enum.ClubFieldType.ClubShortName));
+	if nameErrorCode ~= nil and shortNameErrorCode ~= nil then
+		local nameError = RED_FONT_COLOR:WrapTextInColorCode(nameErrorCode);
+		local shortNameError = RED_FONT_COLOR:WrapTextInColorCode(shortNameErrorCode);
+		Outbound.ShowGameTooltip(COMMUNITIES_CREATE_DIALOG_NAME_AND_SHORT_NAME_ERROR:format(nameError, shortNameError), self:GetRight(), self:GetTop(), true);
+	elseif nameErrorCode ~= nil then
+		local nameError = RED_FONT_COLOR:WrapTextInColorCode(nameErrorCode);
+		Outbound.ShowGameTooltip(COMMUNITIES_CREATE_DIALOG_NAME_ERROR:format(nameError), self:GetRight(), self:GetTop(), true);
+	elseif shortNameErrorCode ~= nil then
+		local shortNameError = RED_FONT_COLOR:WrapTextInColorCode(shortNameErrorCode);
+		Outbound.ShowGameTooltip(COMMUNITIES_CREATE_DIALOG_SHORT_NAME_ERROR:format(shortNameError), self:GetRight(), self:GetTop(), true);
+	else
+		Outbound.HideGameTooltip();
+	end
+end
+
+function CommunitiesCreateDialogCreateButton_OnLeave(self)
+	Outbound.HideGameTooltip();
 end

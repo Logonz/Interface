@@ -2,10 +2,9 @@
 ## Title: Blizzard_Communities
 ## Secure: 1
 ## RequiredDep: Blizzard_GuildRecruitmentUI, Blizzard_GuildControlUI
-## LoadOnDemand: 0
+## LoadOnDemand: 1
 
 ..\..\SharedXML\SecureUIPanelTemplates.lua
-CommunitiesUtil.lua
 CommunitiesList.xml
 CommunitiesMemberList.xml
 CommunitiesChatFrame.xml
@@ -18,8 +17,13 @@ CommunitiesAddDialog.xml
 CommunitiesAddDialogOutbound.lua
 CommunitiesTabs.xml
 CommunitiesSettings.xml
+CommunitiesTicketManagerDialog.xml
+CommunitiesErrors.lua
+CommunitiesHyperlink.lua
 GuildRewards.xml
 GuildPerks.xml
 GuildInfo.xml
 GuildNews.xml
+GuildRoster.xml
 CommunitiesFrame.xml
+Localization.lua

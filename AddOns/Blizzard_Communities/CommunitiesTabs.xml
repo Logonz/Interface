@@ -14,13 +14,18 @@
 				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">
-				<Texture parentKey="Icon" setAllPoints="true" file="INTERFACE\HELPFRAME\REPORTLAGICON-CHAT">
-					<Size x="32" y="32"/>
+				<Texture parentKey="Icon" file="INTERFACE\HELPFRAME\REPORTLAGICON-CHAT">
+					<Size x="30" y="30"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+					<TexCoords left="0.03125" right="0.96875" top="0.03125" bottom="0.96875"/>
 				</Texture>
 			</Layer>
 		</Layers>
 		<Scripts>
 			<OnClick>
+				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 				self:SetChecked(true);
 			</OnClick>
 			<OnEnter function="CommunitiesFrameTab_OnEnter"/>
@@ -37,7 +42,7 @@
 		</KeyValues>
 		<Scripts>
 			<OnLoad>
-				self.Icon:SetTexture("Interface\\Icons\\ability_warrior_battleshout");
+				self.Icon:SetTexture("Interface\\Icons\\UI_Chat");
 			</OnLoad>
 			<OnClick inherit="append">
 				self:GetParent():SetDisplayMode(COMMUNITIES_FRAME_DISPLAY_MODES.CHAT);
@@ -50,7 +55,7 @@
 		</KeyValues>
 		<Scripts>
 			<OnLoad>
-				self.Icon:SetTexture("Interface\\Icons\\Garrison_building_barracks");
+				self.Icon:SetTexture("Interface\\Icons\\achievement_guildperk_everybodysfriend");
 			</OnLoad>
 			<OnClick inherit="append">
 				self:GetParent():SetDisplayMode(COMMUNITIES_FRAME_DISPLAY_MODES.ROSTER);
@@ -63,7 +68,7 @@
 		</KeyValues>
 		<Scripts>
 			<OnLoad>
-				self.Icon:SetTexture("Interface\\Icons\\inv_misc_gift_05");
+				self.Icon:SetTexture("Interface\\Icons\\achievement_guildperk_honorablemention");
 			</OnLoad>
 			<OnClick inherit="append">
 				self:GetParent():SetDisplayMode(COMMUNITIES_FRAME_DISPLAY_MODES.GUILD_BENEFITS);
@@ -76,7 +81,7 @@
 		</KeyValues>
 		<Scripts>
 			<OnLoad>
-				self.Icon:SetTexture("Interface\\Icons\\inv_misc_notepicture1c");
+				self.Icon:SetTexture("Interface\\Icons\\inv_misc_scrollunrolled01");
 			</OnLoad>
 			<OnClick inherit="append">
 				self:GetParent():SetDisplayMode(COMMUNITIES_FRAME_DISPLAY_MODES.GUILD_INFO);

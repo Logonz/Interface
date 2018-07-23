@@ -4,7 +4,7 @@ local GUILD_COMMENT_BORDER = 10;
 
 local INTEREST_TYPES = {"QUEST", "DUNGEON", "RAID", "PVP", "RP"};
 
-function GuildRecruitmentFrame_OnLoad(self)
+function CommunitiesGuildRecruitmentFrame_OnLoad(self)
 	SetLargeGuildTabardTextures("player", self.TabardEmblem, self.TabardBackground, self.TabardBorder);
 	PanelTemplates_SetNumTabs(self, 2);
 	PanelTemplates_SetTab(self, 1);
@@ -17,7 +17,7 @@ function GuildRecruitmentFrame_OnLoad(self)
 	RequestGuildRecruitmentSettings();
 end
 
-function GuildRecruitmentFrame_OnEvent(self, event, arg1)
+function CommunitiesGuildRecruitmentFrame_OnEvent(self, event, arg1)
 	if ( event == "LF_GUILD_POST_UPDATED" ) then
 		local bQuest, bDungeon, bRaid, bPvP, bRP, bWeekdays, bWeekends, bTank, bHealer, bDamage, bAnyLevel, bMaxLevel, bListed = GetGuildRecruitmentSettings();
 		-- interest
@@ -35,26 +35,35 @@ function GuildRecruitmentFrame_OnEvent(self, event, arg1)
 		self.Recruitment.RolesFrame.DamagerButton.checkButton:SetChecked(bDamage);
 		-- level
 		if ( bMaxLevel ) then
-			GuildRecruitmentLevelFrame_SelectLevelButton(self.Recruitment.LevelFrame, 2);
+			CommunitiesGuildRecruitmentLevelFrame_SelectLevelButton(self.Recruitment.LevelFrame, 2);
 		else
-			GuildRecruitmentLevelFrame_SelectLevelButton(self.Recruitment.LevelFrame, 1);
+			CommunitiesGuildRecruitmentLevelFrame_SelectLevelButton(self.Recruitment.LevelFrame, 1);
 		end
 		-- comment
 		self.Recruitment.CommentFrame.CommentInputFrame.ScrollFrame.CommentEditBox:SetText(GetGuildRecruitmentComment());
-		GuildRecruitmentFrameRecruitment_UpdateListGuildButton(self.Recruitment);
+		CommunitiesGuildRecruitmentFrameRecruitment_UpdateListGuildButton(self.Recruitment);
 	elseif ( event == "LF_GUILD_RECRUITS_UPDATED" ) then
-		GuildRecruitmentFrameApplicants_Update(self.Applicants);
+		CommunitiesGuildRecruitmentFrameApplicants_Update(self.Applicants);
 	elseif ( event == "LF_GUILD_RECRUIT_LIST_CHANGED" ) then
 		RequestGuildApplicantsList();
 	end
 end
 
-function GuildRecruitmentFrame_OnShow(self)
+function CommunitiesGuildRecruitmentFrame_OnShow(self)
 	RequestGuildApplicantsList();
-	GuildRecruitmentFrame_Update(self);
+	if not IsGuildLeader() then
+		self.Tab1:Hide();
+		self.Tab2:SetPoint("LEFT", self.Tab1, "LEFT");
+		PanelTemplates_SetTab(self, 2);
+	else
+		self.Tab1:Show();
+		self.Tab2:SetPoint("LEFT", self.Tab1, "RIGHT");
+	end
+	
+	CommunitiesGuildRecruitmentFrame_Update(self);
 end
 
-function GuildRecruitmentFrame_Update(self)
+function CommunitiesGuildRecruitmentFrame_Update(self)
 	local selectedTab = PanelTemplates_GetSelectedTab(self);
 	if ( selectedTab == 1 ) then
 		self.Recruitment:Show();
@@ -69,7 +78,7 @@ end
 --   Recruitment Tab
 --*******************************************************************************
 
-function GuildRecruitmentFrameRecruitment_OnLoad(self)
+function CommunitiesGuildRecruitmentFrameRecruitment_OnLoad(self)
 	self.InterestFrame.Text:SetText(GUILD_INTEREST);
 	self.InterestFrame:SetHeight(63);
 	self.AvailabilityFrame.Text:SetText(GUILD_AVAILABILITY);
@@ -85,7 +94,7 @@ function GuildRecruitmentFrameRecruitment_OnLoad(self)
 	self.ListGuildButton:Disable();
 end
 
-function GuildRecruitmentLevelFrame_SelectLevelButton(self, index, userClick)
+function CommunitiesGuildRecruitmentLevelFrame_SelectLevelButton(self, index, userClick)
 	local guildRecruitmentFrame = self:GetParent();
 	local param;
 	if ( index == 1 ) then
@@ -103,7 +112,7 @@ function GuildRecruitmentLevelFrame_SelectLevelButton(self, index, userClick)
 	end	
 end
 
-function GuildRecruitmentRoleButton_OnClick(self)
+function CommunitiesGuildRecruitmentRoleButton_OnClick(self)
 	local guildRecruitmentFrame = self:GetParent():GetParent():GetParent();
 	local checked = self:GetChecked();
 	if ( self:GetChecked() ) then
@@ -112,10 +121,10 @@ function GuildRecruitmentRoleButton_OnClick(self)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF);
 	end
 	SetGuildRecruitmentSettings(self:GetParent().param, checked);
-	GuildRecruitmentFrameRecruitment_UpdateListGuildButton(guildRecruitmentFrame);
+	CommunitiesGuildRecruitmentFrameRecruitment_UpdateListGuildButton(guildRecruitmentFrame);
 end
 
-function GuildRecruitmentFrameRecruitment_UpdateListGuildButton(self)
+function CommunitiesGuildRecruitmentFrameRecruitment_UpdateListGuildButton(self)
 	local bQuest, bDungeon, bRaid, bPvP, bRP, bWeekdays, bWeekends, bTank, bHealer, bDamage, bAnyLevel, bMaxLevel, bListed = GetGuildRecruitmentSettings();
 	-- need to have at least 1 interest, 1 time, and 1 role checked to be able to list
 	if ( bQuest or bDungeon or bRaid or bPvP or bRP ) and ( bWeekdays or bWeekends ) and ( bTank or bHealer or bDamage ) then
@@ -128,22 +137,22 @@ function GuildRecruitmentFrameRecruitment_UpdateListGuildButton(self)
 			SetGuildRecruitmentSettings(LFGUILD_PARAM_LOOKING, false);
 		end
 	end
-	GuildRecruitmentListGuildButton_UpdateText(self.ListGuildButton, bListed);
+	CommunitiesGuildRecruitmentListGuildButton_UpdateText(self.ListGuildButton, bListed);
 end
 
-function GuildRecruitmentListGuildButton_OnClick(self)
+function CommunitiesGuildRecruitmentListGuildButton_OnClick(self)
 	local guildRecruitmentFrame = self:GetParent();
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 	local bQuest, bDungeon, bRaid, bPvP, bRP, bWeekdays, bWeekends, bTank, bHealer, bDamage, bAnyLevel, bMaxLevel, bListed = GetGuildRecruitmentSettings();
 	bListed = not bListed;
 	if ( bListed and guildRecruitmentFrame.CommentFrame.CommentInputFrame.ScrollFrame.CommentEditBox:HasFocus() ) then
-		GuildRecruitmentComment_SaveText(guildRecruitmentFrame.CommentFrame.CommentInputFrame.ScrollFrame.CommentEditBox);
+		CommunitiesGuildRecruitmentComment_SaveText(guildRecruitmentFrame.CommentFrame.CommentInputFrame.ScrollFrame.CommentEditBox);
 	end
 	SetGuildRecruitmentSettings(LFGUILD_PARAM_LOOKING, bListed);
-	GuildRecruitmentListGuildButton_UpdateText(guildRecruitmentFrame.ListGuildButton, bListed);
+	CommunitiesGuildRecruitmentListGuildButton_UpdateText(guildRecruitmentFrame.ListGuildButton, bListed);
 end
 
-function GuildRecruitmentListGuildButton_UpdateText(self, listed)
+function CommunitiesGuildRecruitmentListGuildButton_UpdateText(self, listed)
 	if ( listed ) then
 		self:SetText(GUILD_CLOSE_RECRUITMENT);
 	else
@@ -151,12 +160,12 @@ function GuildRecruitmentListGuildButton_UpdateText(self, listed)
 	end
 end
 
-function GuildRecruitmentComment_SaveText(self)
+function CommunitiesGuildRecruitmentComment_SaveText(self)
 	SetGuildRecruitmentComment(self:GetText():gsub("\n",""));
 	self:ClearFocus();
 end
 
-function GuildRecruitmentCheckButton_OnEnter(self)
+function CommunitiesGuildRecruitmentCheckButton_OnEnter(self)
 	local interestType = INTEREST_TYPES[self:GetID()];
 	if ( interestType ) then
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
@@ -170,12 +179,12 @@ end
 --   Applicants Tab
 --*******************************************************************************
 
-function GuildRecruitmentFrameApplicants_OnLoad(self)
+function CommunitiesGuildRecruitmentFrameApplicants_OnLoad(self)
 	local applicantsContainer = self.Container;
-	applicantsContainer.update = function () GuildRecruitmentFrameApplicants_Update(self); end;
-	HybridScrollFrame_CreateButtons(applicantsContainer, "GuildRecruitmentApplicantTemplate", 0, 0);
+	applicantsContainer.update = function () CommunitiesGuildRecruitmentFrameApplicants_Update(self); end;
+	HybridScrollFrame_CreateButtons(applicantsContainer, "CommunitiesGuildRecruitmentApplicantTemplate", 0, 0);
 	
-	applicantsContainer.ScrollBar.Show = 
+	applicantsContainer.scrollBar.Show = 
 		function (self)
 			applicantsContainer:SetWidth(304);
 			for _, button in next, applicantsContainer.buttons do
@@ -184,7 +193,7 @@ function GuildRecruitmentFrameApplicants_OnLoad(self)
 			end
 			getmetatable(self).__index.Show(self);
 		end
-	applicantsContainer.ScrollBar.Hide = 
+	applicantsContainer.scrollBar.Hide = 
 		function (self)
 			applicantsContainer:SetWidth(320);
 			for _, button in next, applicantsContainer.buttons do
@@ -195,11 +204,11 @@ function GuildRecruitmentFrameApplicants_OnLoad(self)
 		end
 end
 
-function GuildRecruitmentFrameApplicants_OnShow(self)
-	GuildRecruitmentFrameApplicants_Update(self);
+function CommunitiesGuildRecruitmentFrameApplicants_OnShow(self)
+	CommunitiesGuildRecruitmentFrameApplicants_Update(self);
 end
 
-function GuildRecruitmentFrameApplicants_Update(self)
+function CommunitiesGuildRecruitmentFrameApplicants_Update(self)
 	local scrollFrame = self.Container;
 	local offset = HybridScrollFrame_GetOffset(scrollFrame);
 	local buttons = scrollFrame.buttons;
@@ -291,7 +300,7 @@ function GuildRecruitmentFrameApplicants_Update(self)
 	end
 end
 
-function GuildRecruitmentApplicant_OnClick(self, button)
+function CommunitiesGuildRecruitmentApplicant_OnClick(self, button)
 	if ( button == "LeftButton" ) then
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 		SetGuildApplicantSelection(self.index);
@@ -299,11 +308,11 @@ function GuildRecruitmentApplicant_OnClick(self, button)
 		if ( commentHeight > GUILD_COMMENT_HEIGHT ) then
 			local buttonHeight = GUILD_BUTTON_HEIGHT + commentHeight - GUILD_COMMENT_HEIGHT + GUILD_COMMENT_BORDER;
 			self:SetHeight(buttonHeight);
-			HybridScrollFrame_ExpandButton(self:GetParent(), ((self.index - 1) * GUILD_BUTTON_HEIGHT), buttonHeight);
+			HybridScrollFrame_ExpandButton(self:GetParent():GetParent(), ((self.index - 1) * GUILD_BUTTON_HEIGHT), buttonHeight);
 		else
-			HybridScrollFrame_CollapseButton(self:GetParent());
+			HybridScrollFrame_CollapseButton(self:GetParent():GetParent());
 		end
-		GuildRecruitmentFrameApplicants_Update(self:GetParent():GetParent():GetParent());
+		CommunitiesGuildRecruitmentFrameApplicants_Update(self:GetParent():GetParent():GetParent());
 	elseif ( button == "RightButton" ) then
 		local guildRecruitmentFrame = self:GetParent():GetParent():GetParent();
 		local dropDown = guildRecruitmentFrame.DropDown;
@@ -315,7 +324,7 @@ function GuildRecruitmentApplicant_OnClick(self, button)
 	end
 end
 
-function GuildRecruitmentApplicant_ShowTooltip(self)
+function CommunitiesGuildRecruitmentApplicant_ShowTooltip(self)
 	local name, level, class, bQuest, bDungeon, bRaid, bPvP, bRP, bWeekdays, bWeekends, bTank, bHealer, bDamage, comment, timeSince, timeLeft = GetGuildApplicantInfo(self.index);
 	GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
 	GameTooltip:SetText(name);
@@ -336,11 +345,11 @@ function GuildRecruitmentApplicant_ShowTooltip(self)
 	GameTooltip:Show();
 end
 
-function GuildRecruitmentDropDown_OnLoad(self)
+function CommunitiesGuildRecruitmentDropDown_OnLoad(self)
 	UIDropDownMenu_Initialize(self, GuildRecruitmentDropDown_Initialize, "MENU");
 end
 
-function GuildRecruitmentDropDown_Initialize(self)
+function CommunitiesGuildRecruitmentDropDown_Initialize(self)
 	local info = UIDropDownMenu_CreateInfo();
 	local name = GetGuildApplicantInfo(self.index) or UNKNOWN;
 	info.text = name;
@@ -350,7 +359,7 @@ function GuildRecruitmentDropDown_Initialize(self)
 
 	info = UIDropDownMenu_CreateInfo();
 	info.notCheckable = 1;
-	info.func = function(...) GuildRecruitmentDropDown_OnClick(self, ...); end;
+	info.func = function(...) CommunitiesGuildRecruitmentDropDown_OnClick(self, ...); end;
 	
 	info.text = INVITE;
 	info.arg1 = "invite";
@@ -373,7 +382,7 @@ function GuildRecruitmentDropDown_Initialize(self)
 	UIDropDownMenu_AddButton(info, UIDROPDOWN_MENU_LEVEL);
 end
 
-function GuildRecruitmentDropDown_OnClick(self, button, action)
+function CommunitiesGuildRecruitmentDropDown_OnClick(self, button, action)
 	local name = GetGuildApplicantInfo(self.index);
 	if ( not name ) then
 		return;

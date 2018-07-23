@@ -81,6 +81,7 @@ end
 
 function BonusObjectiveTracker_OnHeaderLoad(self)
 	local module = CreateBonusObjectiveTrackerModule();
+    self.Text:SetFontObjectsToTry(GameFontNormalMed2, SystemFont_Shadow_Med1);
 
 	module.rewardsFrame = self.RewardsFrame;
 	module.ShowWorldQuests = self.ShowWorldQuests;
@@ -183,7 +184,7 @@ function BonusObjectiveTracker_OnBlockClick(self, button)
 						BonusObjectiveTracker_UntrackWorldQuest(self.TrackedQuest.questID);
 					end
 				else
-					local _, mapID = C_TaskQuest.GetQuestZoneID(self.TrackedQuest.questID);
+					local mapID = C_TaskQuest.GetQuestZoneID(self.TrackedQuest.questID);
 					if mapID then
 						OpenQuestLog(mapID);
 						WorldMapPing_StartPingQuest(self.TrackedQuest.questID);

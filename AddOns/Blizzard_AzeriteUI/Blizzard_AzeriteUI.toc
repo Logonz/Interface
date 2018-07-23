@@ -5,11 +5,21 @@
 
 Blizzard_AzeriteEmpoweredItemUITemplates.xml
 
+AzeritePowerLayoutInfo.lua
+AzeritePowerModelInfo.lua
+
+AzeriteEmpoweredItemChannelMixin.lua
+AzeriteEmpoweredItemChannelMixin.xml
+
 AzeriteEmpoweredItemPowerMixin.lua
 AzeriteEmpoweredItemPowerMixin.xml
 
+AzeriteTierAnimationMixin.lua
 AzeriteEmpoweredItemTierMixin.xml
 AzeriteEmpoweredItemTierMixin.lua
+
+AzeriteEmpoweredItemSlotMixin.xml
+AzeriteEmpoweredItemSlotMixin.lua
 
 Blizzard_AzeriteEmpoweredItemUI.lua
 Blizzard_AzeriteEmpoweredItemUI.xml

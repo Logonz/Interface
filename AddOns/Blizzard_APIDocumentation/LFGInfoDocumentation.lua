@@ -6,10 +6,48 @@ local LFGInfo =
 
 	Functions =
 	{
+		{
+			Name = "GetAllEntriesForCategory",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "category", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "lfgDungeonIDs", Type = "table", InnerType = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "HideNameFromUI",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "dungeonID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "shouldHide", Type = "bool", Nilable = false },
+			},
+		},
 	},
 
 	Events =
 	{
+		{
+			Name = "IslandCompleted",
+			Type = "Event",
+			LiteralName = "ISLAND_COMPLETED",
+			Payload =
+			{
+				{ Name = "mapID", Type = "number", Nilable = false },
+				{ Name = "winner", Type = "number", Nilable = false },
+			},
+		},
 		{
 			Name = "LfgBonusFactionIdUpdated",
 			Type = "Event",
@@ -183,6 +221,16 @@ local LFGInfo =
 			Name = "UpdateLfgList",
 			Type = "Event",
 			LiteralName = "UPDATE_LFG_LIST",
+		},
+		{
+			Name = "WarfrontCompleted",
+			Type = "Event",
+			LiteralName = "WARFRONT_COMPLETED",
+			Payload =
+			{
+				{ Name = "mapID", Type = "number", Nilable = false },
+				{ Name = "winner", Type = "number", Nilable = false },
+			},
 		},
 	},
 

@@ -13,7 +13,23 @@ function UIWidgetTemplateTextWithStateMixin:Setup(widgetInfo)
 	UIWidgetBaseTemplateMixin.Setup(self, widgetInfo);
 
 	self.Text:SetText(widgetInfo.text);
-	self.Text:SetColorState(widgetInfo.colorState);
+	self.Text:SetEnabledState(widgetInfo.enabledState);
 
-	self:SetHeight(self.Text:GetHeight());
+	if self.fontColor then
+		self.Text:SetTextColor(self.fontColor:GetRGB());
+	end
+
+	local width;
+	if widgetInfo.widgetWidth > 0 then
+		width = widgetInfo.widgetWidth;
+	else
+		width = self.Text:GetStringWidth();
+	end
+
+	self:SetWidth(width);
+	self:SetHeight(self.Text:GetStringHeight());
+end
+
+function UIWidgetTemplateTextWithStateMixin:SetFontStringColor(fontColor)
+	self.fontColor = fontColor;
 end

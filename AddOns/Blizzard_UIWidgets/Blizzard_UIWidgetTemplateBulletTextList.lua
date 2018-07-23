@@ -20,8 +20,8 @@ function UIWidgetTemplateBulletTextListMixin:Setup(widgetInfo)
 		lineFrame:Show();
 
 		lineFrame.Text:SetText(line);
-		lineFrame:SetColorState(widgetInfo.colorState)
-		lineFrame:SetHeight(lineFrame.Text:GetHeight());
+		lineFrame:SetEnabledState(widgetInfo.enabledState)
+		lineFrame:SetHeight(lineFrame.Text:GetStringHeight());
 
 		lineFrame:ClearAllPoints();
 		if previousLineFrame then
@@ -47,9 +47,19 @@ function UIWidgetTemplateBulletTextListMixin:OnReset()
 	self.linePool:ReleaseAll();
 end
 
+function UIWidgetTemplateBulletTextListMixin:CustomDebugSetup(color)
+	for line in self.linePool:EnumerateActive() do
+		if not line._debugBGTex then
+			line._debugBGTex = line:CreateTexture()
+			line._debugBGTex:SetColorTexture(color:GetRGBA());
+			line._debugBGTex:SetAllPoints(line);
+		end
+	end
+end
+
 UIWidgetTemplateBulletTextListLineMixin = {};
 
-function UIWidgetTemplateBulletTextListLineMixin:SetColorState(colorState)
-	self.Bullet:SetColorState(colorState);
-	self.Text:SetColorState(colorState);
+function UIWidgetTemplateBulletTextListLineMixin:SetEnabledState(enabledState)
+	self.Bullet:SetEnabledState(enabledState);
+	self.Text:SetEnabledState(enabledState);
 end

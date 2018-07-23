@@ -3,18 +3,14 @@ local MIN_STORY_TOOLTIP_WIDTH = 240;
 
 local tooltipButton;
 
-local titleFramePool;
-local objectiveFramePool;
-local headerFramePool;
-
 local WarCampaignTextureKitInfo = {
 	Background = "Campaign_%s"
 };
 
 QUEST_LOG_WAR_CAMPAIGN_LAYOUT_INDEX = 2;
-QUEST_LOG_WAR_CAMPAIGN_NEXT_OBJECTIVE_LAYOUT_INDEX = 3;
-QUEST_LOG_SEPARATOR_LAYOUT_INDEX = 12;
-QUEST_LOG_STORY_LAYOUT_INDEX = 13;
+QUEST_LOG_WAR_CAMPAIGN_NEXT_OBJECTIVE_LAYOUT_INDEX = 12;
+QUEST_LOG_SEPARATOR_LAYOUT_INDEX = 24;
+QUEST_LOG_STORY_LAYOUT_INDEX = 25;
 
 QuestLogMixin = { };
 
@@ -165,9 +161,9 @@ function QuestMapFrame_OnEvent(self, event, ...)
 		if ( questIndex > 0 ) then
 			QuestMapFrame_OpenToQuestDetails(arg1);
 		elseif ( mapID ~= 0 ) then
-			QuestMapFrame:GetParent():NavigateToMap(mapID);
+			QuestMapFrame:GetParent():SetMapID(mapID);
 		elseif ( arg2 and arg2 > 0) then
-			QuestMapFrame:GetParent():NavigateToMap(arg2);
+			QuestMapFrame:GetParent():SetMapID(arg2);
 		end
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then	
 		self:Refresh();
@@ -177,6 +173,10 @@ function QuestMapFrame_OnEvent(self, event, ...)
 			QuestMapFrame_UpdateAll();
 		end
 	end
+end
+
+function QuestMapFrame_OnHide(self)
+	QuestMapFrame_CloseQuestDetails(self:GetParent());
 end
 
 -- opening/closing the quest frame is different from showing/hiding because of fullscreen map mode
@@ -244,7 +244,7 @@ function QuestMapFrame_UpdateAll()
 		if ( questDetailID ) then
 			-- update rewards
 			SelectQuestLogEntry(GetQuestLogIndexByID(questDetailID));
-			QuestInfo_Display(QUEST_TEMPLATE_MAP_REWARDS, QuestMapFrame.DetailsFrame.RewardsFrame, nil, nil, true);
+			QuestMapFrame_ShowQuestDetails(questDetailID);
 		else
 			QuestLogQuests_Update(poiTable);
 		end
@@ -305,7 +305,7 @@ function QuestMapFrame_ShowQuestDetails(questID)
 	QuestMapFrame.DetailsFrame.returnMapID = QuestMapFrame:GetParent():GetMapID();
 	local mapID = GetQuestUiMapID(questID);
 	if ( mapID ~= 0 ) then
-		QuestMapFrame:GetParent():NavigateToMap(mapID);
+		QuestMapFrame:GetParent():SetMapID(mapID);
 	end
 
 	QuestMapFrame_UpdateQuestDetailsButtons();
@@ -333,6 +333,10 @@ function QuestMapFrame_CloseQuestDetails(optPortraitOwnerCheckFrame)
 
 	StaticPopup_Hide("ABANDON_QUEST");
 	StaticPopup_Hide("ABANDON_QUEST_WITH_ITEMS");
+end
+
+function QuestMapFrame_PingQuestID(questId)
+	QuestMapFrame:GetParent():PingQuestID(questId);
 end
 
 function QuestMapFrame_UpdateQuestDetailsButtons()
@@ -365,7 +369,7 @@ end
 
 function QuestMapFrame_ReturnFromQuestDetails()
 	if ( QuestMapFrame.DetailsFrame.returnMapID ) then
-		QuestMapFrame:GetParent():NavigateToMap(QuestMapFrame.DetailsFrame.returnMapID);
+		QuestMapFrame:GetParent():SetMapID(QuestMapFrame.DetailsFrame.returnMapID);
 	end
 	QuestMapFrame_CloseQuestDetails();
 end
@@ -410,9 +414,9 @@ function QuestsFrame_OnLoad(self)
 	self.StoryTooltip:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b);
 	self.StoryTooltip:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b);
 
-	titleFramePool = CreateFramePool("BUTTON", QuestMapFrame.QuestsFrame.Contents, "QuestLogTitleTemplate");
-	objectiveFramePool = CreateFramePool("FRAME", QuestMapFrame.QuestsFrame.Contents, "QuestLogObjectiveTemplate");
-	headerFramePool = CreateFramePool("BUTTON", QuestMapFrame.QuestsFrame.Contents, "QuestLogHeaderTemplate");
+	self.titleFramePool = CreateFramePool("BUTTON", QuestMapFrame.QuestsFrame.Contents, "QuestLogTitleTemplate");
+	self.objectiveFramePool = CreateFramePool("FRAME", QuestMapFrame.QuestsFrame.Contents, "QuestLogObjectiveTemplate");
+	self.headerFramePool = CreateFramePool("BUTTON", QuestMapFrame.QuestsFrame.Contents, "QuestLogHeaderTemplate");
 end
 
 -- *****************************************************************************************************
@@ -487,7 +491,7 @@ end
 
 function QuestLogQuests_AddQuestButton(prevButton, questLogIndex, poiTable, title, level, suggestedGroup, isHeader, isCollapsed, isComplete, frequency, questID, startEvent, displayQuestID, isOnMap, hasLocalPOI, isTask, isBounty, isStory, isHidden, isScaling, layoutIndex)
 	local totalHeight = 8;
-	local button = titleFramePool:Acquire();
+	local button = QuestScrollFrame.titleFramePool:Acquire();
 	button.questID = questID;
 	local difficultyColor = GetQuestDifficultyColor(level, isScaling);
 
@@ -571,7 +575,7 @@ function QuestLogQuests_AddQuestButton(prevButton, questLogIndex, poiTable, titl
 	end
 	-- objectives
 	if ( isComplete ) then
-		local objectiveFrame = objectiveFramePool:Acquire();
+		local objectiveFrame = QuestScrollFrame.objectiveFramePool:Acquire();
 		objectiveFrame.questID = questID;
 		objectiveFrame:Show();
 		local completionText = GetQuestLogCompletionText(questLogIndex) or QUEST_WATCH_QUEST_READY;
@@ -585,7 +589,7 @@ function QuestLogQuests_AddQuestButton(prevButton, questLogIndex, poiTable, titl
 		for i = 1, numObjectives do
 			local text, objectiveType, finished = GetQuestLogLeaderBoard(i, questLogIndex);
 			if ( text and not finished ) then
-				local objectiveFrame = objectiveFramePool:Acquire();
+				local objectiveFrame = QuestScrollFrame.objectiveFramePool:Acquire();
 				objectiveFrame.questID = questID;
 				objectiveFrame:Show();
 				objectiveFrame.Text:SetText(text);
@@ -603,7 +607,7 @@ function QuestLogQuests_AddQuestButton(prevButton, questLogIndex, poiTable, titl
 			end
 		end
 		if ( requiredMoney > playerMoney ) then
-			local objectiveFrame = objectiveFramePool:Aquire();
+			local objectiveFrame = QuestScrollFrame.objectiveFramePool:Aquire();
 			objectiveFrame.questID = questID;
 			objectiveFrame:Show();
 			objectiveFrame.Text:SetText(GetMoneyString(playerMoney).." / "..GetMoneyString(requiredMoney));
@@ -662,9 +666,9 @@ end
 function QuestLogQuests_Update(poiTable)
 	local numEntries, numQuests = GetNumQuestLogEntries();
 
-	titleFramePool:ReleaseAll();
-	objectiveFramePool:ReleaseAll();
-	headerFramePool:ReleaseAll();
+	QuestScrollFrame.titleFramePool:ReleaseAll();
+	QuestScrollFrame.objectiveFramePool:ReleaseAll();
+	QuestScrollFrame.headerFramePool:ReleaseAll();
 
 	local mapID = QuestMapFrame:GetParent():GetMapID();
 
@@ -675,15 +679,24 @@ function QuestLogQuests_Update(poiTable)
 	local storyAchievementID, storyMapID = C_QuestLog.GetZoneStoryInfo(mapID);
 	local warCampaignID = C_CampaignInfo.GetCurrentCampaignID();
 	local warCampaignShown = false;
+	local warCampaignComplete = false;
 
 	if ( warCampaignID ) then
 		local warCampaignInfo = C_CampaignInfo.GetCampaignInfo(warCampaignID);
 		if (warCampaignInfo and warCampaignInfo.visibilityConditionMatched) then
 			local campaignHeader = QuestScrollFrame.Contents.WarCampaignHeader;
 			local campaignNextObj = QuestScrollFrame.Contents.WarCampaignNextObjective;
+			local separator = QuestScrollFrame.Contents.Separator;
 			SetupTextureKits(warCampaignInfo.uiTextureKitID, campaignHeader, WarCampaignTextureKitInfo);
 			local campaignChapterID = C_CampaignInfo.GetCurrentCampaignChapterID();
-			if (campaignChapterID) then
+			if ( warCampaignInfo.complete ) then
+				warCampaignComplete = true;
+				campaignHeader.Progress:SetText(WAR_CAMPAIGN_TO_BE_CONTINUED);
+				campaignHeader.Progress:SetTextColor(HIGHLIGHT_FONT_COLOR:GetRGB());
+				campaignHeader.Background:SetDesaturated(true);
+				campaignHeader.Text:SetTextColor(DISABLED_FONT_COLOR:GetRGB());
+				campaignNextObj:Hide();
+			elseif (campaignChapterID) then
 				local campaignChapterInfo = C_CampaignInfo.GetCampaignChapterInfo(campaignChapterID);		
 				if (campaignChapterInfo) then
 					campaignHeader.Progress:SetText(campaignChapterInfo.name);
@@ -692,12 +705,18 @@ function QuestLogQuests_Update(poiTable)
 					campaignHeader.Progress:SetText("");
 				end
 				campaignNextObj:Hide();
+				campaignHeader.Background:SetDesaturated(false);
+				campaignHeader.Text:SetTextColor(HIGHLIGHT_FONT_COLOR:GetRGB());
 			else
 				campaignNextObj.Text:SetText(warCampaignInfo.playerConditionFailedReason);
+				campaignNextObj.Text:SetTextColor(NORMAL_FONT_COLOR:GetRGB());
 				campaignNextObj:Show();
 				campaignNextObj:SetHeight(campaignNextObj.Text:GetHeight() + 12);
 				campaignHeader.Progress:SetText("");
+				campaignHeader.Background:SetDesaturated(false);
+				campaignHeader.Text:SetTextColor(HIGHLIGHT_FONT_COLOR:GetRGB());
 			end
+			campaignHeader.Text:SetText(warCampaignInfo.name);
 			campaignHeader:Show();
 			warCampaignShown = true;
 		end
@@ -705,12 +724,16 @@ function QuestLogQuests_Update(poiTable)
 
 	if (warCampaignShown) then
 		local separator = QuestScrollFrame.Contents.Separator;
-		if (storyAchievementID) then
-			separator.Divider:SetAtlas("ZoneStory_Divider", true);
+		if (warCampaignComplete) then
+			separator:Hide();
 		else
-			separator.Divider:SetAtlas("QuestLog_Divider", true);
+			if (storyAchievementID) then
+				separator.Divider:SetAtlas("ZoneStory_Divider", true);
+			else
+				separator.Divider:SetAtlas("QuestLog_Divider", true);
+			end
+			separator:Show();
 		end
-		separator:Show();
 	else
 		QuestScrollFrame.Contents.WarCampaignHeader:Hide();
 		QuestScrollFrame.Contents.WarCampaignNextObjective:Hide();
@@ -754,7 +777,7 @@ function QuestLogQuests_Update(poiTable)
 			if ( not headerShown and not C_CampaignInfo.IsCampaignQuest(questID) ) then
 				headerShown = true;
 				noHeaders = false;
-				button = headerFramePool:Acquire();
+				button = QuestScrollFrame.headerFramePool:Acquire();
 				if (headerCollapsed) then
 					button:SetNormalTexture("Interface\\Buttons\\UI-PlusButton-Up");
 				else
@@ -791,7 +814,7 @@ function QuestLogQuests_Update(poiTable)
 	end
 
 	-- background
-	if ( titleFramePool:GetNumActive() == 0 and noHeaders ) then
+	if ( QuestScrollFrame.titleFramePool:GetNumActive() == 0 and noHeaders ) then
 		QuestScrollFrame.Background:SetAtlas("NoQuestsBackground", true);
 	else
 		QuestScrollFrame.Background:SetAtlas("QuestLogBackground", true);
@@ -819,7 +842,7 @@ function OpenQuestLog(mapID)
 	QuestMapFrame_Open();
 
 	if mapID then
-		QuestMapFrame:GetParent():NavigateToMap(mapID);
+		QuestMapFrame:GetParent():SetMapID(mapID);
 	end
 end
 
@@ -847,7 +870,7 @@ function QuestMapLogTitleButton_OnEnter(self)
 	end
 	self.Text:SetTextColor( difficultyHighlightColor.r, difficultyHighlightColor.g, difficultyHighlightColor.b );
 
-	for line in objectiveFramePool:EnumerateActive() do
+	for line in QuestScrollFrame.objectiveFramePool:EnumerateActive() do
 		if ( line.questID == self.questID ) then
 			line.Text:SetTextColor(1, 1, 1);
 		end
@@ -971,7 +994,7 @@ function QuestMapLogTitleButton_OnLeave(self)
 		difficultyColor = QuestDifficultyColors["header"];
 	end
 	self.Text:SetTextColor( difficultyColor.r, difficultyColor.g, difficultyColor.b );
-	for line in objectiveFramePool:EnumerateActive() do
+	for line in QuestScrollFrame.objectiveFramePool:EnumerateActive() do
 		if ( line.questID == self.questID ) then
 			line.Text:SetTextColor(0.8, 0.8, 0.8);
 		end

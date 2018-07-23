@@ -36,6 +36,21 @@ local PaperDollInfo =
 			},
 		},
 		{
+			Name = "GetInspectAzeriteItemEmpoweredChoices",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "unit", Type = "string", Nilable = false },
+				{ Name = "equipmentSlotIndex", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "azeritePowerIDs", Type = "table", InnerType = "number", Nilable = false },
+			},
+		},
+		{
 			Name = "GetMinItemLevel",
 			Type = "Function",
 
@@ -169,7 +184,7 @@ local PaperDollInfo =
 			Payload =
 			{
 				{ Name = "equipmentSlot", Type = "number", Nilable = false },
-				{ Name = "hasCurrent", Type = "number", Nilable = true },
+				{ Name = "hasCurrent", Type = "bool", Nilable = false },
 			},
 		},
 		{

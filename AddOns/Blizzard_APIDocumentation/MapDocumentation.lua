@@ -36,6 +36,29 @@ local Map =
 			},
 		},
 		{
+			Name = "GetBountySetIDForMap",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "uiMapID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "bountySetID", Type = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "GetFallbackWorldMapID",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "uiMapID", Type = "number", Nilable = false },
+			},
+		},
+		{
 			Name = "GetMapArtBackgroundAtlas",
 			Type = "Function",
 
@@ -61,6 +84,20 @@ local Map =
 			Returns =
 			{
 				{ Name = "position", Type = "MapCanvasPosition", Nilable = false },
+			},
+		},
+		{
+			Name = "GetMapArtID",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "uiMapID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "uiMapArtID", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -178,6 +215,7 @@ local Map =
 			Returns =
 			{
 				{ Name = "fileDataID", Type = "number", Nilable = false },
+				{ Name = "atlasID", Type = "string", Nilable = false },
 				{ Name = "texturePercentageX", Type = "number", Nilable = false },
 				{ Name = "texturePercentageY", Type = "number", Nilable = false },
 				{ Name = "textureX", Type = "number", Nilable = false },
@@ -312,6 +350,20 @@ local Map =
 			{
 				{ Name = "continentID", Type = "number", Nilable = false },
 				{ Name = "worldPosition", Type = "table", Mixin = "Vector2DMixin", Nilable = false },
+			},
+		},
+		{
+			Name = "MapHasArt",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "uiMapID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "hasArt", Type = "bool", Nilable = false },
 			},
 		},
 		{

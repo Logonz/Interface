@@ -7,8 +7,10 @@ function MapCanvasDetailLayerMixin:OnLoad()
 end
 
 function MapCanvasDetailLayerMixin:SetMapAndLayer(mapID, layerIndex)
-	if self.mapID ~= mapID or self.layerIndex ~= layerIndex then
+	local mapArtID = C_Map.GetMapArtID(mapID) -- phased map art may be different for the same mapID
+	if self.mapID ~= mapID or self.mapArtID ~= mapArtID or self.layerIndex ~= layerIndex then
 		self.mapID = mapID;
+		self.mapArtID = mapArtID;
 		self.layerIndex = layerIndex;
 
 		self:RefreshDetailTiles();
@@ -25,9 +27,7 @@ end
 
 function MapCanvasDetailLayerMixin:SetLayerAlpha(layerAlpha)
 	self.layerAlpha = layerAlpha;
-	if self:IsFullyLoaded() then
-		self:RefreshAlpha();
-	end
+	self:RefreshAlpha();
 end
 
 function MapCanvasDetailLayerMixin:GetLayerAlpha()
@@ -46,7 +46,6 @@ end
 function MapCanvasDetailLayerMixin:RefreshDetailTiles()
 	self.detailTilePool:ReleaseAll();
 	self.textureLoadGroup:Reset();
-	self:SetAlpha(0);
 	self.isWaitingForLoad = true;
 
 	local layers = C_Map.GetMapArtLayers(self.mapID);
@@ -60,7 +59,7 @@ function MapCanvasDetailLayerMixin:RefreshDetailTiles()
 			local detailTile = self.detailTilePool:Acquire();
 			self.textureLoadGroup:AddTexture(detailTile);
 			local textureIndex = (tileRow - 1) * numDetailTilesCols + tileCol;
-			detailTile:SetTexture(textures[textureIndex]);
+			detailTile:SetTexture(textures[textureIndex], nil, nil, "TRILINEAR");
 
 			local offsetX = math.floor(layerInfo.tileWidth * (tileCol - 1));
 			local offsetY = math.floor(layerInfo.tileHeight * (tileRow - 1));
@@ -71,16 +70,22 @@ function MapCanvasDetailLayerMixin:RefreshDetailTiles()
 			detailTile:Show();
 		end
 	end
+
+	self:RefreshAlpha();
 end
 
 function MapCanvasDetailLayerMixin:OnUpdate()
 	if self.isWaitingForLoad and self.textureLoadGroup:IsFullyLoaded() then
-		self:RefreshAlpha();
 		self.isWaitingForLoad = nil;
+		self:RefreshAlpha();
 		self.textureLoadGroup:Reset();
 	end
 end
 
 function MapCanvasDetailLayerMixin:RefreshAlpha()
-	self:SetAlpha(self:GetLayerAlpha() * self:GetGlobalAlpha());
+	if self:IsFullyLoaded() then
+		self:SetAlpha(self:GetLayerAlpha() * self:GetGlobalAlpha());
+	else
+		self:SetAlpha(0.0);
+	end
 end

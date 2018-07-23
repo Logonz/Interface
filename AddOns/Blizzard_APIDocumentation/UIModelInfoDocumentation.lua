@@ -59,11 +59,7 @@ local UIModelInfo =
 
 			Returns =
 			{
-				{ Name = "animation", Type = "number", Nilable = false },
-				{ Name = "animationVariation", Type = "number", Nilable = false },
-				{ Name = "animSpeed", Type = "number", Nilable = false },
-				{ Name = "alpha", Type = "number", Nilable = false },
-				{ Name = "scale", Type = "number", Nilable = false },
+				{ Name = "actorDisplayInfo", Type = "UIModelSceneActorDisplayInfo", Nilable = false },
 			},
 		},
 		{
@@ -137,9 +133,9 @@ local UIModelInfo =
 		{
 			Name = "ModelSceneType",
 			Type = "Enumeration",
-			NumValues = 14,
+			NumValues = 16,
 			MinValue = 0,
-			MaxValue = 13,
+			MaxValue = 15,
 			Fields =
 			{
 				{ Name = "MountJournal", Type = "ModelSceneType", EnumValue = 0 },
@@ -156,6 +152,22 @@ local UIModelInfo =
 				{ Name = "PvpWarModeFire", Type = "ModelSceneType", EnumValue = 11 },
 				{ Name = "PartyPose", Type = "ModelSceneType", EnumValue = 12 },
 				{ Name = "AzeriteItemLevelUpToast", Type = "ModelSceneType", EnumValue = 13 },
+				{ Name = "AzeritePowers", Type = "ModelSceneType", EnumValue = 14 },
+				{ Name = "AzeriteRewardGlow", Type = "ModelSceneType", EnumValue = 15 },
+			},
+		},
+		{
+			Name = "UIModelSceneActorDisplayInfo",
+			Type = "Structure",
+			Fields =
+			{
+				{ Name = "animation", Type = "number", Nilable = false },
+				{ Name = "animationVariation", Type = "number", Nilable = false },
+				{ Name = "animSpeed", Type = "number", Nilable = false },
+				{ Name = "animationKitID", Type = "number", Nilable = true },
+				{ Name = "spellVisualKitID", Type = "number", Nilable = true },
+				{ Name = "alpha", Type = "number", Nilable = false },
+				{ Name = "scale", Type = "number", Nilable = false },
 			},
 		},
 		{

@@ -112,7 +112,7 @@ function QuickJoinToastMixin:ProcessUpdate(guid)
 		self.groups[guid] = group;
 	end
 
-	if ( group:GetPriority() > 0 ) then
+	if ( group:GetPriority() > 0 and not group:ShouldSuppressToast() ) then
 		if ( not self.groupsAwaitingDisplay[guid] ) then
 			self.groupsAwaitingDisplay[guid] = true;
 			GuildRoster();
@@ -348,7 +348,7 @@ function QuickJoinToastMixin:OnEnter()
 			local knowsLeader = SocialQueueUtil_HasRelationshipWithLeader(self.displayedToast.guid);
 
 			GameTooltip:SetOwner(self.Toast, self.isOnRight and "ANCHOR_LEFT" or "ANCHOR_RIGHT");
-			SocialQueueUtil_SetTooltip(GameTooltip, SOCIAL_QUEUE_TOOLTIP_HEADER, queues, true, knowsLeader);
+			SocialQueueUtil_SetTooltip(GameTooltip, SocialQueueUtil_GetHeaderName(self.displayedToast.guid), queues, true, knowsLeader);
 			GameTooltip:AddLine(" ");
 			GameTooltip:AddLine(SOCIAL_QUEUE_CLICK_TO_JOIN, GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b);
 			GameTooltip:Show();
@@ -392,15 +392,6 @@ end
 
 function QuickJoinToastMixin:GetCurrentText(updateQueues)
 	local group = self.displayedToast;
-
-	local members = SocialQueueUtil_SortGroupMembers(C_SocialQueue.GetGroupMembers(group.guid));
-	local playerName, color = SocialQueueUtil_GetNameAndColor(members[1]);
-
-	if ( #members > 1 ) then
-		playerName = string.format(QUICK_JOIN_TOAST_EXTRA_PLAYERS, playerName, #members - 1);
-	end
-	playerName = color..playerName..FONT_COLOR_CODE_CLOSE;
-
 	local queues;
 	if (updateQueues) then
 		queues = group:GetNewQueues();
@@ -416,9 +407,9 @@ function QuickJoinToastMixin:GetCurrentText(updateQueues)
 	end
 
 	if ( queues[1].queueData.queueType == "lfglist" ) then
-		return string.format(QUICK_JOIN_TOAST_LFGLIST_MESSAGE, playerName, queueName);
+		return string.format(QUICK_JOIN_TOAST_LFGLIST_MESSAGE, SocialQueueUtil_GetHeaderName(group.guid), queueName);
 	else
-		return string.format(QUICK_JOIN_TOAST_MESSAGE, playerName, queueName);
+		return string.format(QUICK_JOIN_TOAST_MESSAGE, SocialQueueUtil_GetHeaderName(group.guid), queueName);
 	end
 end
 
@@ -611,7 +602,7 @@ end
 function QuickJoinToast_GetPriorityFromPlayers(players)
 	local priority = 0;
 	for i=1, #players do
-		local player = players[i];
+		local player = players[i].guid;
 		if ( BNGetGameAccountInfoByGUID(player) or IsCharacterFriend(player) ) then
 			priority = priority + QUICK_JOIN_CONFIG.PLAYER_FRIEND_VALUE;
 		end
@@ -626,6 +617,22 @@ function QuickJoinToastGroupMixin:Update()
 	local canJoin = C_SocialQueue.GetGroupInfo(self.guid);
 	local queues = C_SocialQueue.GetGroupQueues(self.guid);
 	local players = C_SocialQueue.GetGroupMembers(self.guid);
+	
+	self.suppressToast = true;
+	if players then
+		for i, player in ipairs(players) do
+			if not player.clubId then
+				self.suppressToast = false;
+				break;
+			else
+				local clubInfo = C_Club.GetClubInfo(player.clubId);
+				if clubInfo and clubInfo.socialQueueingEnabled then
+					self.suppressToast = false;
+					break;
+				end
+			end
+		end
+	end
 
 	if ( queues and players and canJoin ) then
 		self.priority = QuickJoinToast_GetPriority(self, queues, players);
@@ -644,6 +651,10 @@ function QuickJoinToastGroupMixin:Update()
 	end
 
 	self.displayedQueues = newDisplayedQueues;
+end
+
+function QuickJoinToastGroupMixin:ShouldSuppressToast()
+	return self.suppressToast;
 end
 
 function QuickJoinToastGroupMixin:GetPriority()

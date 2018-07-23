@@ -72,22 +72,6 @@ local Unit =
 			},
 		},
 		{
-			Name = "UnitClassByPlayerLocation",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "playerLocation", Type = "table", Mixin = "PlayerLocationMixin", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "className", Type = "string", Nilable = false },
-				{ Name = "classFilename", Type = "string", Nilable = false },
-				{ Name = "classID", Type = "number", Nilable = false },
-			},
-		},
-		{
 			Name = "UnitIsConnected",
 			Type = "Function",
 
@@ -114,6 +98,48 @@ local Unit =
 			Returns =
 			{
 				{ Name = "unitIsOwnerOrControllerOfUnit", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "UnitIsWarModeActive",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "unit", Type = "string", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "warModeActive", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "UnitIsWarModeDesired",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "unit", Type = "string", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "warModeDesired", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "UnitIsWarModePhased",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "unit", Type = "string", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "warModePhased", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -184,6 +210,10 @@ local Unit =
 			Name = "ArenaCooldownsUpdate",
 			Type = "Event",
 			LiteralName = "ARENA_COOLDOWNS_UPDATE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "ArenaCrowdControlSpellUpdate",
@@ -191,6 +221,7 @@ local Unit =
 			LiteralName = "ARENA_CROWD_CONTROL_SPELL_UPDATE",
 			Payload =
 			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
 				{ Name = "spellID", Type = "number", Nilable = false },
 			},
 		},
@@ -238,24 +269,31 @@ local Unit =
 			LiteralName = "HEARTHSTONE_BOUND",
 		},
 		{
-			Name = "HonorPrestigeUpdate",
-			Type = "Event",
-			LiteralName = "HONOR_PRESTIGE_UPDATE",
-		},
-		{
 			Name = "HonorXpUpdate",
 			Type = "Event",
 			LiteralName = "HONOR_XP_UPDATE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "IncomingResurrectChanged",
 			Type = "Event",
 			LiteralName = "INCOMING_RESURRECT_CHANGED",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "KnownTitlesUpdate",
 			Type = "Event",
 			LiteralName = "KNOWN_TITLES_UPDATE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "LocalplayerPetRenamed",
@@ -336,6 +374,10 @@ local Unit =
 			Name = "PlayerDamageDoneMods",
 			Type = "Event",
 			LiteralName = "PLAYER_DAMAGE_DONE_MODS",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "PlayerEnterCombat",
@@ -351,6 +393,10 @@ local Unit =
 			Name = "PlayerFlagsChanged",
 			Type = "Event",
 			LiteralName = "PLAYER_FLAGS_CHANGED",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "PlayerFocusChanged",
@@ -398,11 +444,19 @@ local Unit =
 			Name = "PlayerPvpKillsChanged",
 			Type = "Event",
 			LiteralName = "PLAYER_PVP_KILLS_CHANGED",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "PlayerPvpRankChanged",
 			Type = "Event",
 			LiteralName = "PLAYER_PVP_RANK_CHANGED",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "PlayerRegenDisabled",
@@ -418,6 +472,10 @@ local Unit =
 			Name = "PlayerSpecializationChanged",
 			Type = "Event",
 			LiteralName = "PLAYER_SPECIALIZATION_CHANGED",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "PlayerStartedMoving",
@@ -438,6 +496,10 @@ local Unit =
 			Name = "PlayerTrialXpUpdate",
 			Type = "Event",
 			LiteralName = "PLAYER_TRIAL_XP_UPDATE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "PlayerUpdateResting",
@@ -448,6 +510,10 @@ local Unit =
 			Name = "PlayerXpUpdate",
 			Type = "Event",
 			LiteralName = "PLAYER_XP_UPDATE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "PortraitsUpdated",
@@ -467,6 +533,10 @@ local Unit =
 			Name = "PvpTimerUpdate",
 			Type = "Event",
 			LiteralName = "PVP_TIMER_UPDATE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "RunePowerUpdate",
@@ -512,26 +582,46 @@ local Unit =
 			Name = "UnitAbsorbAmountChanged",
 			Type = "Event",
 			LiteralName = "UNIT_ABSORB_AMOUNT_CHANGED",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitAttack",
 			Type = "Event",
 			LiteralName = "UNIT_ATTACK",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitAttackPower",
 			Type = "Event",
 			LiteralName = "UNIT_ATTACK_POWER",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitAttackSpeed",
 			Type = "Event",
 			LiteralName = "UNIT_ATTACK_SPEED",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitAura",
 			Type = "Event",
 			LiteralName = "UNIT_AURA",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitCheatToggleEvent",
@@ -542,6 +632,10 @@ local Unit =
 			Name = "UnitClassificationChanged",
 			Type = "Event",
 			LiteralName = "UNIT_CLASSIFICATION_CHANGED",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitCombat",
@@ -549,6 +643,7 @@ local Unit =
 			LiteralName = "UNIT_COMBAT",
 			Payload =
 			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
 				{ Name = "event", Type = "string", Nilable = false },
 				{ Name = "flagText", Type = "string", Nilable = false },
 				{ Name = "amount", Type = "number", Nilable = false },
@@ -561,6 +656,7 @@ local Unit =
 			LiteralName = "UNIT_CONNECTION",
 			Payload =
 			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
 				{ Name = "isConnected", Type = "bool", Nilable = false },
 			},
 		},
@@ -568,66 +664,118 @@ local Unit =
 			Name = "UnitDamage",
 			Type = "Event",
 			LiteralName = "UNIT_DAMAGE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitDefense",
 			Type = "Event",
 			LiteralName = "UNIT_DEFENSE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitDisplaypower",
 			Type = "Event",
 			LiteralName = "UNIT_DISPLAYPOWER",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitFaction",
 			Type = "Event",
 			LiteralName = "UNIT_FACTION",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitFlags",
 			Type = "Event",
 			LiteralName = "UNIT_FLAGS",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitHealAbsorbAmountChanged",
 			Type = "Event",
 			LiteralName = "UNIT_HEAL_ABSORB_AMOUNT_CHANGED",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitHealPrediction",
 			Type = "Event",
 			LiteralName = "UNIT_HEAL_PREDICTION",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitHealth",
 			Type = "Event",
 			LiteralName = "UNIT_HEALTH",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitHealthFrequent",
 			Type = "Event",
 			LiteralName = "UNIT_HEALTH_FREQUENT",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitInventoryChanged",
 			Type = "Event",
 			LiteralName = "UNIT_INVENTORY_CHANGED",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitLevel",
 			Type = "Event",
 			LiteralName = "UNIT_LEVEL",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitMana",
 			Type = "Event",
 			LiteralName = "UNIT_MANA",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitMaxhealth",
 			Type = "Event",
 			LiteralName = "UNIT_MAXHEALTH",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitMaxpower",
@@ -635,6 +783,7 @@ local Unit =
 			LiteralName = "UNIT_MAXPOWER",
 			Payload =
 			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
 				{ Name = "powerType", Type = "string", Nilable = false },
 			},
 		},
@@ -642,51 +791,91 @@ local Unit =
 			Name = "UnitModelChanged",
 			Type = "Event",
 			LiteralName = "UNIT_MODEL_CHANGED",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitNameUpdate",
 			Type = "Event",
 			LiteralName = "UNIT_NAME_UPDATE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitOtherPartyChanged",
 			Type = "Event",
 			LiteralName = "UNIT_OTHER_PARTY_CHANGED",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitPet",
 			Type = "Event",
 			LiteralName = "UNIT_PET",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitPetExperience",
 			Type = "Event",
 			LiteralName = "UNIT_PET_EXPERIENCE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitPhase",
 			Type = "Event",
 			LiteralName = "UNIT_PHASE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitPortraitUpdate",
 			Type = "Event",
 			LiteralName = "UNIT_PORTRAIT_UPDATE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitPowerBarHide",
 			Type = "Event",
 			LiteralName = "UNIT_POWER_BAR_HIDE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitPowerBarShow",
 			Type = "Event",
 			LiteralName = "UNIT_POWER_BAR_SHOW",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitPowerBarTimerUpdate",
 			Type = "Event",
 			LiteralName = "UNIT_POWER_BAR_TIMER_UPDATE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitPowerFrequent",
@@ -694,6 +883,7 @@ local Unit =
 			LiteralName = "UNIT_POWER_FREQUENT",
 			Payload =
 			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
 				{ Name = "powerType", Type = "string", Nilable = false },
 			},
 		},
@@ -703,6 +893,7 @@ local Unit =
 			LiteralName = "UNIT_POWER_UPDATE",
 			Payload =
 			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
 				{ Name = "powerType", Type = "string", Nilable = false },
 			},
 		},
@@ -710,26 +901,46 @@ local Unit =
 			Name = "UnitQuestLogChanged",
 			Type = "Event",
 			LiteralName = "UNIT_QUEST_LOG_CHANGED",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitRangedAttackPower",
 			Type = "Event",
 			LiteralName = "UNIT_RANGED_ATTACK_POWER",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitRangeddamage",
 			Type = "Event",
 			LiteralName = "UNIT_RANGEDDAMAGE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitResistances",
 			Type = "Event",
 			LiteralName = "UNIT_RESISTANCES",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitSpellHaste",
 			Type = "Event",
 			LiteralName = "UNIT_SPELL_HASTE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitSpellcastChannelStart",
@@ -737,6 +948,7 @@ local Unit =
 			LiteralName = "UNIT_SPELLCAST_CHANNEL_START",
 			Payload =
 			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
 				{ Name = "castGUID", Type = "string", Nilable = false },
 				{ Name = "spellID", Type = "number", Nilable = false },
 			},
@@ -747,6 +959,7 @@ local Unit =
 			LiteralName = "UNIT_SPELLCAST_CHANNEL_STOP",
 			Payload =
 			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
 				{ Name = "castGUID", Type = "string", Nilable = false },
 				{ Name = "spellID", Type = "number", Nilable = false },
 			},
@@ -757,6 +970,7 @@ local Unit =
 			LiteralName = "UNIT_SPELLCAST_CHANNEL_UPDATE",
 			Payload =
 			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
 				{ Name = "castGUID", Type = "string", Nilable = false },
 				{ Name = "spellID", Type = "number", Nilable = false },
 			},
@@ -767,6 +981,7 @@ local Unit =
 			LiteralName = "UNIT_SPELLCAST_DELAYED",
 			Payload =
 			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
 				{ Name = "castGUID", Type = "string", Nilable = false },
 				{ Name = "spellID", Type = "number", Nilable = false },
 			},
@@ -777,6 +992,7 @@ local Unit =
 			LiteralName = "UNIT_SPELLCAST_FAILED",
 			Payload =
 			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
 				{ Name = "castGUID", Type = "string", Nilable = false },
 				{ Name = "spellID", Type = "number", Nilable = false },
 			},
@@ -787,6 +1003,7 @@ local Unit =
 			LiteralName = "UNIT_SPELLCAST_FAILED_QUIET",
 			Payload =
 			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
 				{ Name = "castGUID", Type = "string", Nilable = false },
 				{ Name = "spellID", Type = "number", Nilable = false },
 			},
@@ -797,6 +1014,7 @@ local Unit =
 			LiteralName = "UNIT_SPELLCAST_INTERRUPTED",
 			Payload =
 			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
 				{ Name = "castGUID", Type = "string", Nilable = false },
 				{ Name = "spellID", Type = "number", Nilable = false },
 			},
@@ -805,11 +1023,19 @@ local Unit =
 			Name = "UnitSpellcastInterruptible",
 			Type = "Event",
 			LiteralName = "UNIT_SPELLCAST_INTERRUPTIBLE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitSpellcastNotInterruptible",
 			Type = "Event",
 			LiteralName = "UNIT_SPELLCAST_NOT_INTERRUPTIBLE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitSpellcastStart",
@@ -817,6 +1043,7 @@ local Unit =
 			LiteralName = "UNIT_SPELLCAST_START",
 			Payload =
 			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
 				{ Name = "castGUID", Type = "string", Nilable = false },
 				{ Name = "spellID", Type = "number", Nilable = false },
 			},
@@ -827,6 +1054,7 @@ local Unit =
 			LiteralName = "UNIT_SPELLCAST_STOP",
 			Payload =
 			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
 				{ Name = "castGUID", Type = "string", Nilable = false },
 				{ Name = "spellID", Type = "number", Nilable = false },
 			},
@@ -837,6 +1065,7 @@ local Unit =
 			LiteralName = "UNIT_SPELLCAST_SUCCEEDED",
 			Payload =
 			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
 				{ Name = "castGUID", Type = "string", Nilable = false },
 				{ Name = "spellID", Type = "number", Nilable = false },
 			},
@@ -845,26 +1074,46 @@ local Unit =
 			Name = "UnitStats",
 			Type = "Event",
 			LiteralName = "UNIT_STATS",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitTarget",
 			Type = "Event",
 			LiteralName = "UNIT_TARGET",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitTargetableChanged",
 			Type = "Event",
 			LiteralName = "UNIT_TARGETABLE_CHANGED",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitThreatListUpdate",
 			Type = "Event",
 			LiteralName = "UNIT_THREAT_LIST_UPDATE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UnitThreatSituationUpdate",
 			Type = "Event",
 			LiteralName = "UNIT_THREAT_SITUATION_UPDATE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "UpdateExhaustion",

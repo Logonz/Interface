@@ -299,6 +299,7 @@ function DeveloperConsoleMixin:StopDragResizing()
 end
 
 function DeveloperConsoleMixin:ExecuteCommand(text)
+	forceinsecure();
 	ConsoleExec(text, true);
 	self:AddMessage(("> %s"):format(text:gsub("\n", " > ")), Enum.ConsoleColorType.InputColor);
 
@@ -362,6 +363,7 @@ function DeveloperConsoleMixin:OnEditBoxTabPressed()
 	if IsControlKeyDown() then
 		C_Console.PrintAllMatchingCommands((self:FindBestEditCommand()));
 	else
+		self.AutoComplete:FinishWork();
 		if IsShiftKeyDown() then
 			if self.AutoComplete:PreviousEntry() then
 				return;

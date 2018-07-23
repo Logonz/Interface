@@ -48,6 +48,23 @@ local Club =
 			},
 		},
 		{
+			Name = "CanResolvePlayerLocationFromClubMessageData",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "clubId", Type = "string", Nilable = false },
+				{ Name = "streamId", Type = "string", Nilable = false },
+				{ Name = "epoch", Type = "number", Nilable = false },
+				{ Name = "position", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "canResolve", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "ClearAutoAdvanceStreamViewMarker",
 			Type = "Function",
 		},
@@ -62,6 +79,7 @@ local Club =
 			Arguments =
 			{
 				{ Name = "name", Type = "string", Nilable = false },
+				{ Name = "shortName", Type = "string", Nilable = true },
 				{ Name = "description", Type = "string", Nilable = false },
 				{ Name = "clubType", Type = "ClubType", Nilable = false, Documentation = { "Valid types are BattleNet or Character" } },
 				{ Name = "avatarId", Type = "number", Nilable = false },
@@ -90,6 +108,7 @@ local Club =
 				{ Name = "clubId", Type = "string", Nilable = false },
 				{ Name = "allowedRedeemCount", Type = "number", Nilable = true, Documentation = { "Number of uses. nil means unlimited" } },
 				{ Name = "duration", Type = "number", Nilable = true, Documentation = { "Duration in seconds. nil never expires" } },
+				{ Name = "defaultStreamId", Type = "string", Nilable = true },
 			},
 		},
 		{
@@ -153,6 +172,7 @@ local Club =
 			{
 				{ Name = "clubId", Type = "string", Nilable = false },
 				{ Name = "name", Type = "string", Nilable = true },
+				{ Name = "shortName", Type = "string", Nilable = true },
 				{ Name = "description", Type = "string", Nilable = true },
 				{ Name = "avatarId", Type = "number", Nilable = true },
 				{ Name = "broadcast", Type = "string", Nilable = true },
@@ -250,6 +270,7 @@ local Club =
 			Arguments =
 			{
 				{ Name = "clubId", Type = "string", Nilable = false },
+				{ Name = "streamId", Type = "string", Nilable = true },
 			},
 
 			Returns =
@@ -284,6 +305,41 @@ local Club =
 			Returns =
 			{
 				{ Name = "settings", Type = "table", InnerType = "ClubStreamNotificationSetting", Nilable = false },
+			},
+		},
+		{
+			Name = "GetCommunityNameResultText",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "result", Type = "ValidateNameResult", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "errorCode", Type = "string", Nilable = true },
+			},
+		},
+		{
+			Name = "GetGuildClubId",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "guildClubId", Type = "string", Nilable = true },
+			},
+		},
+		{
+			Name = "GetInfoFromLastCommunityChatLine",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "messageInfo", Type = "ClubMessageInfo", Nilable = false },
+				{ Name = "clubId", Type = "string", Nilable = false },
+				{ Name = "streamId", Type = "string", Nilable = false },
+				{ Name = "clubType", Type = "ClubType", Nilable = false },
 			},
 		},
 		{
@@ -408,9 +464,27 @@ local Club =
 			},
 		},
 		{
+			Name = "GetMessagesBefore",
+			Type = "Function",
+			Documentation = { "Get downloaded messages before (and including) the specified messageId limited by count. These are filtered by ignored players" },
+
+			Arguments =
+			{
+				{ Name = "clubId", Type = "string", Nilable = false },
+				{ Name = "streamId", Type = "string", Nilable = false },
+				{ Name = "newest", Type = "ClubMessageIdentifier", Nilable = false },
+				{ Name = "count", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "messages", Type = "table", InnerType = "ClubMessageInfo", Nilable = false },
+			},
+		},
+		{
 			Name = "GetMessagesInRange",
 			Type = "Function",
-			Documentation = { "Get all downloaded messages in the given range." },
+			Documentation = { "Get downloaded messages in the given range. These are filtered by ignored players" },
 
 			Arguments =
 			{
@@ -494,6 +568,41 @@ local Club =
 			},
 		},
 		{
+			Name = "IsBeginningOfStream",
+			Type = "Function",
+			Documentation = { "Returns whether the given message is the first message in the stream, taking into account ignored messages" },
+
+			Arguments =
+			{
+				{ Name = "clubId", Type = "string", Nilable = false },
+				{ Name = "streamId", Type = "string", Nilable = false },
+				{ Name = "messageId", Type = "ClubMessageIdentifier", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "isBeginningOfStream", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "IsEnabled",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "clubsEnabled", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "IsRestricted",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "restrictionReason", Type = "ClubRestrictionReason", Nilable = false },
+			},
+		},
+		{
 			Name = "IsSubscribedToStream",
 			Type = "Function",
 
@@ -548,18 +657,6 @@ local Club =
 			},
 		},
 		{
-			Name = "RequestMoreMessagesAfter",
-			Type = "Function",
-			Documentation = { "Call this when the user scrolls near the bottom of the message view, and more need to be displayed." },
-
-			Arguments =
-			{
-				{ Name = "clubId", Type = "string", Nilable = false },
-				{ Name = "streamId", Type = "string", Nilable = false },
-				{ Name = "messageId", Type = "ClubMessageIdentifier", Nilable = false },
-			},
-		},
-		{
 			Name = "RequestMoreMessagesBefore",
 			Type = "Function",
 			Documentation = { "Call this when the user scrolls near the top of the message view, and more need to be displayed. The history will be downloaded backwards (newest to oldest)." },
@@ -569,6 +666,12 @@ local Club =
 				{ Name = "clubId", Type = "string", Nilable = false },
 				{ Name = "streamId", Type = "string", Nilable = false },
 				{ Name = "messageId", Type = "ClubMessageIdentifier", Nilable = true },
+				{ Name = "count", Type = "number", Nilable = true },
+			},
+
+			Returns =
+			{
+				{ Name = "alreadyHasMessages", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -598,6 +701,16 @@ local Club =
 			Arguments =
 			{
 				{ Name = "clubId", Type = "string", Nilable = false },
+				{ Name = "memberId", Type = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "SendBattleTagFriendRequest",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "guildClubId", Type = "string", Nilable = false },
 				{ Name = "memberId", Type = "number", Nilable = false },
 			},
 		},
@@ -707,6 +820,30 @@ local Club =
 			},
 		},
 		{
+			Name = "SetSocialQueueingEnabled",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "clubId", Type = "string", Nilable = false },
+				{ Name = "enabled", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "ShouldAllowClubType",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "clubType", Type = "ClubType", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "clubTypeIsAllowed", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "UnfocusStream",
 			Type = "Function",
 
@@ -714,6 +851,22 @@ local Club =
 			{
 				{ Name = "clubId", Type = "string", Nilable = false },
 				{ Name = "streamId", Type = "string", Nilable = false },
+			},
+		},
+		{
+			Name = "ValidateText",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "clubType", Type = "ClubType", Nilable = false },
+				{ Name = "text", Type = "string", Nilable = false },
+				{ Name = "clubFieldType", Type = "ClubFieldType", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "result", Type = "ValidateNameResult", Nilable = false },
 			},
 		},
 	},
@@ -736,6 +889,17 @@ local Club =
 			Payload =
 			{
 				{ Name = "clubId", Type = "string", Nilable = false },
+			},
+		},
+		{
+			Name = "ClubError",
+			Type = "Event",
+			LiteralName = "CLUB_ERROR",
+			Payload =
+			{
+				{ Name = "action", Type = "ClubActionType", Nilable = false },
+				{ Name = "error", Type = "ClubErrorType", Nilable = false },
+				{ Name = "clubType", Type = "ClubType", Nilable = false },
 			},
 		},
 		{
@@ -861,6 +1025,16 @@ local Club =
 			},
 		},
 		{
+			Name = "ClubRemovedMessage",
+			Type = "Event",
+			LiteralName = "CLUB_REMOVED_MESSAGE",
+			Payload =
+			{
+				{ Name = "clubName", Type = "string", Nilable = false },
+				{ Name = "clubRemovedReason", Type = "ClubRemovedReason", Nilable = false },
+			},
+		},
+		{
 			Name = "ClubSelfMemberRoleUpdated",
 			Type = "Event",
 			LiteralName = "CLUB_SELF_MEMBER_ROLE_UPDATED",
@@ -930,14 +1104,33 @@ local Club =
 			},
 		},
 		{
+			Name = "ClubTicketCreated",
+			Type = "Event",
+			LiteralName = "CLUB_TICKET_CREATED",
+			Payload =
+			{
+				{ Name = "clubId", Type = "string", Nilable = false },
+				{ Name = "ticketInfo", Type = "ClubTicketInfo", Nilable = false },
+			},
+		},
+		{
 			Name = "ClubTicketReceived",
 			Type = "Event",
 			LiteralName = "CLUB_TICKET_RECEIVED",
 			Payload =
 			{
-				{ Name = "succeeded", Type = "bool", Nilable = false },
+				{ Name = "error", Type = "ClubErrorType", Nilable = false },
 				{ Name = "ticket", Type = "string", Nilable = false },
 				{ Name = "info", Type = "ClubInfo", Nilable = true },
+			},
+		},
+		{
+			Name = "ClubTicketsReceived",
+			Type = "Event",
+			LiteralName = "CLUB_TICKETS_RECEIVED",
+			Payload =
+			{
+				{ Name = "clubId", Type = "string", Nilable = false },
 			},
 		},
 		{
@@ -948,6 +1141,11 @@ local Club =
 			{
 				{ Name = "clubId", Type = "string", Nilable = false },
 			},
+		},
+		{
+			Name = "InitialClubsLoaded",
+			Type = "Event",
+			LiteralName = "INITIAL_CLUBS_LOADED",
 		},
 		{
 			Name = "StreamViewMarkerUpdated",
@@ -981,29 +1179,134 @@ local Club =
 		{
 			Name = "ClubType",
 			Type = "Enumeration",
-			NumValues = 3,
+			NumValues = 4,
 			MinValue = 0,
-			MaxValue = 2,
+			MaxValue = 3,
 			Fields =
 			{
 				{ Name = "BattleNet", Type = "ClubType", EnumValue = 0 },
 				{ Name = "Character", Type = "ClubType", EnumValue = 1 },
 				{ Name = "Guild", Type = "ClubType", EnumValue = 2 },
+				{ Name = "Other", Type = "ClubType", EnumValue = 3 },
+			},
+		},
+		{
+			Name = "ClubActionType",
+			Type = "Enumeration",
+			NumValues = 27,
+			MinValue = 0,
+			MaxValue = 26,
+			Fields =
+			{
+				{ Name = "ErrorClubActionSubscribe", Type = "ClubActionType", EnumValue = 0 },
+				{ Name = "ErrorClubActionCreate", Type = "ClubActionType", EnumValue = 1 },
+				{ Name = "ErrorClubActionEdit", Type = "ClubActionType", EnumValue = 2 },
+				{ Name = "ErrorClubActionDestroy", Type = "ClubActionType", EnumValue = 3 },
+				{ Name = "ErrorClubActionLeave", Type = "ClubActionType", EnumValue = 4 },
+				{ Name = "ErrorClubActionCreateTicket", Type = "ClubActionType", EnumValue = 5 },
+				{ Name = "ErrorClubActionDestroyTicket", Type = "ClubActionType", EnumValue = 6 },
+				{ Name = "ErrorClubActionRedeemTicket", Type = "ClubActionType", EnumValue = 7 },
+				{ Name = "ErrorClubActionGetTicket", Type = "ClubActionType", EnumValue = 8 },
+				{ Name = "ErrorClubActionGetTickets", Type = "ClubActionType", EnumValue = 9 },
+				{ Name = "ErrorClubActionGetBans", Type = "ClubActionType", EnumValue = 10 },
+				{ Name = "ErrorClubActionGetInvitations", Type = "ClubActionType", EnumValue = 11 },
+				{ Name = "ErrorClubActionRevokeInvitation", Type = "ClubActionType", EnumValue = 12 },
+				{ Name = "ErrorClubActionAcceptInvitation", Type = "ClubActionType", EnumValue = 13 },
+				{ Name = "ErrorClubActionDeclineInvitation", Type = "ClubActionType", EnumValue = 14 },
+				{ Name = "ErrorClubActionCreateStream", Type = "ClubActionType", EnumValue = 15 },
+				{ Name = "ErrorClubActionEditStream", Type = "ClubActionType", EnumValue = 16 },
+				{ Name = "ErrorClubActionDestroyStream", Type = "ClubActionType", EnumValue = 17 },
+				{ Name = "ErrorClubActionInviteMember", Type = "ClubActionType", EnumValue = 18 },
+				{ Name = "ErrorClubActionEditMember", Type = "ClubActionType", EnumValue = 19 },
+				{ Name = "ErrorClubActionEditMemberNote", Type = "ClubActionType", EnumValue = 20 },
+				{ Name = "ErrorClubActionKickMember", Type = "ClubActionType", EnumValue = 21 },
+				{ Name = "ErrorClubActionAddBan", Type = "ClubActionType", EnumValue = 22 },
+				{ Name = "ErrorClubActionRemoveBan", Type = "ClubActionType", EnumValue = 23 },
+				{ Name = "ErrorClubActionCreateMessage", Type = "ClubActionType", EnumValue = 24 },
+				{ Name = "ErrorClubActionEditMessage", Type = "ClubActionType", EnumValue = 25 },
+				{ Name = "ErrorClubActionDestroyMessage", Type = "ClubActionType", EnumValue = 26 },
+			},
+		},
+		{
+			Name = "ClubErrorType",
+			Type = "Enumeration",
+			NumValues = 39,
+			MinValue = 0,
+			MaxValue = 38,
+			Fields =
+			{
+				{ Name = "ErrorCommunitiesNone", Type = "ClubErrorType", EnumValue = 0 },
+				{ Name = "ErrorCommunitiesUnknown", Type = "ClubErrorType", EnumValue = 1 },
+				{ Name = "ErrorCommunitiesNeutralFaction", Type = "ClubErrorType", EnumValue = 2 },
+				{ Name = "ErrorCommunitiesUnknownRealm", Type = "ClubErrorType", EnumValue = 3 },
+				{ Name = "ErrorCommunitiesBadTarget", Type = "ClubErrorType", EnumValue = 4 },
+				{ Name = "ErrorCommunitiesWrongFaction", Type = "ClubErrorType", EnumValue = 5 },
+				{ Name = "ErrorCommunitiesRestricted", Type = "ClubErrorType", EnumValue = 6 },
+				{ Name = "ErrorCommunitiesIgnored", Type = "ClubErrorType", EnumValue = 7 },
+				{ Name = "ErrorCommunitiesGuild", Type = "ClubErrorType", EnumValue = 8 },
+				{ Name = "ErrorCommunitiesWrongRegion", Type = "ClubErrorType", EnumValue = 9 },
+				{ Name = "ErrorCommunitiesUnknownTicket", Type = "ClubErrorType", EnumValue = 10 },
+				{ Name = "ErrorCommunitiesMissingShortName", Type = "ClubErrorType", EnumValue = 11 },
+				{ Name = "ErrorCommunitiesProfanity", Type = "ClubErrorType", EnumValue = 12 },
+				{ Name = "ErrorCommunitiesTrial", Type = "ClubErrorType", EnumValue = 13 },
+				{ Name = "ErrorCommunitiesVeteranTrial", Type = "ClubErrorType", EnumValue = 14 },
+				{ Name = "ErrorClubFull", Type = "ClubErrorType", EnumValue = 15 },
+				{ Name = "ErrorClubNoClub", Type = "ClubErrorType", EnumValue = 16 },
+				{ Name = "ErrorClubNotMember", Type = "ClubErrorType", EnumValue = 17 },
+				{ Name = "ErrorClubAlreadyMember", Type = "ClubErrorType", EnumValue = 18 },
+				{ Name = "ErrorClubNoSuchMember", Type = "ClubErrorType", EnumValue = 19 },
+				{ Name = "ErrorClubNoSuchInvitation", Type = "ClubErrorType", EnumValue = 20 },
+				{ Name = "ErrorClubInvitationAlreadyExists", Type = "ClubErrorType", EnumValue = 21 },
+				{ Name = "ErrorClubInvalidRoleID", Type = "ClubErrorType", EnumValue = 22 },
+				{ Name = "ErrorClubInsufficientPrivileges", Type = "ClubErrorType", EnumValue = 23 },
+				{ Name = "ErrorClubTooManyClubsJoined", Type = "ClubErrorType", EnumValue = 24 },
+				{ Name = "ErrorClubVoiceFull", Type = "ClubErrorType", EnumValue = 25 },
+				{ Name = "ErrorClubStreamNoStream", Type = "ClubErrorType", EnumValue = 26 },
+				{ Name = "ErrorClubStreamInvalidName", Type = "ClubErrorType", EnumValue = 27 },
+				{ Name = "ErrorClubStreamCountAtMin", Type = "ClubErrorType", EnumValue = 28 },
+				{ Name = "ErrorClubStreamCountAtMax", Type = "ClubErrorType", EnumValue = 29 },
+				{ Name = "ErrorClubMemberHasRequiredRole", Type = "ClubErrorType", EnumValue = 30 },
+				{ Name = "ErrorClubSentInvitationCountAtMax", Type = "ClubErrorType", EnumValue = 31 },
+				{ Name = "ErrorClubReceivedInvitationCountAtMax", Type = "ClubErrorType", EnumValue = 32 },
+				{ Name = "ErrorClubTargetIsBanned", Type = "ClubErrorType", EnumValue = 33 },
+				{ Name = "ErrorClubBanAlreadyExists", Type = "ClubErrorType", EnumValue = 34 },
+				{ Name = "ErrorClubBanCountAtMax", Type = "ClubErrorType", EnumValue = 35 },
+				{ Name = "ErrorClubTicketCountAtMax", Type = "ClubErrorType", EnumValue = 36 },
+				{ Name = "ErrorClubTicketNoSuchTicket", Type = "ClubErrorType", EnumValue = 37 },
+				{ Name = "ErrorClubTicketHasConsumedAllowedRedeemCount", Type = "ClubErrorType", EnumValue = 38 },
+			},
+		},
+		{
+			Name = "ClubFieldType",
+			Type = "Enumeration",
+			NumValues = 7,
+			MinValue = 0,
+			MaxValue = 6,
+			Fields =
+			{
+				{ Name = "ClubName", Type = "ClubFieldType", EnumValue = 0 },
+				{ Name = "ClubShortName", Type = "ClubFieldType", EnumValue = 1 },
+				{ Name = "ClubDescription", Type = "ClubFieldType", EnumValue = 2 },
+				{ Name = "ClubBroadcast", Type = "ClubFieldType", EnumValue = 3 },
+				{ Name = "ClubStreamName", Type = "ClubFieldType", EnumValue = 4 },
+				{ Name = "ClubStreamSubject", Type = "ClubFieldType", EnumValue = 5 },
+				{ Name = "NumTypes", Type = "ClubFieldType", EnumValue = 6 },
 			},
 		},
 		{
 			Name = "ClubMemberPresence",
 			Type = "Enumeration",
-			NumValues = 5,
+			NumValues = 6,
 			MinValue = 0,
-			MaxValue = 4,
+			MaxValue = 5,
 			Fields =
 			{
 				{ Name = "Unknown", Type = "ClubMemberPresence", EnumValue = 0 },
 				{ Name = "Online", Type = "ClubMemberPresence", EnumValue = 1 },
-				{ Name = "Offline", Type = "ClubMemberPresence", EnumValue = 2 },
-				{ Name = "Away", Type = "ClubMemberPresence", EnumValue = 3 },
-				{ Name = "Busy", Type = "ClubMemberPresence", EnumValue = 4 },
+				{ Name = "OnlineMobile", Type = "ClubMemberPresence", EnumValue = 2 },
+				{ Name = "Offline", Type = "ClubMemberPresence", EnumValue = 3 },
+				{ Name = "Away", Type = "ClubMemberPresence", EnumValue = 4 },
+				{ Name = "Busy", Type = "ClubMemberPresence", EnumValue = 5 },
 			},
 		},
 		{
@@ -1020,6 +1323,46 @@ local Club =
 			},
 		},
 		{
+			Name = "ClubRemovedReason",
+			Type = "Enumeration",
+			NumValues = 4,
+			MinValue = 0,
+			MaxValue = 3,
+			Fields =
+			{
+				{ Name = "None", Type = "ClubRemovedReason", EnumValue = 0 },
+				{ Name = "Banned", Type = "ClubRemovedReason", EnumValue = 1 },
+				{ Name = "Removed", Type = "ClubRemovedReason", EnumValue = 2 },
+				{ Name = "ClubDestroyed", Type = "ClubRemovedReason", EnumValue = 3 },
+			},
+		},
+		{
+			Name = "ClubRestrictionReason",
+			Type = "Enumeration",
+			NumValues = 2,
+			MinValue = 0,
+			MaxValue = 1,
+			Fields =
+			{
+				{ Name = "None", Type = "ClubRestrictionReason", EnumValue = 0 },
+				{ Name = "Unavailable", Type = "ClubRestrictionReason", EnumValue = 1 },
+			},
+		},
+		{
+			Name = "ClubStreamType",
+			Type = "Enumeration",
+			NumValues = 4,
+			MinValue = 0,
+			MaxValue = 3,
+			Fields =
+			{
+				{ Name = "General", Type = "ClubStreamType", EnumValue = 0 },
+				{ Name = "Guild", Type = "ClubStreamType", EnumValue = 1 },
+				{ Name = "Officer", Type = "ClubStreamType", EnumValue = 2 },
+				{ Name = "Other", Type = "ClubStreamType", EnumValue = 3 },
+			},
+		},
+		{
 			Name = "ClubStreamNotificationFilter",
 			Type = "Enumeration",
 			NumValues = 3,
@@ -1033,18 +1376,48 @@ local Club =
 			},
 		},
 		{
+			Name = "ValidateNameResult",
+			Type = "Enumeration",
+			NumValues = 17,
+			MinValue = 0,
+			MaxValue = 16,
+			Fields =
+			{
+				{ Name = "NameSuccess", Type = "ValidateNameResult", EnumValue = 0 },
+				{ Name = "NameFailure", Type = "ValidateNameResult", EnumValue = 1 },
+				{ Name = "NameNoName", Type = "ValidateNameResult", EnumValue = 2 },
+				{ Name = "NameTooShort", Type = "ValidateNameResult", EnumValue = 3 },
+				{ Name = "NameTooLong", Type = "ValidateNameResult", EnumValue = 4 },
+				{ Name = "NameInvalidCharacter", Type = "ValidateNameResult", EnumValue = 5 },
+				{ Name = "NameMixedLanguages", Type = "ValidateNameResult", EnumValue = 6 },
+				{ Name = "NameProfane", Type = "ValidateNameResult", EnumValue = 7 },
+				{ Name = "NameReserved", Type = "ValidateNameResult", EnumValue = 8 },
+				{ Name = "NameInvalidApostrophe", Type = "ValidateNameResult", EnumValue = 9 },
+				{ Name = "NameMultipleApostrophes", Type = "ValidateNameResult", EnumValue = 10 },
+				{ Name = "NameThreeConsecutive", Type = "ValidateNameResult", EnumValue = 11 },
+				{ Name = "NameInvalidSpace", Type = "ValidateNameResult", EnumValue = 12 },
+				{ Name = "NameConsecutiveSpaces", Type = "ValidateNameResult", EnumValue = 13 },
+				{ Name = "NameRussianConsecutiveSilentCharacters", Type = "ValidateNameResult", EnumValue = 14 },
+				{ Name = "NameRussianSilentCharacterAtBeginningOrEnd", Type = "ValidateNameResult", EnumValue = 15 },
+				{ Name = "NameDeclensionDoesntMatchBaseName", Type = "ValidateNameResult", EnumValue = 16 },
+			},
+		},
+		{
 			Name = "ClubInfo",
 			Type = "Structure",
 			Fields =
 			{
 				{ Name = "clubId", Type = "string", Nilable = false },
 				{ Name = "name", Type = "string", Nilable = false },
+				{ Name = "shortName", Type = "string", Nilable = true },
 				{ Name = "description", Type = "string", Nilable = false },
 				{ Name = "broadcast", Type = "string", Nilable = false },
 				{ Name = "clubType", Type = "ClubType", Nilable = false },
 				{ Name = "avatarId", Type = "number", Nilable = false },
+				{ Name = "memberCount", Type = "number", Nilable = true },
 				{ Name = "favoriteTimeStamp", Type = "number", Nilable = true },
 				{ Name = "joinTime", Type = "number", Nilable = true },
+				{ Name = "socialQueueingEnabled", Type = "bool", Nilable = true },
 			},
 		},
 		{
@@ -1057,11 +1430,29 @@ local Club =
 				{ Name = "name", Type = "string", Nilable = true, Documentation = { "name may be encoded as a Kstring" } },
 				{ Name = "role", Type = "ClubRoleIdentifier", Nilable = true },
 				{ Name = "presence", Type = "ClubMemberPresence", Nilable = false },
+				{ Name = "clubType", Type = "ClubType", Nilable = true },
+				{ Name = "guid", Type = "string", Nilable = true },
+				{ Name = "bnetAccountId", Type = "number", Nilable = true },
 				{ Name = "memberNote", Type = "string", Nilable = true },
+				{ Name = "officerNote", Type = "string", Nilable = true },
 				{ Name = "classID", Type = "number", Nilable = true },
 				{ Name = "race", Type = "number", Nilable = true },
 				{ Name = "level", Type = "number", Nilable = true },
 				{ Name = "zone", Type = "string", Nilable = true },
+				{ Name = "achievementPoints", Type = "number", Nilable = true },
+				{ Name = "profession1ID", Type = "number", Nilable = true },
+				{ Name = "profession1Rank", Type = "number", Nilable = true },
+				{ Name = "profession1Name", Type = "string", Nilable = true },
+				{ Name = "profession2ID", Type = "number", Nilable = true },
+				{ Name = "profession2Rank", Type = "number", Nilable = true },
+				{ Name = "profession2Name", Type = "string", Nilable = true },
+				{ Name = "lastOnlineYear", Type = "number", Nilable = true },
+				{ Name = "lastOnlineMonth", Type = "number", Nilable = true },
+				{ Name = "lastOnlineDay", Type = "number", Nilable = true },
+				{ Name = "lastOnlineHour", Type = "number", Nilable = true },
+				{ Name = "guildRank", Type = "string", Nilable = true },
+				{ Name = "guildRankOrder", Type = "number", Nilable = true },
+				{ Name = "isRemoteChat", Type = "bool", Nilable = true },
 			},
 		},
 		{
@@ -1122,7 +1513,9 @@ local Club =
 				{ Name = "messageId", Type = "ClubMessageIdentifier", Nilable = false },
 				{ Name = "content", Type = "string", Nilable = false },
 				{ Name = "author", Type = "ClubMemberInfo", Nilable = false },
-				{ Name = "destroyer", Type = "ClubMemberInfo", Nilable = true, Documentation = { "If destroyer is not nil, then the message has been destroyed" } },
+				{ Name = "destroyer", Type = "ClubMemberInfo", Nilable = true, Documentation = { "May be nil even if the message has been destroyed" } },
+				{ Name = "destroyed", Type = "bool", Nilable = false },
+				{ Name = "edited", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -1183,6 +1576,7 @@ local Club =
 				{ Name = "name", Type = "string", Nilable = false },
 				{ Name = "subject", Type = "string", Nilable = false },
 				{ Name = "leadersAndModeratorsOnly", Type = "bool", Nilable = false },
+				{ Name = "streamType", Type = "ClubStreamType", Nilable = false },
 				{ Name = "creationTime", Type = "number", Nilable = false },
 			},
 		},
@@ -1201,11 +1595,12 @@ local Club =
 			Fields =
 			{
 				{ Name = "ticketId", Type = "string", Nilable = false },
-				{ Name = "isMyTicket", Type = "bool", Nilable = false },
 				{ Name = "allowedRedeemCount", Type = "number", Nilable = false },
 				{ Name = "currentRedeemCount", Type = "number", Nilable = false },
 				{ Name = "creationTime", Type = "number", Nilable = false, Documentation = { "Creation time in microseconds since the UNIX epoch." } },
 				{ Name = "expirationTime", Type = "number", Nilable = false, Documentation = { "Expiration time in microseconds since the UNIX epoch." } },
+				{ Name = "defaultStreamId", Type = "string", Nilable = true },
+				{ Name = "creator", Type = "ClubMemberInfo", Nilable = false },
 			},
 		},
 	},
