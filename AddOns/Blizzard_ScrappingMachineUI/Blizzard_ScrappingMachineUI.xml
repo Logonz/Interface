@@ -42,14 +42,14 @@
 		<HighlightTexture file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
 	</Button>
 	
-	<Frame name="ScrappingMachineFrame" inherits="ButtonFrameTemplate" toplevel="true" parent="UIParent" enableMouse="true" mixin="ScrappingMachineMixin">
+	<Frame name="ScrappingMachineFrame" inherits="ButtonFrameTemplate" toplevel="true" hidden="true" parent="UIParent" enableMouse="true" mixin="ScrappingMachineMixin">
 		<Size x="333" y="278"/>
 		<Anchors>
 			<Anchor point="CENTER"/>
 		</Anchors>
 		<Layers>
 			<Layer level="BORDER">
-				<Texture parentKey="Background" atlas="scrappingmachine-background-goblin">
+				<Texture parentKey="Background">
 					<Size x="323" y="227" />
 					<Anchors>
 						<Anchor point="BOTTOM" y="30" />

@@ -1,6 +1,84 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\..\FrameXML\UI.xsd">
-	<Frame name="PartyPoseFrameTemplate" virtual="true">
+	<Button name="PartyPoseRewardsButtonTemplate" mixin="PartyPoseRewardsMixin" alpha="0" virtual="true">
+		<Size x="174" y="55"/> 
+		<Animations>
+			<AnimationGroup parentKey="AnimFade">
+                <Alpha parentKey="FadeIn" fromAlpha="0" toAlpha="1" order="1" duration=".5">
+                    <Scripts>
+                        <OnFinished>
+                            self:GetParent():GetParent():CheckForIndefinitePause();
+                        </OnFinished>
+                    </Scripts>
+                </Alpha>
+				<Alpha parentKey="FadeOut" startDelay="1.75" fromAlpha="1" toAlpha="0" order="3" duration=".5"/>
+				<Scripts>
+					<OnFinished>
+						self:GetParent():OnAnimationFinished();
+					</OnFinished>
+				</Scripts>
+			</AnimationGroup>
+		</Animations>
+		<Layers>
+			<Layer level="BACKGROUND" textureSubLevel="-1">
+				<Texture parentKey="NameFrame" atlas="scoreboard-footer-lootbackground" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="LEFT" relativeKey="$parent.Icon" x="60" y="-8"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="BORDER" textureSubLevel="1">
+				<Texture parentKey="Icon">
+					<Size x="55" y="55" />
+					<Anchors>
+						<Anchor point="TOPLEFT" />
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="BORDER" textureSubLevel="2">
+				<Texture parentKey="IconBorder" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="CENTER" relativeKey="$parent.Icon"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="BORDER">
+				<FontString parentKey="Name" inherits="GameFontHighlightMedium" justifyH="LEFT">
+					<Size x="160" y="40"/>
+					<Anchors>
+						<Anchor point="LEFT" relativeKey="$parent.NameFrame" x="8" y="0"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+			<Layer level="ARTWORK">
+				<FontString parentKey="Count" inherits="NumberFontNormal" justifyH="RIGHT" >
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.Icon" x="-1" y="1" />
+					</Anchors>
+				</FontString>
+				<FontString parentKey="Label" inherits="GameFontNormal" justifyH="CENTER" text="YOU_EARNED_LABEL">
+					<Anchors>
+						<Anchor point="TOP" relativeKey="$parent.NameFrame" x="-49" y="15"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad method="OnLoad"/>
+			<OnEnter method="OnEnter"/>
+			<OnLeave method="OnLeave"/>
+			<OnHide method="OnHide"/>
+			<OnUpdate>
+				CursorOnUpdate(self, elapsed);
+			</OnUpdate>
+			<OnClick>
+				if (self.objectType == "item" or self:IsAzeriteCurrency()) then
+					HandleModifiedItemClick(self.objectLink);
+				end
+			</OnClick>
+		</Scripts>
+	</Button>
+	<Frame name="PartyPoseFrameTemplate" enableMouse="true" frameStrata="FULLSCREEN" hidden="true" virtual="true">
 		<Size x="760" y="549"/>
 		<Layers>
 			<Layer level="BACKGROUND" textureSubLevel="-6">
@@ -72,23 +150,60 @@
 		</Layers>
 		<Scripts>
 			<OnLoad method="OnLoad"/>
+			<OnEvent method="OnEvent"/> 
 		</Scripts>
+		<Frames>
+			<Frame parentKey="RewardAnimations">
+				<Size x="174" y="55"/>
+				<Anchors>
+					<Anchor point="BOTTOM" x="0" y="10"/> 
+				</Anchors>
+				<Frames>
+					<Button parentKey="RewardFrame" inherits="PartyPoseRewardsButtonTemplate" hidden="true">
+						<Anchors>
+							<Anchor point="CENTER" />
+						</Anchors>
+					</Button>
+					<ModelScene parentKey="HoldModelScene" hidden="true" inherits="NonInteractableModelSceneMixinTemplate" drawLayer="BACKGROUND" useParentLevel="true">
+						<Size x="700" y="700"/>
+						<Anchors>
+							<Anchor point="CENTER" />
+						</Anchors>
+						<Animations>
+							<AnimationGroup parentKey="RewardModelAnim" setToFinalAlpha="true">
+								<Alpha childKey="HoldModelScene" startDelay=".3" fromAlpha="0" toAlpha="1" order="1" duration=".5"/>
+								<Alpha childKey="HoldModelScene" startDelay="1.25" fromAlpha="1" toAlpha="0" order="2" duration=".5"/>
+							</AnimationGroup>
+						</Animations>
+					</ModelScene>
+					
+					<ModelScene parentKey="ImpactModelScene" hidden="true" inherits="NonInteractableModelSceneMixinTemplate" drawLayer="OVERLAY" useParentLevel="true">
+						<Size x="700" y="700"/>
+						<Anchors>
+							<Anchor point="CENTER" />
+						</Anchors>
+					</ModelScene>
+				</Frames>
+			</Frame>
+		</Frames>
 	</Frame>
-	<ModelScene name="PartyPoseModelFrameTemplate" enableMouse="false" inherits="ReversedLightingModelSceneMixinTemplate" virtual="true">
+	<ModelScene name="PartyPoseModelFrameTemplate" inherits="NonInteractableModelSceneMixinTemplate" virtual="true">
 		<Size x="730" y="400"/>
+		<KeyValues>
+			<KeyValue key="reversedLighting" value="true" type="boolean"/>
+		</KeyValues>
 		<Anchors>
-			<Anchor point="CENTER"/> 
+			<Anchor point="TOPLEFT" x="5" y="-75"/>	
+			<Anchor point="BOTTOMRIGHT" x="-5" y="65"/>	
 		</Anchors>
 		<Layers>
 			<Layer level="BACKGROUND" textureSubLevel="-5">
 				<Texture parentKey="Bg">
-					<Size x="720" y="400"/> 
 					<Anchors>
 						<Anchor point="TOPLEFT" />
 						<Anchor point="BOTTOMRIGHT" />
 					</Anchors>
 				</Texture>
-				<TexCoords right="1" left="0.5" top="0" bottom="1"/>
 			</Layer>
 			<Layer level="BORDER" textureSubLevel="2">
 				<Texture parentKey="ShadowCornerTopLeft" atlas="collections-background-shadow-large" useAtlasSize="true">
@@ -261,35 +376,6 @@
 			</Layer>
 		</Layers>
 	</ModelScene> 
-	<Frame name="PartyPoseScoreFrameTemplate" virtual="true">
-		<Size x="200" y="89"/>
-		<Layers>
-			<Layer level="ARTWORK">
-				<Texture parentKey="Icons" atlas="scoreboard-footer-factionicons" useAtlasSize="true">
-					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="30" y="-10"/>
-					</Anchors>
-				</Texture>
-				<FontString parentKey="Score1" inherits="GameFontNormal">
-					<Anchors>
-						<Anchor point="RIGHT" relativeKey="$parent.Icons" x="40" y="12"/> 
-					</Anchors>
-				</FontString>
-				<FontString parentKey="Score2" inherits="GameFontNormal">
-					<Anchors>
-						<Anchor point="BOTTOM" relativeKey="$parent.Score1" x="0" y="-23"/> 
-					</Anchors>
-				</FontString>
-			</Layer>
-			<Layer level="BORDER"> 
-				<Texture parentKey="Glow" atlas="scoreboard-footer-factionglows" useAtlasSize="true">
-					<Anchors>
-						<Anchor point="LEFT" relativeKey="$parent.Icons" x="-25"/>
-					</Anchors>
-				</Texture>
-			</Layer>			
-		</Layers>
-	</Frame>
 	<Texture name="PartyPoseModelShadowTextureTemplate" atlas="scoreboard-charactermodels-shadow" useAtlasSize="true" virtual="true"/>
 </Ui>
 

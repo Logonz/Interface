@@ -38,7 +38,7 @@ StaticPopupDialogs["NOT_ENOUGH_POWER_ARTIFACT_RESPEC"] = {
 }
 
 function ArtifactUI_CanViewArtifact()
-	return C_ArtifactUI.IsAtForge() or ArtifactUI_HasPurchasedAnything() or C_ArtifactUI.GetNumObtainedArtifacts() > 1;
+	return C_ArtifactUI.IsAtForge() or ArtifactUI_HasPurchasedAnything() or C_ArtifactUI.IsArtifactDisabled() or C_ArtifactUI.GetNumObtainedArtifacts() > 1;
 end
 
 function ArtifactUI_HasPurchasedAnything()
@@ -222,7 +222,7 @@ end
 
 function ArtifactUIMixin:RefreshKnowledgeRanks()
 	local totalRanks = C_ArtifactUI.GetTotalPurchasedRanks();
-	if totalRanks > 0 then
+	if totalRanks > 0 and not C_ArtifactUI.IsArtifactDisabled() then
 		self.ForgeBadgeFrame.ForgeLevelLabel:SetText(totalRanks);
 		self.ForgeBadgeFrame.ForgeLevelLabel:Show();
 		self.ForgeBadgeFrame.ForgeLevelBackground:Show();
@@ -233,8 +233,8 @@ function ArtifactUIMixin:RefreshKnowledgeRanks()
 		self.ForgeBadgeFrame.ForgeLevelBackground:Hide();
 		self.ForgeBadgeFrame.ForgeLevelBackgroundBlack:Hide();
 		self.ForgeLevelFrame:Hide();
-		self.KnowledgeLevelHelpBox:Hide();
 	end
+	self.KnowledgeLevelHelpBox:Hide();
 end
 
 function ArtifactUIMixin:OnKnowledgeEnter(knowledgeFrame)

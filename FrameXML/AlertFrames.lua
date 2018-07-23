@@ -435,6 +435,7 @@ function AlertFrameMixin:OnLoad()
 	self:RegisterEvent("GARRISON_RANDOM_MISSION_ADDED");
 	self:RegisterEvent("NEW_RECIPE_LEARNED");
 	self:RegisterEvent("SHOW_LOOT_TOAST_LEGENDARY_LOOTED");
+	self:RegisterEvent("AZERITE_EMPOWERED_ITEM_LOOTED");
 	self:RegisterEvent("QUEST_TURNED_IN");
 	self:RegisterEvent("QUEST_LOOT_RECEIVED");
 	self:RegisterEvent("NEW_PET_ADDED");
@@ -468,10 +469,14 @@ function AlertFrameMixin:OnEvent(event, ...)
 		if ( C_Scenario.IsInScenario() and not C_Scenario.TreatScenarioAsDungeon() ) then
 			local scenarioType = select(10, C_Scenario.GetInfo());
 			if scenarioType ~= LE_SCENARIO_TYPE_LEGION_INVASION then
-				ScenarioAlertSystem:AddAlert(self:BuildScenarioRewardData());
+				if (not self:ShouldSupressDungeonOrScenarioAlert()) then 
+					ScenarioAlertSystem:AddAlert(self:BuildScenarioRewardData());
+				end
 			end
 		else
-			DungeonCompletionAlertSystem:AddAlert(self:BuildLFGRewardData());
+			if (not self:ShouldSupressDungeonOrScenarioAlert()) then 
+				DungeonCompletionAlertSystem:AddAlert(self:BuildLFGRewardData());
+			end
 		end
 	elseif ( event == "SCENARIO_COMPLETED" ) then
 		local scenarioName, _, _, _, hasBonusStep, isBonusStepComplete, _, xp, money, scenarioType, areaName = C_Scenario.GetInfo();
@@ -577,6 +582,9 @@ function AlertFrameMixin:OnEvent(event, ...)
 	elseif ( event == "SHOW_LOOT_TOAST_LEGENDARY_LOOTED") then
 		local itemLink = ...;
 		LegendaryItemAlertSystem:AddAlert(itemLink);
+	elseif ( event == "AZERITE_EMPOWERED_ITEM_LOOTED" ) then
+		local itemLink = ...;
+		LootAlertSystem:AddAlert(itemLink, quantity, nil, nil, specID, false);
 	elseif ( event == "NEW_PET_ADDED") then
 		local petID = ...;
 		NewPetAlertSystem:AddAlert(petID);
@@ -667,6 +675,19 @@ function AlertFrameMixin:BuildQuestData(questID)
 	end
 
 	return questData;
+end
+
+function AlertFrameMixin:ShouldSupressDungeonOrScenarioAlert()
+	if	(IslandsPartyPoseFrame) then 
+		if (IslandsPartyPoseFrame:IsVisible()) then 
+			return true; 
+		end
+	elseif (WarfrontsPartyPoseFrame) then 
+		if(WarfrontsPartyPoseFrame:IsVisible()) then 
+			return true;
+		end
+	end
+	return false;
 end
 
 -- [[ AlertFrameTemplate functions ]] --

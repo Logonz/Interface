@@ -18,10 +18,21 @@ local QuestLog =
 		{
 			Name = "GetMaxNumQuests",
 			Type = "Function",
+			Documentation = { "This is the maximum number of quests a player can be on, including hidden quests, world quests, emissaries etc" },
 
 			Returns =
 			{
 				{ Name = "maxNumQuests", Type = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "GetMaxNumQuestsCanAccept",
+			Type = "Function",
+			Documentation = { "This is the maximum number of standard quests a player can accept. These are quests that are normally visible in the quest log." },
+
+			Returns =
+			{
+				{ Name = "maxNumQuestsCanAccept", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -36,6 +47,20 @@ local QuestLog =
 			Returns =
 			{
 				{ Name = "title", Type = "string", Nilable = false },
+			},
+		},
+		{
+			Name = "GetQuestObjectives",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "questID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "objectives", Type = "table", InnerType = "QuestObjectiveInfo", Nilable = false },
 			},
 		},
 		{
@@ -82,12 +107,40 @@ local QuestLog =
 			},
 		},
 		{
+			Name = "QuestHasWarModeBonus",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "questID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "hasBonus", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "SetMapForQuestPOIs",
 			Type = "Function",
 
 			Arguments =
 			{
 				{ Name = "uiMapID", Type = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "ShouldShowQuestRewards",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "questID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "shouldShow", Type = "bool", Nilable = false },
 			},
 		},
 	},
@@ -239,6 +292,18 @@ local QuestLog =
 				{ Name = "Raid25", Type = "QuestTag", EnumValue = 89 },
 				{ Name = "Scenario", Type = "QuestTag", EnumValue = 98 },
 				{ Name = "Account", Type = "QuestTag", EnumValue = 102 },
+			},
+		},
+		{
+			Name = "QuestObjectiveInfo",
+			Type = "Structure",
+			Fields =
+			{
+				{ Name = "text", Type = "string", Nilable = false },
+				{ Name = "type", Type = "string", Nilable = false },
+				{ Name = "finished", Type = "bool", Nilable = false },
+				{ Name = "numFulfilled", Type = "number", Nilable = false },
+				{ Name = "numRequired", Type = "number", Nilable = false },
 			},
 		},
 		{

@@ -6,6 +6,8 @@
 
 ## add snippets independent of modules here
 ..\SharedXML\Util.lua
+..\SharedXML\AnchorUtil.xml
+..\SharedXML\EasingUtil.lua
 ..\SharedXML\BindingUtil.lua
 ..\SharedXML\FrameUtil.lua
 ..\SharedXML\Pools.lua
@@ -61,6 +63,8 @@ QuestUtils.lua
 MapUtil.lua
 AzeriteUtil.lua
 VehicleUtil.lua
+AuraUtil.lua
+CommunitiesUtil.lua
 CurrencyContainer.lua
 ## IME.xml needs to be loaded after UIParent.xml
 ..\SharedXML\IME.xml
@@ -90,7 +94,6 @@ WardrobeOutfits.xml
 DressUpFrames.xml
 ItemButtonTemplate.xml
 NavigationBar.xml
-SparkleFrame.xml
 ..\SharedXML\HybridScrollFrame.lua
 ..\SharedXML\HybridScrollFrame.xml
 GameMenuFrame.xml
@@ -136,6 +139,7 @@ LowHealthFrame.xml
 CombatFeedback.xml
 UnitPowerBarAlt.xml
 CastingBarFrame.xml
+VoiceChatHeadsetButton.xml
 VoiceToggleButton.xml
 UnitPopupSlider.xml
 UnitPopupCustomControls.xml
@@ -249,10 +253,10 @@ ZoneAbility.xml
 ArtifactToasts.xml
 AzeriteItemToasts.xml
 AzeriteIslandsToast.xml
-IslandsQueueFrame.xml
 ..\SharedXML\ModelPreviewFrame.xml
 SplashFrame.xml
 QuestChoiceFrameMixin.lua
+AzeriteEmpoweredItemDataSource.lua
 
 #Save off whatever we need available unmodified.
 SecureCapsule.lua

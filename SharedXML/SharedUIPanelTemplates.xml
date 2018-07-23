@@ -322,6 +322,15 @@
 			</OnLeave>
 		</Scripts>
 	</Button>
+
+	<!--A super simple standard button that will widen on load to fit its text if its 
+	localized version is bigger than its current size + 40 padding.  It will never reshrink.-->
+	<Button name="UIPanelDynamicResizeButtonTemplate" inherits="UIPanelButtonTemplate" virtual="true">
+		<Scripts>
+			<OnLoad function="DynamicResizeButton_Resize" inherit="append"/>
+		</Scripts>
+	</Button>
+	
 	<CheckButton name="UIRadioButtonTemplate" virtual="true">
 		<Size>
 			<AbsDimension x="16" y="16"/>
@@ -384,7 +393,7 @@
 						<Anchor point="BOTTOMRIGHT" x="-2" y="2"/>
 					</Anchors>
 				</Texture>
-				<Texture name="$parentTitleBg" inherits="_UI-Frame-TitleTileBg">
+				<Texture name="$parentTitleBg" parentKey="TitleBg" inherits="_UI-Frame-TitleTileBg">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="2" y="-3"/>
 						<Anchor point="TOPRIGHT" x="-25" y="-3"/>
@@ -423,7 +432,7 @@
 				</Texture>
 				<FontString name="$parentTitleText" inherits="GameFontNormal" text="" parentKey="TitleText" wordwrap="false">
 					<Anchors>
-						<Anchor point="TOP" x="0" y="-4"/>
+						<Anchor point="TOP" x="0" y="-5"/>
 						<Anchor point="LEFT" x="60"/>
 						<Anchor point="RIGHT" x="-60"/>
 					</Anchors>
@@ -1810,10 +1819,12 @@
 				<Scripts>
 					<OnClick>
 						self:GetParent():Maximize();
+						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 					</OnClick>
 				</Scripts>
 				<NormalTexture file="Interface\Buttons\UI-Panel-BiggerButton-Up"/>
 				<PushedTexture file="Interface\Buttons\UI-Panel-BiggerButton-Down"/>
+				<DisabledTexture file="Interface\Buttons\UI-Panel-BiggerButton-Disabled"/>
 				<HighlightTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
 			</Button>
 			<Button parentKey="MinimizeButton" setAllPoints="true">
@@ -1821,10 +1832,12 @@
 				<Scripts>
 					<OnClick>
 						self:GetParent():Minimize();
+						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 					</OnClick>
 				</Scripts>
 				<NormalTexture file="Interface\Buttons\UI-Panel-SmallerButton-Up"/>
 				<PushedTexture file="Interface\Buttons\UI-Panel-SmallerButton-Down"/>
+				<DisabledTexture file="Interface\Buttons\UI-Panel-SmallerButton-Disabled"/>
 				<HighlightTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
 			</Button>
 		</Frames>

@@ -6,6 +6,84 @@ local GuildInfo =
 
 	Functions =
 	{
+		{
+			Name = "GetGuildRankOrder",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "guid", Type = "string", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "rankOrder", Type = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "GuildControlGetRankFlags",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "rankOrder", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "permissions", Type = "table", InnerType = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "IsGuildRankAssignmentAllowed",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "guid", Type = "string", Nilable = false },
+				{ Name = "rankOrder", Type = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "QueryGuildMemberRecipes",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "guildMemberGUID", Type = "string", Nilable = false },
+				{ Name = "skillLineID", Type = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "RemoveFromGuild",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "guid", Type = "string", Nilable = false },
+			},
+		},
+		{
+			Name = "SetGuildRankOrder",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "guid", Type = "string", Nilable = false },
+				{ Name = "rankOrder", Type = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "SetNote",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "guid", Type = "string", Nilable = false },
+				{ Name = "note", Type = "string", Nilable = false },
+				{ Name = "isPublic", Type = "bool", Nilable = false },
+			},
+		},
 	},
 
 	Events =
@@ -160,6 +238,10 @@ local GuildInfo =
 			Name = "PlayerGuildUpdate",
 			Type = "Event",
 			LiteralName = "PLAYER_GUILD_UPDATE",
+			Payload =
+			{
+				{ Name = "unitTarget", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "RequiredGuildRenameResult",

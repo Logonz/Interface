@@ -1,5 +1,5 @@
-TOOLTIP_DEFAULT_COLOR = { r = 1, g = 1, b = 1 };
-TOOLTIP_DEFAULT_BACKGROUND_COLOR = { r = 0.09, g = 0.09, b = 0.19 };
+TOOLTIP_DEFAULT_COLOR = CreateColor(1, 1, 1);
+TOOLTIP_DEFAULT_BACKGROUND_COLOR = CreateColor(0.09, 0.09, 0.19);
 
 -- Panel Positions
 PANEL_INSET_LEFT_OFFSET = 4;
@@ -106,6 +106,13 @@ function MagicButton_OnLoad(self)
 			self.RightSeparator:SetPoint("TOPLEFT", self, "TOPRIGHT", -6, 1);
 		end
 	end
+end
+
+function DynamicResizeButton_Resize(self)
+	local padding = 40;
+	local width = self:GetWidth();
+	local textWidth = self:GetTextWidth() + padding;
+	self:SetWidth(math.max(width, textWidth));
 end
 
 -- ButtonFrameTemplate code
@@ -439,11 +446,12 @@ end
 function PanelTemplates_TabResize(tab, padding, absoluteSize, minWidth, maxWidth, absoluteTextSize)
 	local tabName = tab:GetName();
 
-	local buttonMiddle = tab.Middle or _G[tabName.."Middle"];
-	local buttonMiddleDisabled = tab.MiddleDisabled or _G[tabName.."MiddleDisabled"];
-	local sideWidths = tab.Left and 2 * tab.Left:GetWidth() or 2 * _G[tabName.."Left"]:GetWidth();
+	local buttonMiddle = tab.Middle or tab.middleTexture or _G[tabName.."Middle"];
+	local buttonMiddleDisabled = tab.MiddleDisabled or (tabName and _G[tabName.."MiddleDisabled"]);
+	local left = tab.Left or tab.leftTexture or _G[tabName.."Left"];
+	local sideWidths = 2 * left:GetWidth();
 	local tabText = tab.Text or _G[tab:GetName().."Text"];
-	local highlightTexture = tab.HighlightTexture or _G[tabName.."HighlightTexture"];
+	local highlightTexture = tab.HighlightTexture or (tabName and _G[tabName.."HighlightTexture"]);
 
 	local width, tabWidth;
 	local textWidth;
@@ -956,6 +964,7 @@ function ColumnDisplayMixin:LayoutColumns(columnInfo, extraColumnInfo)
 		extraHeader:SetText(extraColumnInfo.title);
 		extraHeader:SetWidth(extraColumnInfo.width);
 		extraHeader:SetPoint("BOTTOMRIGHT", -28, 1);
+		extraHeader:SetID(#columnInfo + 1);
 		extraHeader:Show();
 	end
 	
@@ -988,9 +997,11 @@ function ColumnDisplayMixin:LayoutColumns(columnInfo, extraColumnInfo)
 end
 
 function ColumnDisplayMixin:OnClick(columnIndex)
-	-- Implement in your mixin to support column clicks (e.g. sorting).
+	if self.sortingFunction then
+		self.sortingFunction(self, columnIndex);
+	end
 end
 
 function ColumnDisplayButton_OnClick(self)
-	self:GetParent():Sort(self:GetID());
+	self:GetParent():OnClick(self:GetID());
 end

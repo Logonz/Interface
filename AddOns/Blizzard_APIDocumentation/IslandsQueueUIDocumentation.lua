@@ -7,43 +7,79 @@ local IslandsQueueUI =
 	Functions =
 	{
 		{
-			Name = "GetIslandDifficultyIds",
+			Name = "CloseIslandsQueueScreen",
+			Type = "Function",
+		},
+		{
+			Name = "GetIslandDifficultyInfo",
 			Type = "Function",
 
 			Returns =
 			{
-				{ Name = "lfgIslandDifficultyIds", Type = "table", InnerType = "number", Nilable = false },
+				{ Name = "islandDifficultyInfo", Type = "table", InnerType = "IslandsQueueDifficultyInfo", Nilable = false },
 			},
 		},
 		{
-			Name = "GetIslandInfoByDifficulty",
+			Name = "GetIslandsMaxGroupSize",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "maxGroupSize", Type = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "GetIslandsWeeklyQuestID",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "questID", Type = "number", Nilable = true },
+			},
+		},
+		{
+			Name = "QueueForIsland",
 			Type = "Function",
 
 			Arguments =
 			{
-				{ Name = "difficulty", Type = "number", Nilable = false },
+				{ Name = "difficultyID", Type = "number", Nilable = false },
 			},
+		},
+		{
+			Name = "RequestPreloadRewardData",
+			Type = "Function",
 
-			Returns =
+			Arguments =
 			{
-				{ Name = "info", Type = "table", InnerType = "IslandsQueueInfo", Nilable = false },
+				{ Name = "questId", Type = "number", Nilable = false },
 			},
 		},
 	},
 
 	Events =
 	{
+		{
+			Name = "IslandsQueueClose",
+			Type = "Event",
+			LiteralName = "ISLANDS_QUEUE_CLOSE",
+		},
+		{
+			Name = "IslandsQueueOpen",
+			Type = "Event",
+			LiteralName = "ISLANDS_QUEUE_OPEN",
+		},
 	},
 
 	Tables =
 	{
 		{
-			Name = "IslandsQueueInfo",
+			Name = "IslandsQueueDifficultyInfo",
 			Type = "Structure",
 			Fields =
 			{
-				{ Name = "name", Type = "string", Nilable = false },
-				{ Name = "cardArtAtlas", Type = "string", Nilable = false },
+				{ Name = "difficultyId", Type = "number", Nilable = false },
+				{ Name = "previewRewardQuestId", Type = "number", Nilable = false },
 			},
 		},
 	},

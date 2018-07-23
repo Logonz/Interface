@@ -46,7 +46,7 @@ function VignetteDataProviderMixin:RefreshAllData(fromOnShow)
 	local mapID = self:GetMap():GetMapID();
 	for i, vignetteGUID in ipairs(vignetteGUIDs) do
 		local vignetteInfo = C_VignetteInfo.GetVignetteInfo(vignetteGUID);
-		if vignetteInfo.onWorldMap then
+		if vignetteInfo and vignetteInfo.onWorldMap then
 			local existingPin = pinsToRemove[vignetteGUID];
 			if existingPin then
 				pinsToRemove[vignetteGUID] = nil;
@@ -103,7 +103,7 @@ end
 function VignetteDataProviderMixin:RemoveUniquePin(pin)
 	local vignetteID = pin:GetVignetteID();
 	local uniquePins = self.uniqueVignettesPins[vignetteID];
-	if uniquePins then	
+	if uniquePins then
 		for i, uniquePin in ipairs(uniquePins) do
 			if uniquePin == pin then
 				table.remove(uniquePins, i);
@@ -130,9 +130,13 @@ end
 function VignettePinMixin:OnAcquired(vignetteGUID, vignetteInfo)
 	self.vignetteGUID = vignetteGUID;
 	self.name = vignetteInfo.name;
-	self.hasTooltip = vignetteInfo.hasTooltip;
+	self.hasTooltip = vignetteInfo.hasTooltip or vignetteInfo.type == Enum.VignetteType.PvpBounty;
 	self.isUnique = vignetteInfo.isUnique;
 	self.vignetteID = vignetteInfo.vignetteID;
+
+	self:EnableMouse(self.hasTooltip);
+
+	self.vignetteInfo = vignetteInfo;
 
 	self.Texture:SetAtlas(vignetteInfo.atlasName, true);
 	self.HighlightTexture:SetAtlas(vignetteInfo.atlasName, true);
@@ -167,6 +171,22 @@ function VignettePinMixin:GetVignetteGUID()
 	return self.vignetteGUID;
 end
 
+function VignettePinMixin:GetObjectGUID()
+	return self.vignetteInfo.objectGUID;
+end
+
+function VignettePinMixin:GetVignetteType()
+	return self.vignetteInfo.type;
+end
+
+function VignettePinMixin:GetVignetteName()
+	return self.name;
+end
+
+function VignettePinMixin:GetRewardQuestID()
+	return self.vignetteInfo.rewardQuestID;
+end
+
 function VignettePinMixin:UpdateFogOfWar(vignetteInfo)
 	self.Texture:SetDesaturation(vignetteInfo.inFogOfWar and 1 or 0);
 	self.Texture:SetAlpha(vignetteInfo.inFogOfWar and .55 or 1);
@@ -191,12 +211,50 @@ end
 
 function VignettePinMixin:OnMouseEnter()
 	if self.hasTooltip then
-		GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
-		GameTooltip:SetText(HIGHLIGHT_FONT_COLOR:WrapTextInColorCode(self.name));
-		GameTooltip:Show();
+		WorldMapTooltip:SetOwner(self, "ANCHOR_RIGHT");
+		self.UpdateTooltip = self.OnMouseEnter;
+
+		local hasValidTooltip = false;
+
+		if self:GetVignetteType() == Enum.VignetteType.Normal then
+			hasValidTooltip = self:DisplayNormalTooltip();
+		elseif self:GetVignetteType() == Enum.VignetteType.PvpBounty then
+			hasValidTooltip = self:DisplayPvpBountyTooltip();
+		end
+
+		if not hasValidTooltip then
+			GameTooltip_SetTitle(WorldMapTooltip, RETRIEVING_DATA);
+		end
+
+		WorldMapTooltip:Show();
 	end
 end
 
 function VignettePinMixin:OnMouseLeave()
-	GameTooltip:Hide();
+	WorldMapTooltip:Hide();
+end
+
+function VignettePinMixin:DisplayNormalTooltip()
+	GameTooltip_SetTitle(WorldMapTooltip, self:GetVignetteName());
+	return true;
+end
+
+function VignettePinMixin:DisplayPvpBountyTooltip()
+	local player = PlayerLocation:CreateFromGUID(self:GetObjectGUID());
+	local class = select(3, C_PlayerInfo.GetClass(player));
+	local race = C_PlayerInfo.GetRace(player);
+	local name = C_PlayerInfo.GetName(player);
+
+	if race and class and name then
+		local classInfo = C_CreatureInfo.GetClassInfo(class);
+		local factionInfo = C_CreatureInfo.GetFactionInfo(race);
+
+		GameTooltip_SetTitle(WorldMapTooltip, name, GetClassColorObj(classInfo.classFile));
+		GameTooltip_AddColoredLine(WorldMapTooltip, factionInfo.name, GetFactionColor(factionInfo.groupTag));
+		GameTooltip_AddQuestRewardsToTooltip(WorldMapTooltip, self:GetRewardQuestID(), TOOLTIP_QUEST_REWARDS_STYLE_PVP_BOUNTY);
+
+		return true;
+	end
+
+	return false;
 end

@@ -3,6 +3,7 @@ local BN_TOAST_TYPE_OFFLINE = 2;
 local BN_TOAST_TYPE_BROADCAST = 3;
 local BN_TOAST_TYPE_PENDING_INVITES = 4;
 local BN_TOAST_TYPE_NEW_INVITE = 5;
+local BN_TOAST_TYPE_CLUB_INVITATION = 6;
 
 BNET_CLIENT_WOW = "WoW";
 BNET_CLIENT_SC2 = "S2";
@@ -14,6 +15,7 @@ BNET_CLIENT_OVERWATCH = "Pro";
 BNET_CLIENT_CLNT = "CLNT";
 BNET_CLIENT_SC = "S1";
 BNET_CLIENT_DESTINY2 = "DST2";
+BNET_CLIENT_COD = "VIPR";
 
 --Name can be a realID or plain battletag with no 4 digit number (e.g. Murky McGrill or LichKing).
 function BNet_GetBNetIDAccount(name)
@@ -39,6 +41,7 @@ function BNToastMixin:OnLoad()
 	self.BNToastEvents = {
 		showToastOnline = { "BN_FRIEND_ACCOUNT_ONLINE" },
 		showToastOffline = { "BN_FRIEND_ACCOUNT_OFFLINE" },
+		showToastClubInvitation = { "CLUB_INVITATION_ADDED_FOR_SELF" },
 		showToastBroadcast = { "BN_CUSTOM_MESSAGE_CHANGED" },
 		showToastFriendRequest = { "BN_FRIEND_INVITE_ADDED", "BN_FRIEND_INVITE_LIST_INITIALIZED" },
 	};
@@ -66,6 +69,8 @@ function BNToastMixin:OnEvent(event, ...)
 		self:OnCustomMessageChanged(...);
 	elseif ( event == "BN_FRIEND_INVITE_ADDED" ) then
 		self:AddToast(BN_TOAST_TYPE_NEW_INVITE);
+	elseif ( event == "CLUB_INVITATION_ADDED_FOR_SELF" ) then
+		self:AddToast(BN_TOAST_TYPE_CLUB_INVITATION, ...);
 	elseif ( event == "BN_FRIEND_INVITE_LIST_INITIALIZED" ) then
 		self:AddToast(BN_TOAST_TYPE_PENDING_INVITES, ...);
 	elseif( event == "VARIABLES_LOADED" ) then
@@ -112,6 +117,10 @@ function BNToastMixin:OnClick()
 		if accountName then --This player may have been removed from our friends list, so we may not have a name.
 			ChatFrame_SendSmartTell(accountName);
 		end
+	elseif toastType == BN_TOAST_TYPE_CLUB_INVITATION then
+		Communities_LoadUI();
+		ShowUIPanel(CommunitiesFrame);
+		CommunitiesFrame:SelectClub(toastData.club.clubId);
 	end
 end
 
@@ -205,6 +214,7 @@ function BNToastMixin:ShowToast()
 		self.IconTexture:SetTexCoord(0.75, 1, 0, 0.5);
 		doubleLine:Show();
 		doubleLine:SetText(BN_TOAST_NEW_INVITE);
+		doubleLine:SetMaxLines(0);
 	elseif ( toastType == BN_TOAST_TYPE_PENDING_INVITES ) then
 		self.IconTexture:SetTexCoord(0.75, 1, 0, 0.5);
 		doubleLine:Show();
@@ -257,6 +267,17 @@ function BNToastMixin:ShowToast()
 		bottomLine:SetTextColor(FRIENDS_GRAY_COLOR.r, FRIENDS_GRAY_COLOR.g, FRIENDS_GRAY_COLOR.b);
 		doubleLine:Hide();
 		middleLine:Hide();
+	elseif ( toastType == BN_TOAST_TYPE_CLUB_INVITATION ) then
+		self.IconTexture:SetTexCoord(0.5, 0.75, 0, 0.5);
+		doubleLine:Show();
+		local clubName = "";
+		if toastData.club.clubType == Enum.ClubType.BattleNet then
+			clubName = BATTLENET_FONT_COLOR:WrapTextInColorCode(toastData.club.name);
+		else
+			clubName = NORMAL_FONT_COLOR:WrapTextInColorCode(toastData.club.name);
+		end
+		doubleLine:SetText(BN_TOAST_NEW_CLUB_INVITATION:format(clubName));
+		doubleLine:SetMaxLines(2);
 	end
 
 	if (middleLine:IsShown() and bottomLine:IsShown()) then
@@ -292,53 +313,6 @@ function BNToastMixin:RemoveToast(toastType, toastData)
 			break;
 		end
 	end
-end
-
-function BNet_InitiateReport(bnetIDAccount, reportType)
-	local reportFrame = BNetReportFrame;
-	if ( reportFrame:IsShown() ) then
-		StaticPopupSpecial_Hide(reportFrame);
-	end
-	CloseDropDownMenus();
-	-- set up
-	local fullName;
-	if ( not bnetIDAccount ) then
-		-- invite
-		bnetIDAccount, fullName = BNGetFriendInviteInfo(UIDROPDOWNMENU_MENU_VALUE);
-	else
-		local _, accountName, battleTag, isBattleTag, characterName = BNGetFriendInfoByID(bnetIDAccount);
-		if ( accountName ) then
-			if ( characterName ) then
-				fullName = accountName.." ("..characterName..")";
-			else
-				fullName = accountName;
-			end
-		else
-			local _, characterName = BNGetGameAccountInfo(bnetIDAccount);
-			fullName = characterName;
-		end
-	end
-	reportFrame.bnetIDAccount = bnetIDAccount;
-	reportFrame.type = reportType;
-	reportFrame.name = fullName;
-	BNetReportFrameCommentBox:SetText("");
-
-	if ( reportType == "SPAM" or reportType == "NAME" ) then
-		StaticPopup_Show("CONFIRM_BNET_REPORT", format(_G["BNET_REPORT_CONFIRM_"..reportType], fullName));
-	elseif ( reportType == "ABUSE" ) then
-		BNetReportFrameName:SetText(fullName);
-		StaticPopupSpecial_Show(reportFrame);
-	end
-end
-
-function BNet_ConfirmReport()
-	StaticPopup_Show("CONFIRM_BNET_REPORT", format(_G["BNET_REPORT_CONFIRM_"..BNetReportFrame.type], BNetReportFrame.name));
-end
-
-function BNet_SendReport()
-	local reportFrame = BNetReportFrame;
-	local comments = BNetReportFrameCommentBox:GetText();
-	BNReportPlayer(reportFrame.bnetIDAccount, reportFrame.type, comments);
 end
 
 --This is used to track time played for an alert in Korea
@@ -402,6 +376,8 @@ function BNet_GetClientEmbeddedTexture(client, width, height, xOffset, yOffset)
 		textureString = "Interface\\ChatFrame\\UI-ChatIcon-SC";
 	elseif ( client == BNET_CLIENT_DESTINY2 ) then
 		textureString = "Interface\\ChatFrame\\UI-ChatIcon-Destiny2";
+	elseif ( client == BNET_CLIENT_COD ) then
+		textureString = "Interface\\ChatFrame\\UI-ChatIcon-CallOfDutyBlackOps4";
 	else
 		textureString = "Interface\\ChatFrame\\UI-ChatIcon-Battlenet";
 	end
@@ -425,6 +401,8 @@ function BNet_GetClientTexture(client)
 		return "Interface\\FriendsFrame\\Battlenet-SCicon";
 	elseif ( client == BNET_CLIENT_DESTINY2 ) then
 		return "Interface\\FriendsFrame\\Battlenet-Destiny2icon";
+	elseif ( client == BNET_CLIENT_COD ) then
+		return "Interface\\FriendsFrame\\Battlenet-CallOfDutyBlackOps4icon";
 	else
 		return "Interface\\FriendsFrame\\Battlenet-Battleneticon";
 	end

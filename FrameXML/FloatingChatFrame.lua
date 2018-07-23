@@ -594,7 +594,7 @@ function FCFMessageTypeDropDown_OnClick(self)
 	end
 end
 
-function FCF_OpenNewWindow(name)
+function FCF_OpenNewWindow(name, noDefaultChannels)
 	local count = 1;
 	local chatFrame, chatTab;
 
@@ -621,14 +621,16 @@ function FCF_OpenNewWindow(name)
 			ChatFrame_RemoveAllChannels(chatFrame);
 			ChatFrame_ReceiveAllPrivateMessages(chatFrame);
 
-			ChatFrame_AddMessageGroup(chatFrame, "SAY");
-			ChatFrame_AddMessageGroup(chatFrame, "YELL");
-			ChatFrame_AddMessageGroup(chatFrame, "GUILD");
-			ChatFrame_AddMessageGroup(chatFrame, "WHISPER");
-			ChatFrame_AddMessageGroup(chatFrame, "BN_WHISPER");
-			ChatFrame_AddMessageGroup(chatFrame, "PARTY");
-			ChatFrame_AddMessageGroup(chatFrame, "PARTY_LEADER");
-			ChatFrame_AddMessageGroup(chatFrame, "CHANNEL");
+			if ( not noDefaultChannels ) then
+				ChatFrame_AddMessageGroup(chatFrame, "SAY");
+				ChatFrame_AddMessageGroup(chatFrame, "YELL");
+				ChatFrame_AddMessageGroup(chatFrame, "GUILD");
+				ChatFrame_AddMessageGroup(chatFrame, "WHISPER");
+				ChatFrame_AddMessageGroup(chatFrame, "BN_WHISPER");
+				ChatFrame_AddMessageGroup(chatFrame, "PARTY");
+				ChatFrame_AddMessageGroup(chatFrame, "PARTY_LEADER");
+				ChatFrame_AddMessageGroup(chatFrame, "CHANNEL");
+			end
 
 			--Clear the edit box history.
 			chatFrame.editBox:ClearHistory();
@@ -641,6 +643,7 @@ function FCF_OpenNewWindow(name)
 			-- Dock the frame by default
 			FCF_DockFrame(chatFrame, (#FCFDock_GetChatFrames(GENERAL_CHAT_DOCK)+1), true);
 			FCF_FadeInChatFrame(FCFDock_GetSelectedWindow(GENERAL_CHAT_DOCK));
+			ChatEdit_SetLastActiveWindow(chatFrame.editBox);
 			return chatFrame, i;
 		end
 		count = count + 1;
@@ -959,8 +962,14 @@ function FCF_SetChatWindowFontSize(self, chatFrame, fontSize)
 	end
 	local fontFile, unused, fontFlags = chatFrame:GetFont();
 	chatFrame:SetFont(fontFile, fontSize, fontFlags);
-	if ( GMChatFrame and chatFrame == DEFAULT_CHAT_FRAME ) then
-		GMChatFrame:SetFont(fontFile, fontSize, fontFlags);
+	if ( chatFrame == DEFAULT_CHAT_FRAME ) then
+		if ( GMChatFrame ) then
+			GMChatFrame:SetFont(fontFile, fontSize, fontFlags);
+		end
+
+		if ( CommunitiesFrame ) then
+			CommunitiesFrame.Chat.MessageFrame:SetFont(fontFile, fontSize, fontFlags);
+		end
 	end
 	SetChatWindowSize(chatFrame:GetID(), fontSize);
 end
@@ -1392,8 +1401,8 @@ function FCF_IsValidChatFrame(chatFrame)
 end
 
 function FCF_UpdateButtonSide(chatFrame)
-	local leftDist =  chatFrame:GetLeft();
-	local rightDist = GetScreenWidth() - chatFrame:GetRight();
+	local leftDist =  chatFrame:GetLeft() or 0;
+	local rightDist = GetScreenWidth() - (chatFrame:GetRight() or 0);
 	local changed = nil;
 	if (( leftDist > 0 and leftDist <= rightDist ) or rightDist < 0 ) then
 		if ( chatFrame.buttonSide ~= "left" ) then
@@ -1426,12 +1435,12 @@ function FCF_SetButtonSide(chatFrame, buttonSide, forceUpdate)
 
 	if ( chatFrame == DEFAULT_CHAT_FRAME ) then
 		ChatFrameMenu_UpdateAnchorPoint();
-	end
 
-	ChatAlertFrame:SetChatButtonSide(buttonSide);
+		ChatAlertFrame:SetChatButtonSide(buttonSide);
 
-	if ( QuickJoinToastButton ) then
-		QuickJoinToastButton:SetToastDirection(buttonSide == "right");
+		if ( QuickJoinToastButton ) then
+			QuickJoinToastButton:SetToastDirection(buttonSide == "right");
+		end
 	end
 end
 
@@ -2398,12 +2407,12 @@ function FCFDockOverflowList_Update(list, dock)
 		end
 
 		FCFDockOverflowListButton_SetValue(button, dockedFrames[i]);
-		
+
 		totalHeight = totalHeight + button:GetHeight() + 3;
 	end
 
 	list:SetHeight(totalHeight);
-	
+
 	for i = #dockedFrames + 1, #list.buttons do
 		list.buttons[i]:Hide();
 	end

@@ -951,9 +951,9 @@ function GarrisonMissionListMixin:Update()
 				button.ItemLevel:Hide();
 			end
 			if ( showingItemLevel and mission.isRare ) then
-				button.Level:SetPoint("CENTER", button, "TOPLEFT", 40, -22);
+				button.Level:SetPoint("CENTER", button, "TOPLEFT", 35, -22);
 			else
-				button.Level:SetPoint("CENTER", button, "TOPLEFT", 40, -36);
+				button.Level:SetPoint("CENTER", button, "TOPLEFT", 35, -36);
 			end
 
 			button:Enable();
@@ -1192,6 +1192,11 @@ function GarrisonMissionButton_SetInProgressTooltip(missionInfo, showRewards)
 				end
 			elseif (reward.followerXP) then
 				GameTooltip:AddLine(reward.title, 1, 1, 1);
+            elseif (reward.currencyID and C_CurrencyInfo.IsCurrencyContainer(reward.currencyID, reward.quantity)) then
+                local name, texture, quantity, quality = CurrencyContainerUtil.GetCurrencyContainerInfo(reward.currencyID, reward.quantity);
+                if name then
+					GameTooltip:AddLine(ITEM_QUALITY_COLORS[quality].hex..name..FONT_COLOR_CODE_CLOSE);
+				end
 			else
 				GameTooltip:AddLine(reward.title, 1, 1, 1);
 			end

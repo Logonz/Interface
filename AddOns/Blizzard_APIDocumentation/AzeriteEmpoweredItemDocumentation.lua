@@ -22,6 +22,19 @@ local AzeriteEmpoweredItem =
 			},
 		},
 		{
+			Name = "CloseAzeriteEmpoweredItemRespec",
+			Type = "Function",
+		},
+		{
+			Name = "ConfirmAzeriteEmpoweredItemRespec",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "azeriteEmpoweredItemLocation", Type = "table", Mixin = "ItemLocationMixin", Nilable = false },
+			},
+		},
+		{
 			Name = "GetAllTierInfo",
 			Type = "Function",
 
@@ -36,18 +49,55 @@ local AzeriteEmpoweredItem =
 			},
 		},
 		{
+			Name = "GetAllTierInfoByItemID",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemInfo", Type = "string", Nilable = false },
+				{ Name = "classID", Type = "number", Nilable = true, Documentation = { "Specify a class ID to get tier information about that class, otherwise uses the player's class if left nil" } },
+			},
+
+			Returns =
+			{
+				{ Name = "tierInfo", Type = "table", InnerType = "AzeriteEmpoweredItemTierInfo", Nilable = false },
+			},
+		},
+		{
+			Name = "GetAzeriteEmpoweredItemRespecCost",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "cost", Type = "number", Nilable = false },
+			},
+		},
+		{
 			Name = "GetPowerInfo",
 			Type = "Function",
 
 			Arguments =
 			{
-				{ Name = "azeriteEmpoweredItemLocation", Type = "table", Mixin = "ItemLocationMixin", Nilable = false },
 				{ Name = "powerID", Type = "number", Nilable = false },
 			},
 
 			Returns =
 			{
 				{ Name = "powerInfo", Type = "AzeriteEmpoweredItemPowerInfo", Nilable = false },
+			},
+		},
+		{
+			Name = "GetSpecsForPower",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "powerID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "specInfo", Type = "table", InnerType = "AzeriteSpecInfo", Nilable = false },
 			},
 		},
 		{
@@ -62,6 +112,20 @@ local AzeriteEmpoweredItem =
 			Returns =
 			{
 				{ Name = "hasAnyUnselectedPowers", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "HasBeenViewed",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "azeriteEmpoweredItemLocation", Type = "table", Mixin = "ItemLocationMixin", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "hasBeenViewed", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -93,6 +157,21 @@ local AzeriteEmpoweredItem =
 			},
 		},
 		{
+			Name = "IsAzeritePreviewSourceDisplayable",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "itemInfo", Type = "string", Nilable = false },
+				{ Name = "classID", Type = "number", Nilable = true, Documentation = { "Specify a class ID to determine if its displayable for that class, otherwise uses the player's class if left nil" } },
+			},
+
+			Returns =
+			{
+				{ Name = "isAzeritePreviewSourceDisplayable", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "IsPowerAvailableForSpec",
 			Type = "Function",
 
@@ -105,6 +184,21 @@ local AzeriteEmpoweredItem =
 			Returns =
 			{
 				{ Name = "isPowerAvailableForSpec", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "IsPowerSelected",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "azeriteEmpoweredItemLocation", Type = "table", Mixin = "ItemLocationMixin", Nilable = false },
+				{ Name = "powerID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "isSelected", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -122,6 +216,15 @@ local AzeriteEmpoweredItem =
 				{ Name = "success", Type = "bool", Nilable = false },
 			},
 		},
+		{
+			Name = "SetHasBeenViewed",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "azeriteEmpoweredItemLocation", Type = "table", Mixin = "ItemLocationMixin", Nilable = false },
+			},
+		},
 	},
 
 	Events =
@@ -135,6 +238,16 @@ local AzeriteEmpoweredItem =
 				{ Name = "azeriteEmpoweredItemLocation", Type = "table", Mixin = "ItemLocationMixin", Nilable = false },
 			},
 		},
+		{
+			Name = "RespecAzeriteEmpoweredItemClosed",
+			Type = "Event",
+			LiteralName = "RESPEC_AZERITE_EMPOWERED_ITEM_CLOSED",
+		},
+		{
+			Name = "RespecAzeriteEmpoweredItemOpened",
+			Type = "Event",
+			LiteralName = "RESPEC_AZERITE_EMPOWERED_ITEM_OPENED",
+		},
 	},
 
 	Tables =
@@ -146,8 +259,6 @@ local AzeriteEmpoweredItem =
 			{
 				{ Name = "azeritePowerID", Type = "number", Nilable = false },
 				{ Name = "spellID", Type = "number", Nilable = false },
-				{ Name = "tierIndex", Type = "number", Nilable = false },
-				{ Name = "selected", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -155,9 +266,17 @@ local AzeriteEmpoweredItem =
 			Type = "Structure",
 			Fields =
 			{
-				{ Name = "tierIndex", Type = "number", Nilable = false },
 				{ Name = "azeritePowerIDs", Type = "table", InnerType = "number", Nilable = false },
 				{ Name = "unlockLevel", Type = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "AzeriteSpecInfo",
+			Type = "Structure",
+			Fields =
+			{
+				{ Name = "classID", Type = "number", Nilable = false },
+				{ Name = "specID", Type = "number", Nilable = false },
 			},
 		},
 	},

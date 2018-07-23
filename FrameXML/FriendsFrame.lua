@@ -171,7 +171,7 @@ function FriendsFrame_ClickSummonButton (self)
 	end
 end
 
-function FriendsFrame_ShowDropdown(name, connected, lineID, chatType, chatFrame, friendsList, isMobile)
+function FriendsFrame_ShowDropdown(name, connected, lineID, chatType, chatFrame, friendsList, isMobile, communityClubID, communityStreamID, communityEpoch, communityPosition, guid)
 	HideDropDownMenu(1);
 	if ( connected or friendsList ) then
 		if ( connected ) then
@@ -184,16 +184,21 @@ function FriendsFrame_ShowDropdown(name, connected, lineID, chatType, chatFrame,
 		FriendsDropDown.name = name;
 		FriendsDropDown.friendsList = friendsList;
 		FriendsDropDown.lineID = lineID;
+		FriendsDropDown.communityClubID = communityClubID;
+		FriendsDropDown.communityStreamID = communityStreamID;
+		FriendsDropDown.communityEpoch = communityEpoch;
+		FriendsDropDown.communityPosition = communityPosition;
 		FriendsDropDown.chatType = chatType;
 		FriendsDropDown.chatTarget = name;
 		FriendsDropDown.chatFrame = chatFrame;
 		FriendsDropDown.bnetIDAccount = nil;
 		FriendsDropDown.isMobile = isMobile;
+		FriendsDropDown.guid = guid;
 		ToggleDropDownMenu(1, nil, FriendsDropDown, "cursor");
 	end
 end
 
-function FriendsFrame_ShowBNDropdown(name, connected, lineID, chatType, chatFrame, friendsList, bnetIDAccount)
+function FriendsFrame_ShowBNDropdown(name, connected, lineID, chatType, chatFrame, friendsList, bnetIDAccount, communityClubID, communityStreamID, communityEpoch, communityPosition)
 	if ( connected or friendsList ) then
 		if ( connected ) then
 			FriendsDropDown.initialize = FriendsFrameBNDropDown_Initialize;
@@ -204,6 +209,10 @@ function FriendsFrame_ShowBNDropdown(name, connected, lineID, chatType, chatFram
 		FriendsDropDown.name = name;
 		FriendsDropDown.friendsList = friendsList;
 		FriendsDropDown.lineID = lineID;
+		FriendsDropDown.communityClubID = communityClubID;
+		FriendsDropDown.communityStreamID = communityStreamID;
+		FriendsDropDown.communityEpoch = communityEpoch;
+		FriendsDropDown.communityPosition = communityPosition;
 		FriendsDropDown.chatType = chatType;
 		FriendsDropDown.chatTarget = name;
 		FriendsDropDown.chatFrame = chatFrame;
@@ -411,7 +420,7 @@ function FriendsList_InitializePendingInviteDropDown(self, level)
 					end
 		UIDropDownMenu_AddButton(info, level)
 
-		info.text = BNET_REPORT;
+		info.text = REPORT_PLAYER;
 		info.hasArrow = true;
 		info.func = nil;
 		UIDropDownMenu_AddButton(info, level)
@@ -428,24 +437,26 @@ function FriendsList_InitializePendingInviteDropDown(self, level)
 		UIDropDownMenu_AddButton(info, level)
 	else
 		if level == 2 then
-			info.text = BNET_REPORT_SPAM;
+			local bnetIDAccount, name = BNGetFriendInviteInfo(self.inviteIndex);
+
+			info.text = REPORT_SPAMMING;
 			info.func = function()
 							UIDROPDOWNMENU_MENU_VALUE = self.inviteIndex;
-							BNet_InitiateReport(nil, "SPAM");
+							PlayerReportFrame:InitiateReport(PLAYER_REPORT_TYPE_SPAM, name);
 						end
 			UIDropDownMenu_AddButton(info, level)
 
-			info.text = BNET_REPORT_ABUSE;
+			info.text = REPORT_ABUSE;
 			info.func = function()
 							UIDROPDOWNMENU_MENU_VALUE = self.inviteIndex;
-							BNet_InitiateReport(nil, "ABUSE");
+							PlayerReportFrame:InitiateReport(PLAYER_REPORT_TYPE_ABUSE, name);
 						end
 			UIDropDownMenu_AddButton(info, level)
 
-			info.text = BNET_REPORT_NAME;
+			info.text = REPORT_BAD_NAME;
 			info.func = function()
 							UIDROPDOWNMENU_MENU_VALUE = self.inviteIndex;
-							BNet_InitiateReport(nil, "NAME");
+							PlayerReportFrame:InitiateReport(PLAYER_REPORT_TYPE_BAD_PLAYER_NAME, name);
 						end
 			UIDropDownMenu_AddButton(info, level)
 			info.notCheckable = false;
@@ -456,8 +467,7 @@ end
 function FriendsList_ClosePendingInviteDialogs()
 	CloseDropDownMenus();
 	StaticPopup_Hide("CONFIRM_BLOCK_INVITES");
-	StaticPopup_Hide("CONFIRM_BNET_REPORT");
-	StaticPopupSpecial_Hide(BNetReportFrame);
+	StaticPopupSpecial_Hide(PlayerReportFrame);
 end
 
 function FriendsList_GetScrollFrameTopButton(offset)
@@ -912,11 +922,11 @@ function FriendsFrameFriendButton_OnClick(self, button)
 		if ( self.buttonType == FRIENDS_BUTTON_TYPE_BNET ) then
 			-- bnet friend
 			local bnetIDAccount, accountName, battleTag, isBattleTag, characterName, bnetIDGameAccount, client, isOnline = BNGetFriendInfo(self.id);
-			FriendsFrame_ShowBNDropdown(accountName, isOnline, nil, nil, nil, 1, bnetIDAccount);
+			FriendsFrame_ShowBNDropdown(accountName, isOnline, nil, nil, nil, 1, bnetIDAccount, nil, nil, nil, nil);
 		else
 			-- wow friend
 			local name, level, class, area, connected = GetFriendInfo(self.id);
-			FriendsFrame_ShowDropdown(name, connected, nil, nil, nil, 1);
+			FriendsFrame_ShowDropdown(name, connected, nil, nil, nil, 1, nil, nil, nil, nil);
 		end
 	end
 end
@@ -2241,14 +2251,14 @@ function TravelPassButton_OnEnter(self)
 			local members = C_SocialQueue.GetGroupMembers(group);
 			local numDisplayed = 0;
 			for i=1, #members do
-				if ( members[i] ~= guid ) then
+				if ( members[i].guid ~= guid ) then
 					if ( numDisplayed == 0 ) then
 						GameTooltip:AddLine(SOCIAL_QUEUE_ALSO_IN_GROUP);
 					elseif ( numDisplayed >= 7 ) then
 						GameTooltip:AddLine(SOCIAL_QUEUE_AND_MORE, GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b, 1);
 						break;
 					end
-					local name, color = SocialQueueUtil_GetNameAndColor(members[i]);
+					local name, color = SocialQueueUtil_GetRelationshipInfo(members[i].guid, nil, members[i].clubId);
 					GameTooltip:AddLine(color..name..FONT_COLOR_CODE_CLOSE);
 
 					numDisplayed = numDisplayed + 1;

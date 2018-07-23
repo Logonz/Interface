@@ -165,7 +165,7 @@ VideoData["Display_DisplayModeDropDown"]={
 			fullscreen = false;
 		},
 		[2] = {
-			text = VIDEO_OPTIONS_FULLSCREEN,
+			text = VIDEO_OPTIONS_WINDOWED_FULLSCREEN,
 			cvars =	{
 				gxMaximize = 1,
 			},
@@ -231,6 +231,7 @@ VideoData["Display_PrimaryMonitorDropDown"]={
 			local ratio = GetMonitorAspectRatio(self:GetValue());
 			return (ratio>=1.0);
 		end,
+	restart = true,
 }
 
 -------------------------------------------------------------------------------------------------------
@@ -297,13 +298,13 @@ VideoData["Display_VerticalSyncDropDown"]={
 		[1] = {
 			text = VIDEO_OPTIONS_DISABLED,
 			cvars =	{
-				gxVSync = 0,
+				vsync = 0,
 			},
 		},
 		[2] = {
 			text = VIDEO_OPTIONS_ENABLED,
 			cvars =	{
-				gxVSync = 1,
+				vsync = 1,
 			},
 		},
 	},
@@ -321,7 +322,6 @@ local function GenerateMSAAData(data, advanced, ...)
 				text = advanced and ADVANCED_ANTIALIASING_MSAA_FORMAT:format(sampleCount, coverageCount) or ANTIALIASING_MSAA_FORMAT:format(sampleCount),
 				cvars =	{
 					ffxAntiAliasingMode = not advanced and 0 or nil,
-					RenderScale = not advanced and tonumber(GetCVarDefault("RenderScale")) or nil,
 					MSAAQuality = msaaQuality,
 				},
 			};
@@ -339,7 +339,6 @@ local function GenerateFFXAntiAliasingData(data, advanced)
 			text = ANTIALIASING_FXAA_LOW,
 			cvars =	{
 				ffxAntiAliasingMode = 1,
-				RenderScale = not advanced and tonumber(GetCVarDefault("RenderScale")) or nil,
 				MSAAQuality = not advanced and 0 or nil,
 			},
 		};
@@ -348,7 +347,6 @@ local function GenerateFFXAntiAliasingData(data, advanced)
 			text = ANTIALIASING_FXAA_HIGH,
 			cvars =	{
 				ffxAntiAliasingMode = 2,
-				RenderScale = not advanced and tonumber(GetCVarDefault("RenderScale")) or nil,
 				MSAAQuality = not advanced and 0 or nil,
 			},
 		};
@@ -359,7 +357,6 @@ local function GenerateFFXAntiAliasingData(data, advanced)
 			text = ANTIALIASING_CMAA,
 			cvars =	{
 				ffxAntiAliasingMode = 3,
-				RenderScale = not advanced and tonumber(GetCVarDefault("RenderScale")) or nil,
 				MSAAQuality = not advanced and 0 or nil,
 			},
 		};
@@ -375,7 +372,6 @@ local function GenerateAntiAliasingDropDownData()
 		text = VIDEO_OPTIONS_NONE,
 		cvars =	{
 			ffxAntiAliasingMode = 0,
-			RenderScale = tonumber(GetCVarDefault("RenderScale")),
 			MSAAQuality = 0,
 		},
 	};
@@ -383,30 +379,6 @@ local function GenerateAntiAliasingDropDownData()
 	local fxaa, cmaa = GenerateFFXAntiAliasingData(data, false);
 
 	GenerateMSAAData(data, false, MultiSampleAntiAliasingSupported());
-
-	local ssaa2x = GetMaxRenderScale() >= 2.0;
-
-	if ssaa2x then
-		data[#data + 1] = {
-			text = ANTIALIASING_SSAA,
-			cvars =	{
-				ffxAntiAliasingMode = 0,
-				RenderScale = 2,
-				MSAAQuality = 0,
-			},
-		};
-	end
-
-	if cmaa and ssaa2x then
-		data[#data + 1] = {
-			text = ANTIALIASING_SSAA_CMAA,
-			cvars =	{
-				ffxAntiAliasingMode = 3,
-				RenderScale = 2,
-				MSAAQuality = 0,
-			},
-		};
-	end
 
 	return data;
 end
@@ -502,6 +474,9 @@ VideoData["Graphics_ParticleDensityDropDown"]={
 		[4] = {
 			text = VIDEO_OPTIONS_HIGH,
 		},
+		[5] = {
+			text = VIDEO_OPTIONS_ULTRA,
+		},
 	},
 	dependent = {
 		"Graphics_Quality",
@@ -525,6 +500,9 @@ VideoData["RaidGraphics_ParticleDensityDropDown"]={
 		[4] = {
 			text = VIDEO_OPTIONS_HIGH,
 		},
+		[5] = {
+			text = VIDEO_OPTIONS_ULTRA,
+		},
 	},
 	dependent = {
 		"RaidGraphics_Quality",
@@ -544,11 +522,13 @@ VideoData["Graphics_SSAODropDown"]={
 			text = VIDEO_OPTIONS_LOW,
 		},
 		{
+			text = VIDEO_OPTIONS_MEDIUM,
+		},
+		{
 			text = VIDEO_OPTIONS_HIGH,
 		},
 		{
 			text = VIDEO_OPTIONS_ULTRA,
-			tooltip = VIDEO_OPTIONS_SSAO_ULTRA,
 		},
 	},
 
@@ -568,6 +548,9 @@ VideoData["RaidGraphics_SSAODropDown"]={
 		},
 		{
 			text = VIDEO_OPTIONS_LOW,
+		},
+		{
+			text = VIDEO_OPTIONS_MEDIUM,
 		},
 		{
 			text = VIDEO_OPTIONS_HIGH,
@@ -1176,6 +1159,21 @@ VideoData["Advanced_MaxFPSBKSlider"]={
 		end,
 }
 
+VideoData["Advanced_ContrastSlider"]={
+	name = OPTION_CONTRAST;
+	tooltip = OPTION_TOOLTIP_CONTRAST,
+}
+
+VideoData["Advanced_BrightnessSlider"]={
+	name = OPTIONS_BRIGHTNESS;
+	tooltip = OPTION_TOOLTIP_BRIGHTNESS,
+}
+
+VideoData["Advanced_GammaSlider"]={
+	name = GAMMA;
+	tooltip = OPTION_TOOLTIP_GAMMA,
+}
+
 VideoData["Advanced_MaxFPSCheckBox"]={
 	name = MAXFPS_CHECK;
 	tooltip = OPTION_MAXFPS_CHECK,
@@ -1226,15 +1224,12 @@ VideoData["Advanced_AdapterDropDown"]={
 				end
 			end
 		end,
+	restart = true,
 }
+
 VideoData["Advanced_StereoEnabled"]={
 	name = ENABLE_STEREO_VIDEO;
 	tooltip = OPTION_TOOLTIP_ENABLE_STEREO_VIDEO,
-}
-
-VideoData["Advanced_ShowHDModels"]={
-	name = SHOW_HD_MODELS_TEXT;
-	tooltip = OPTION_TOOLTIP_SHOW_HD_MODELS,
 }
 
 VideoData["Advanced_MultisampleAlphaTest"]={
@@ -1318,4 +1313,6 @@ VideoData["Advanced_PhysicsInteractionDropDown"]={
 			},
 		},
 	},
+	clientRestart = true,
+	gameRestart = true,
 }

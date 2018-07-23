@@ -44,7 +44,8 @@ local PvpInfo =
 			{
 				{ Name = "honor", Type = "number", Nilable = false },
 				{ Name = "experience", Type = "number", Nilable = false },
-				{ Name = "rewards", Type = "table", InnerType = "BattlefieldReward", Nilable = true },
+				{ Name = "itemRewards", Type = "table", InnerType = "BattlefieldItemReward", Nilable = true },
+				{ Name = "currencyRewards", Type = "table", InnerType = "BattlefieldCurrencyReward", Nilable = true },
 			},
 		},
 		{
@@ -55,7 +56,8 @@ local PvpInfo =
 			{
 				{ Name = "honor", Type = "number", Nilable = false },
 				{ Name = "experience", Type = "number", Nilable = false },
-				{ Name = "rewards", Type = "table", InnerType = "BattlefieldReward", Nilable = true },
+				{ Name = "itemRewards", Type = "table", InnerType = "BattlefieldItemReward", Nilable = true },
+				{ Name = "currencyRewards", Type = "table", InnerType = "BattlefieldCurrencyReward", Nilable = true },
 			},
 		},
 		{
@@ -81,7 +83,8 @@ local PvpInfo =
 			{
 				{ Name = "honor", Type = "number", Nilable = false },
 				{ Name = "experience", Type = "number", Nilable = false },
-				{ Name = "rewards", Type = "table", InnerType = "BattlefieldReward", Nilable = true },
+				{ Name = "itemRewards", Type = "table", InnerType = "BattlefieldItemReward", Nilable = true },
+				{ Name = "currencyRewards", Type = "table", InnerType = "BattlefieldCurrencyReward", Nilable = true },
 				{ Name = "hasWon", Type = "bool", Nilable = false },
 			},
 		},
@@ -172,16 +175,29 @@ local PvpInfo =
 			{
 				{ Name = "honor", Type = "number", Nilable = false },
 				{ Name = "experience", Type = "number", Nilable = false },
-				{ Name = "rewards", Type = "table", InnerType = "BattlefieldReward", Nilable = true },
+				{ Name = "itemRewards", Type = "table", InnerType = "BattlefieldItemReward", Nilable = true },
+				{ Name = "currencyRewards", Type = "table", InnerType = "BattlefieldCurrencyReward", Nilable = true },
 			},
 		},
 		{
-			Name = "GetRandomLargeBGInfo",
+			Name = "GetRandomEpicBGInfo",
 			Type = "Function",
 
 			Returns =
 			{
 				{ Name = "info", Type = "RandomBGInfo", Nilable = false },
+			},
+		},
+		{
+			Name = "GetRandomEpicBGRewards",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "honor", Type = "number", Nilable = false },
+				{ Name = "experience", Type = "number", Nilable = false },
+				{ Name = "itemRewards", Type = "table", InnerType = "BattlefieldItemReward", Nilable = true },
+				{ Name = "currencyRewards", Type = "table", InnerType = "BattlefieldCurrencyReward", Nilable = true },
 			},
 		},
 		{
@@ -192,7 +208,18 @@ local PvpInfo =
 			{
 				{ Name = "honor", Type = "number", Nilable = false },
 				{ Name = "experience", Type = "number", Nilable = false },
-				{ Name = "rewards", Type = "table", InnerType = "BattlefieldReward", Nilable = true },
+				{ Name = "itemRewards", Type = "table", InnerType = "BattlefieldItemReward", Nilable = true },
+				{ Name = "currencyRewards", Type = "table", InnerType = "BattlefieldCurrencyReward", Nilable = true },
+			},
+		},
+		{
+			Name = "GetSeasonBestInfo",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "tierID", Type = "number", Nilable = false },
+				{ Name = "nextTierID", Type = "number", Nilable = true },
 			},
 		},
 		{
@@ -235,6 +262,24 @@ local PvpInfo =
 			Returns =
 			{
 				{ Name = "isInBrawl", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "IsPVPMap",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "isPVPMap", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "IsWarModeActive",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "warModeActive", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -366,11 +411,6 @@ local PvpInfo =
 			LiteralName = "PLAYER_ENTERING_BATTLEGROUND",
 		},
 		{
-			Name = "PrestigeAndHonorInvoluntarilyChanged",
-			Type = "Event",
-			LiteralName = "PRESTIGE_AND_HONOR_INVOLUNTARILY_CHANGED",
-		},
-		{
 			Name = "PvpBrawlInfoUpdated",
 			Type = "Event",
 			LiteralName = "PVP_BRAWL_INFO_UPDATED",
@@ -480,7 +520,16 @@ local PvpInfo =
 			},
 		},
 		{
-			Name = "BattlefieldReward",
+			Name = "BattlefieldCurrencyReward",
+			Type = "Structure",
+			Fields =
+			{
+				{ Name = "id", Type = "number", Nilable = false },
+				{ Name = "quantity", Type = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "BattlefieldItemReward",
 			Type = "Structure",
 			Fields =
 			{

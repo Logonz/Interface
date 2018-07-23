@@ -1,8 +1,3 @@
-
-
-
-UIPanelWindows["ArchaeologyFrame"] = {area = "left", pushable = 3, showFailedFunc = "ArchaeologyFrame_ShowFailed" };
-
 ARCHAEOLOGY_BUTTON_HEIGHT = 59;
 ARCHAEOLOGY_MID_TITLE_YOFFSET = -110;
 
@@ -59,6 +54,7 @@ end
 
 
 function ArchaeologyFrame_OnLoad(self)
+	UIPanelWindows["ArchaeologyFrame"] = {area = "left", pushable = 3, showFailedFunc = ArchaeologyFrame_ShowFailed };
 	ButtonFrameTemplate_HideButtonBar(ArchaeologyFrame);
 	ButtonFrameTemplate_HideAttic(ArchaeologyFrame);
 	
@@ -147,9 +143,9 @@ local function ArchaeologyFrame_CancelSpellLoadCallback(control)
 end
 
 function ArchaeologyFrame_OnHide(self)
-	ArchaeologyFrame_CancelSpellLoadCallback(self.historyScroll);
+	ArchaeologyFrame_CancelSpellLoadCallback(self.artifactPage.historyScroll);
 	for i=1,ARCHAEOLOGY_MAX_COMPLETED_SHOWN do
-		local projectButton = self["artifact"..i];
+		local projectButton = self.completedPage["artifact"..i];
 		ArchaeologyFrame_CancelSpellLoadCallback(projectButton);
 	end
 	CloseResearch();

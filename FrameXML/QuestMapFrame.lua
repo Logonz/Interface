@@ -8,9 +8,9 @@ local WarCampaignTextureKitInfo = {
 };
 
 QUEST_LOG_WAR_CAMPAIGN_LAYOUT_INDEX = 2;
-QUEST_LOG_WAR_CAMPAIGN_NEXT_OBJECTIVE_LAYOUT_INDEX = 3;
-QUEST_LOG_SEPARATOR_LAYOUT_INDEX = 12;
-QUEST_LOG_STORY_LAYOUT_INDEX = 13;
+QUEST_LOG_WAR_CAMPAIGN_NEXT_OBJECTIVE_LAYOUT_INDEX = 12;
+QUEST_LOG_SEPARATOR_LAYOUT_INDEX = 24;
+QUEST_LOG_STORY_LAYOUT_INDEX = 25;
 
 QuestLogMixin = { };
 
@@ -161,9 +161,9 @@ function QuestMapFrame_OnEvent(self, event, ...)
 		if ( questIndex > 0 ) then
 			QuestMapFrame_OpenToQuestDetails(arg1);
 		elseif ( mapID ~= 0 ) then
-			QuestMapFrame:GetParent():NavigateToMap(mapID);
+			QuestMapFrame:GetParent():SetMapID(mapID);
 		elseif ( arg2 and arg2 > 0) then
-			QuestMapFrame:GetParent():NavigateToMap(arg2);
+			QuestMapFrame:GetParent():SetMapID(arg2);
 		end
 	elseif ( event == "PLAYER_ENTERING_WORLD" ) then	
 		self:Refresh();
@@ -173,6 +173,10 @@ function QuestMapFrame_OnEvent(self, event, ...)
 			QuestMapFrame_UpdateAll();
 		end
 	end
+end
+
+function QuestMapFrame_OnHide(self)
+	QuestMapFrame_CloseQuestDetails(self:GetParent());
 end
 
 -- opening/closing the quest frame is different from showing/hiding because of fullscreen map mode
@@ -240,7 +244,7 @@ function QuestMapFrame_UpdateAll()
 		if ( questDetailID ) then
 			-- update rewards
 			SelectQuestLogEntry(GetQuestLogIndexByID(questDetailID));
-			QuestInfo_Display(QUEST_TEMPLATE_MAP_REWARDS, QuestMapFrame.DetailsFrame.RewardsFrame, nil, nil, true);
+			QuestMapFrame_ShowQuestDetails(questDetailID);
 		else
 			QuestLogQuests_Update(poiTable);
 		end
@@ -301,7 +305,7 @@ function QuestMapFrame_ShowQuestDetails(questID)
 	QuestMapFrame.DetailsFrame.returnMapID = QuestMapFrame:GetParent():GetMapID();
 	local mapID = GetQuestUiMapID(questID);
 	if ( mapID ~= 0 ) then
-		QuestMapFrame:GetParent():NavigateToMap(mapID);
+		QuestMapFrame:GetParent():SetMapID(mapID);
 	end
 
 	QuestMapFrame_UpdateQuestDetailsButtons();
@@ -329,6 +333,10 @@ function QuestMapFrame_CloseQuestDetails(optPortraitOwnerCheckFrame)
 
 	StaticPopup_Hide("ABANDON_QUEST");
 	StaticPopup_Hide("ABANDON_QUEST_WITH_ITEMS");
+end
+
+function QuestMapFrame_PingQuestID(questId)
+	QuestMapFrame:GetParent():PingQuestID(questId);
 end
 
 function QuestMapFrame_UpdateQuestDetailsButtons()
@@ -361,7 +369,7 @@ end
 
 function QuestMapFrame_ReturnFromQuestDetails()
 	if ( QuestMapFrame.DetailsFrame.returnMapID ) then
-		QuestMapFrame:GetParent():NavigateToMap(QuestMapFrame.DetailsFrame.returnMapID);
+		QuestMapFrame:GetParent():SetMapID(QuestMapFrame.DetailsFrame.returnMapID);
 	end
 	QuestMapFrame_CloseQuestDetails();
 end
@@ -834,7 +842,7 @@ function OpenQuestLog(mapID)
 	QuestMapFrame_Open();
 
 	if mapID then
-		QuestMapFrame:GetParent():NavigateToMap(mapID);
+		QuestMapFrame:GetParent():SetMapID(mapID);
 	end
 end
 

@@ -19,6 +19,8 @@ function CommunitiesSettingsDialogMixin:OnShow()
 	else
 		self.DialogLabel:SetText(COMMUNITIES_SETTINGS_CHARACTER_LABEL);
 	end
+	
+	CommunitiesFrame:RegisterDialogShown(self);
 end
 
 function CommunitiesSettingsDialogMixin:SetClubId(clubId)
@@ -29,7 +31,9 @@ function CommunitiesSettingsDialogMixin:SetClubId(clubId)
 		self.IconPreviewRing:SetAtlas(self.clubType == Enum.ClubType.BattleNet and "communities-ring-blue" or "communities-ring-gold");
 		self:SetAvatarId(clubInfo.avatarId);
 		self.NameEdit:SetText(clubInfo.name);
+		self.ShortNameEdit:SetText(clubInfo.shortName or "");
 		self.Description.EditBox:SetText(clubInfo.description);
+		self.Description.EditBox.Instructions:SetText(self.clubType == Enum.ClubType.BattleNet and COMMUNITIES_CREATE_DIALOG_DESCRIPTION_INSTRUCTIONS_BATTLE_NET or COMMUNITIES_CREATE_DIALOG_DESCRIPTION_INSTRUCTIONS);
 		self.MessageOfTheDay.EditBox:SetText(clubInfo.broadcast);
 	end
 end
@@ -55,12 +59,27 @@ function CommunitiesSettingsDialogMixin:GetName()
 	return self.NameEdit:GetText();
 end
 
+function CommunitiesSettingsDialogMixin:GetShortName()
+	return self.ShortNameEdit:GetText();
+end
+
 function CommunitiesSettingsDialogMixin:GetDescription()
 	return self.Description.EditBox:GetText();
 end
 
 function CommunitiesSettingsDialogMixin:GetMessageOfTheDay()
 	return self.MessageOfTheDay.EditBox:GetText();
+end
+
+function CommunitiesSettingsDialogMixin:UpdateCreateButton()
+	local name = self.NameEdit:GetText();
+	local nameIsValid = C_Club.ValidateText(self:GetClubType(), name, Enum.ClubFieldType.ClubName) == Enum.ValidateNameResult.NameSuccess;
+	local shortName = self.ShortNameEdit:GetText();
+	local shortNameIsValid = C_Club.ValidateText(self:GetClubType(), shortName, Enum.ClubFieldType.ClubShortName) == Enum.ValidateNameResult.NameSuccess;
+	self.Accept:SetEnabled(nameIsValid and shortNameIsValid);
+	if self.Accept:IsMouseOver() then
+		CommunitiesSettingsDialogAcceptButton_OnEnter(self.Accept);
+	end
 end
 
 local function CommunitiesAvatarPickerDialog_OnOkay(self)
@@ -84,12 +103,36 @@ function CommunitiesSettingsDialogChangeAvatarButton_OnClick(self)
 	CommunitiesAvatarPicker_OpenDialog(communitiesSettingsDialog:GetClubType(), communitiesSettingsDialog:GetAvatarId(), CommunitiesAvatarPickerDialog_OnOkay, CommunitiesAvatarPickerDialog_OnCancel);
 	PlaySound(SOUNDKIT.GS_TITLE_OPTION_OK);
 end
+		
+function CommunitiesSettingsDialogAcceptButton_OnEnter(self)
+	local communitiesSettingsDialog = self:GetParent();
+	local name = communitiesSettingsDialog.NameEdit:GetText();
+	local nameErrorCode = C_Club.GetCommunityNameResultText(C_Club.ValidateText(communitiesSettingsDialog:GetClubType(), name, Enum.ClubFieldType.ClubName));
+	local shortName = communitiesSettingsDialog.ShortNameEdit:GetText();
+	local shortNameErrorCode = C_Club.GetCommunityNameResultText(C_Club.ValidateText(communitiesSettingsDialog:GetClubType(), shortName, Enum.ClubFieldType.ClubShortName));
+	if nameErrorCode ~= nil and shortNameErrorCode ~= nil then
+		local nameError = RED_FONT_COLOR:WrapTextInColorCode(nameErrorCode);
+		local shortNameError = RED_FONT_COLOR:WrapTextInColorCode(shortNameErrorCode);
+		GameTooltip_SetBasicTooltip(GameTooltip, COMMUNITIES_CREATE_DIALOG_NAME_AND_SHORT_NAME_ERROR:format(nameError, shortNameError), self:GetRight(), self:GetTop(), true);
+	elseif nameErrorCode ~= nil then
+		local nameError = RED_FONT_COLOR:WrapTextInColorCode(nameErrorCode);
+		GameTooltip_SetBasicTooltip(GameTooltip, COMMUNITIES_CREATE_DIALOG_NAME_ERROR:format(nameError), self:GetRight(), self:GetTop(), true);
+	elseif shortNameErrorCode ~= nil then
+		local shortNameError = RED_FONT_COLOR:WrapTextInColorCode(shortNameErrorCode);
+		GameTooltip_SetBasicTooltip(GameTooltip, COMMUNITIES_CREATE_DIALOG_SHORT_NAME_ERROR:format( shortNameError), self:GetRight(), self:GetTop(), true);
+	else
+		GameTooltip:Hide();
+	end
+end
+
+function CommunitiesSettingsDialogAcceptButton_OnLeave(self)
+	GameTooltip:Hide();
+end
 
 function CommunitiesSettingsDialogAcceptButton_OnClick(self)
 	local communitiesSettingsDialog = self:GetParent();
 	communitiesSettingsDialog:Hide();
-	-- TODO: Short name edit box for Character clubs
-	C_Club.EditClub(communitiesSettingsDialog:GetClubId(), communitiesSettingsDialog:GetName(), nil, communitiesSettingsDialog:GetDescription(), communitiesSettingsDialog:GetAvatarId(), communitiesSettingsDialog:GetMessageOfTheDay());
+	C_Club.EditClub(communitiesSettingsDialog:GetClubId(), communitiesSettingsDialog:GetName(), communitiesSettingsDialog:GetShortName(), communitiesSettingsDialog:GetDescription(), communitiesSettingsDialog:GetAvatarId(), communitiesSettingsDialog:GetMessageOfTheDay());
 end
 
 function CommunitiesSettingsDialogDeleteButton_OnClick(self)

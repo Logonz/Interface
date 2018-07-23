@@ -4,6 +4,7 @@ CHAT_BUTTON_FLASH_TIME = 0.5;
 CHAT_TELL_ALERT_TIME = 300;
 NUM_CHAT_WINDOWS = 10;
 DEFAULT_CHAT_FRAME = ChatFrame1;
+CHAT_FOCUS_OVERRIDE = nil;
 NUM_REMEMBERED_TELLS = 10;
 MAX_WOW_CHAT_CHANNELS = 20;
 
@@ -325,7 +326,7 @@ function Chat_GetChannelColor(chatInfo)
 end
 
 function Chat_GetCommunitiesChannelName(clubId, streamId)
-	return "Community:"..clubId..":"..streamId;
+	return ("Community:%s:%s"):format(tostring(clubId), tostring(streamId));
 end
 
 local function Chat_GetCommunitiesChannel(clubId, streamId)
@@ -349,7 +350,18 @@ function Chat_GetCommunitiesChannelColor(clubId, streamId)
 		end
 	end
 
-	return nil;
+	local clubInfo = C_Club.GetClubInfo(clubId);
+	if clubInfo then
+		if clubInfo.clubType == Enum.ClubType.Guild then
+			local streamInfo = C_Club.GetStreamInfo(clubId, streamId);
+			local chatInfoType = (streamInfo and streamInfo.streamType == Enum.ClubStreamType.Officer) and "OFFICER" or "GUILD";
+			return Chat_GetChannelColor(ChatTypeInfo[chatInfoType]);
+		elseif clubInfo.clubType == Enum.ClubType.BattleNet then
+			return BATTLENET_FONT_COLOR:GetRGB();
+		end
+	end
+
+	return DEFAULT_CHAT_CHANNEL_COLOR:GetRGB();
 end
 
 -- list of text emotes that we want to show on the Emote submenu (these have anims)
@@ -756,6 +768,7 @@ GROUP_LANGUAGE_INDEPENDENT_STRINGS =
 };
 
 local MAX_COMMUNITY_NAME_LENGTH = 12;
+local MAX_COMMUNITY_NAME_LENGTH_NO_CHANNEL = 24;
 function ChatFrame_TruncateToMaxLength(text, maxLength)
 	local length = strlenutf8(text);
 	if ( length > maxLength ) then
@@ -770,17 +783,37 @@ function ChatFrame_ResolvePrefixedChannelName(communityChannel)
 	return prefix..ChatFrame_ResolveChannelName(communityChannel);
 end
 
+function ChatFrame_GetCommunityAndStreamFromChannel(communityChannel)
+	local clubId, streamId = communityChannel:match("(%d+)%:(%d+)");
+	return tonumber(clubId), tonumber(streamId);
+end
+
 function ChatFrame_ResolveChannelName(communityChannel)
-	local communityId, streamId = communityChannel:match("(%d+)%:(%d+)");
-	if not communityId or not streamId then
+	local clubId, streamId = ChatFrame_GetCommunityAndStreamFromChannel(communityChannel);
+	if not clubId or not streamId then
 		return communityChannel;
 	end
 
-	local clubInfo = C_Club.GetClubInfo(communityId);
-	local streamInfo = C_Club.GetStreamInfo(communityId, streamId);
-	local communityName = clubInfo and ChatFrame_TruncateToMaxLength(clubInfo.name, MAX_COMMUNITY_NAME_LENGTH) or "";
-	local streamName = streamInfo and ChatFrame_TruncateToMaxLength(streamInfo.name, MAX_COMMUNITY_NAME_LENGTH)  or "";
-	return communityName.." - "..streamName;
+	return ChatFrame_GetCommunityAndStreamName(clubId, streamId);
+end
+
+function ChatFrame_GetCommunityAndStreamName(clubId, streamId)
+	local streamInfo = C_Club.GetStreamInfo(clubId, streamId);
+
+	if streamInfo and (streamInfo.streamType == Enum.ClubStreamType.Guild or streamInfo.streamType == Enum.ClubStreamType.Officer) then
+		return streamInfo.name;
+	end
+
+	local streamName = streamInfo and ChatFrame_TruncateToMaxLength(streamInfo.name, MAX_COMMUNITY_NAME_LENGTH) or "";
+
+	local clubInfo = C_Club.GetClubInfo(clubId);
+	if streamInfo and streamInfo.streamType == Enum.ClubStreamType.General then
+		local communityName = clubInfo and ChatFrame_TruncateToMaxLength(clubInfo.shortName or clubInfo.name, MAX_COMMUNITY_NAME_LENGTH_NO_CHANNEL) or "";
+		return communityName;
+	else
+		local communityName = clubInfo and ChatFrame_TruncateToMaxLength(clubInfo.shortName or clubInfo.name, MAX_COMMUNITY_NAME_LENGTH) or "";
+		return communityName.." - "..streamName;
+	end
 end
 
 --
@@ -1492,7 +1525,7 @@ SecureCmdList["DUEL"] = function(msg)
 end
 
 SecureCmdList["DUEL_CANCEL"] = function(msg)
-	CancelDuel()
+	ForfeitDuel()
 end
 
 SecureCmdList["PET_ATTACK"] = function(msg)
@@ -2075,7 +2108,7 @@ end
 
 SlashCmdList["CHANNEL"] = function(msg, editBox)
 	msg = SubstituteChatMessageBeforeSend(msg);
-	SendChatMessage(msg, "CHANNEL", editBox.languageID, editBox:GetAttribute("channelTarget"));
+	SendChatMessage(msg, "CHANNEL", editBox.languageID, ChatEdit_GetChannelTarget(editBox));
 end
 
 SlashCmdList["FRIENDS"] = function(msg)
@@ -2148,6 +2181,10 @@ end
 
 SlashCmdList["MACRO"] = function(msg)
 	ShowMacroFrame();
+end
+
+SlashCmdList["PVP"] = function(msg)
+	TogglePVP();
 end
 
 SlashCmdList["RAID_INFO"] = function(msg)
@@ -2325,6 +2362,7 @@ SlashCmdList["EVENTTRACE"] = function(msg)
 end
 
 SlashCmdList["TABLEINSPECT"] = function(msg)
+	forceinsecure();
 	UIParentLoadAddOn("Blizzard_DebugTools");
 
 	local focusedTable = nil;
@@ -2691,14 +2729,43 @@ function ChatFrame_ContainsChannel(chatFrame, channel)
 			return true;
 		end
 	end
-	
+
 	return false;
 end
 
-function ChatFrame_AddCommunitiesChannel(chatFrame, clubId, streamId)
-	local channelName = Chat_GetCommunitiesChannelName(clubId, streamId);
+function ChatFrame_AddNewCommunitiesChannel(chatFrameIndex, clubId, streamId, setEditBoxToChannel)
+	local clubInfo = C_Club.GetClubInfo(clubId);
+	if clubInfo then
+		C_Club.AddClubStreamToChatWindow(clubId, streamId, chatFrameIndex);
+		
+		local channelColor = DEFAULT_CHAT_CHANNEL_COLOR;
+		local channelName = Chat_GetCommunitiesChannelName(clubId, streamId);
+		if clubInfo.clubType == Enum.ClubType.BattleNet then
+			channelColor = BATTLENET_FONT_COLOR;
+			
+			local channel = Chat_GetCommunitiesChannel(clubId, streamId);
+			ChangeChatColor(channel, channelColor:GetRGB());
+		end
+		
+		local chatFrame = _G["ChatFrame"..chatFrameIndex];
+		ChatFrame_AddCommunitiesChannel(chatFrame, channelName, channelColor, setEditBoxToChannel);
+	end
+end
+
+function ChatFrame_AddCommunitiesChannel(chatFrame, channelName, channelColor, setEditBoxToChannel)
 	local channelIndex = ChatFrame_AddChannel(chatFrame, channelName);
-	chatFrame:AddMessage(COMMUNITIES_CHANNEL_ADDED_TO_CHAT_WINDOW:format(channelIndex, ChatFrame_ResolveChannelName(channelName)), DEFAULT_CHAT_CHANNEL_COLOR:GetRGB());
+	chatFrame:AddMessage(COMMUNITIES_CHANNEL_ADDED_TO_CHAT_WINDOW:format(channelIndex, ChatFrame_ResolveChannelName(channelName)), channelColor:GetRGB());
+
+	if setEditBoxToChannel then
+		chatFrame.editBox:SetAttribute("channelTarget", channelIndex);
+		chatFrame.editBox:SetAttribute("chatType", "CHANNEL");
+		chatFrame.editBox:SetAttribute("stickyType", "CHANNEL");
+		ChatEdit_UpdateHeader(chatFrame.editBox);
+	end
+end
+
+function ChatFrame_CanAddChannel()
+	return C_ChatInfo.GetNumActiveChannels() < MAX_WOW_CHAT_CHANNELS;
 end
 
 function ChatFrame_AddChannel(chatFrame, channel)
@@ -2711,30 +2778,38 @@ function ChatFrame_AddChannel(chatFrame, channel)
 		end
 		chatFrame.channelList[i] = channel;
 		chatFrame.zoneChannelList[i] = zoneChannel;
-		channelIndex = i;
+
+		local localId = GetChannelName(channel);
+		channelIndex = localId;
 	end
-	
+
 	return channelIndex;
+end
+
+function ChatFrame_GetCommunitiesChannelLocalID(clubId, streamId)
+	local channelName = Chat_GetCommunitiesChannelName(clubId, streamId);	
+	local localID = GetChannelName(channelName);
+	return localID;
 end
 
 function ChatFrame_RemoveCommunitiesChannel(chatFrame, clubId, streamId)
 	local channelName = Chat_GetCommunitiesChannelName(clubId, streamId);
 	local channelIndex = ChatFrame_RemoveChannel(chatFrame, channelName);
-	chatFrame:AddMessage(COMMUNITIES_CHANNEL_REMOVED_FROM_CHAT_WINDOW:format(channelIndex, ChatFrame_ResolveChannelName(channelName)), DEFAULT_CHAT_CHANNEL_COLOR:GetRGB());
+	local r, g, b = Chat_GetCommunitiesChannelColor(clubId, streamId);
+	chatFrame:AddMessage(COMMUNITIES_CHANNEL_REMOVED_FROM_CHAT_WINDOW:format(channelIndex, ChatFrame_ResolveChannelName(channelName)), r, g, b);
 end
 
 function ChatFrame_RemoveChannel(chatFrame, channel)
-	local channelIndex = nil;
 	for index, value in pairs(chatFrame.channelList) do
 		if ( strupper(channel) == strupper(value) ) then
 			chatFrame.channelList[index] = nil;
 			chatFrame.zoneChannelList[index] = nil;
-			channelIndex = index;
 		end
 	end
-	
+
+	local localId = GetChannelName(channel);
 	RemoveChatWindowChannel(chatFrame:GetID(), channel);
-	return channelIndex;
+	return localId;
 end
 
 function ChatFrame_RemoveAllChannels(chatFrame)
@@ -2794,7 +2869,7 @@ do
 				local defaulteditbox = securecall(GetDefaultChatEditBox);
 				self:SetAttribute("chatType", defaulteditbox:GetAttribute("chatType"));
 				self:SetAttribute("tellTarget", defaulteditbox:GetAttribute("tellTarget"));
-				self:SetAttribute("channelTarget", defaulteditbox:GetAttribute("channelTarget"));
+				self:SetAttribute("channelTarget", ChatEdit_GetChannelTarget(defaulteditbox));
 				self:SetText(line);
 				ChatEdit_SendText(self);
 			end
@@ -2825,6 +2900,22 @@ function ChatFrame_UpdateColorByID(self, chatTypeID, r, g, b)
 	self:AdjustMessageColors(TransformColorByID);
 end
 
+function ChatFrame_GetDefaultChatTarget(chatFrame)
+	if #chatFrame.messageTypeList == 1 and #chatFrame.channelList == 0 then
+		return chatFrame.messageTypeList[1], nil;
+	elseif #chatFrame.messageTypeList == 0 and #chatFrame.channelList == 1 then
+		local channelName = chatFrame.channelList[1];
+		local localID = GetChannelName(channelName);
+		if localID ~= 0 then
+			return "CHANNEL", localID;
+		else
+			return "CHANNEL", channelName;
+		end
+	end
+
+	return nil;
+end
+
 function ChatFrame_ConfigEventHandler(self, event, ...)
 	if ( event == "PLAYER_ENTERING_WORLD" ) then
 		self.defaultLanguage = GetDefaultLanguage();
@@ -2849,6 +2940,16 @@ function ChatFrame_ConfigEventHandler(self, event, ...)
 		-- Do more stuff!!!
 		ChatFrame_RegisterForMessages(self, GetChatWindowMessages(self:GetID()));
 		ChatFrame_RegisterForChannels(self, GetChatWindowChannels(self:GetID()));
+
+		local defaultChatType, defaultChannelTarget = ChatFrame_GetDefaultChatTarget(self);
+		if defaultChatType then
+			local editBox = self.editBox;
+			editBox:SetAttribute("chatType", defaultChatType);
+			editBox:SetAttribute("stickyType", defaultChatType);
+			editBox:SetAttribute("channelTarget", defaultChannelTarget);
+			ChatEdit_UpdateHeader(editBox);
+		end
+
 		-- GMOTD may have arrived before this frame registered for the event
 		if ( not self.checkedGMOTD and self:IsEventRegistered("GUILD_MOTD") ) then
 			self.checkedGMOTD = true;
@@ -2980,7 +3081,7 @@ function GetColoredName(event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, a
 		arg2 = Ambiguate(arg2, "none")
 	end
 
-	if ( info and info.colorNameByClass and arg12 ) then
+	if ( arg12 and info and Chat_ShouldColorChatByClass(info) ) then
 		local localizedClass, englishClass, localizedRace, englishRace, sex = GetPlayerInfoByGUID(arg12)
 
 		if ( englishClass ) then
@@ -3366,10 +3467,26 @@ function ChatFrame_MessageEventHandler(self, event, ...)
 				playerLinkDisplayText = ("[%s]"):format(coloredName);
 			end
 
-			if ( type ~= "BN_WHISPER" and type ~= "BN_WHISPER_INFORM" ) then
-				playerLink = GetPlayerLink(arg2, playerLinkDisplayText, arg11, chatGroup, chatTarget);
+			local isCommunityType = type == "COMMUNITIES_CHANNEL";
+			local playerName, lineID, bnetIDAccount = arg2, arg11, arg13;
+			if ( isCommunityType ) then
+				local isBattleNetCommunity = bnetIDAccount ~= nil and bnetIDAccount ~= 0;
+				local messageInfo, clubId, streamId, clubType = C_Club.GetInfoFromLastCommunityChatLine();
+				if (messageInfo ~= nil) then
+					if ( isBattleNetCommunity ) then
+						playerLink = GetBNPlayerCommunityLink(playerName, playerLinkDisplayText, bnetIDAccount, clubId, streamId, messageInfo.messageId.epoch, messageInfo.messageId.position);
+					else
+						playerLink = GetPlayerCommunityLink(playerName, playerLinkDisplayText, clubId, streamId, messageInfo.messageId.epoch, messageInfo.messageId.position);
+					end
+				else
+					playerLink = playerLinkDisplayText;
+				end
 			else
-				playerLink = GetBNPlayerLink(arg2, playerLinkDisplayText, arg13, arg11, chatGroup, chatTarget);
+				if ( type == "BN_WHISPER" or type == "BN_WHISPER_INFORM" ) then
+					playerLink = GetBNPlayerLink(playerName, playerLinkDisplayText, bnetIDAccount, lineID, chatGroup, chatTarget);
+				else
+					playerLink = GetPlayerLink(playerName, playerLinkDisplayText, lineID, chatGroup, chatTarget);
+				end
 			end
 
 			local message = arg1;
@@ -3511,7 +3628,24 @@ function ChatFrame_OnMouseWheel(value)
 	end
 end
 
+function ChatFrame_SetChatFocusOverride(editBoxOverride)
+	CHAT_FOCUS_OVERRIDE = editBoxOverride;
+end
+
+function ChatFrame_GetChatFocusOverride()
+	return CHAT_FOCUS_OVERRIDE;
+end
+
+function ChatFrame_ClearChatFocusOverride()
+	CHAT_FOCUS_OVERRIDE = nil;
+end
+
 function ChatFrame_OpenChat(text, chatFrame, desiredCursorPosition)
+	if chatFrame == nil and CHAT_FOCUS_OVERRIDE ~= nil then
+		CHAT_FOCUS_OVERRIDE:SetFocus();
+		return;
+	end
+	
 	local editBox = ChatEdit_ChooseBoxForSend(chatFrame);
 
 	ChatEdit_ActivateChat(editBox);
@@ -3769,6 +3903,11 @@ function ChatFrame_DisplaySystemMessageInPrimary(messageTag)
 	DEFAULT_CHAT_FRAME:AddMessage(messageTag, info.r, info.g, info.b, info.id);
 end
 
+function ChatFrame_DisplaySystemMessageInCurrent(messageTag)
+	local info = ChatTypeInfo["SYSTEM"];
+	SELECTED_CHAT_FRAME:AddMessage(messageTag, info.r, info.g, info.b, info.id);
+end
+
 -- ChatEdit functions
 
 local ChatEdit_LastTell = {};
@@ -3867,6 +4006,7 @@ function ChatEdit_OnEditFocusLost(self)
 end
 
 function ChatEdit_ActivateChat(editBox)
+	ChatFrame_ClearChatFocusOverride();
 	if ( ACTIVE_CHAT_EDIT_BOX and ACTIVE_CHAT_EDIT_BOX ~= editBox ) then
 		ChatEdit_DeactivateChat(ACTIVE_CHAT_EDIT_BOX);
 	end
@@ -4058,6 +4198,16 @@ function ChatEdit_TryInsertQuestLinkForQuestID(questID)
 	return ChatEdit_TryInsertChatLink(GetQuestLink(questID));
 end
 
+function ChatEdit_GetChannelTarget(editBox)
+	local channelTarget = editBox:GetAttribute("channelTarget"); -- may be a name or an index
+	if channelTarget == nil then
+		return 0;
+	end
+
+	local localID = GetChannelName(channelTarget);
+	return localID;
+end
+
 function ChatEdit_GetLastTellTarget()
 	for i=1, #ChatEdit_LastTell do
 		local value = ChatEdit_LastTell[i];
@@ -4148,16 +4298,16 @@ function ChatEdit_UpdateHeader(editBox)
 	elseif ( type == "EMOTE" ) then
 		header:SetFormattedText(CHAT_EMOTE_SEND, UnitName("player"));
 	elseif ( type == "CHANNEL" ) then
-		local channel, channelName, instanceID, isCommunitiesChannel = GetChannelName(editBox:GetAttribute("channelTarget"));
+		local localID, channelName, instanceID, isCommunitiesChannel = GetChannelName(ChatEdit_GetChannelTarget(editBox));
 		if ( channelName ) then
 			if ( isCommunitiesChannel ) then
 				channelName = ChatFrame_ResolveChannelName(channelName);
 			elseif ( instanceID > 0 ) then
 				channelName = channelName.." "..instanceID;
 			end
-			info = ChatTypeInfo["CHANNEL"..channel];
-			editBox:SetAttribute("channelTarget", channel);
-			header:SetFormattedText(CHAT_CHANNEL_SEND, channel, channelName);
+			info = ChatTypeInfo["CHANNEL"..localID];
+			editBox:SetAttribute("channelTarget", localID);
+			header:SetFormattedText(CHAT_CHANNEL_SEND, localID, channelName);
 		end
 	elseif ( (type == "PARTY") and
 		 (not IsInGroup(LE_PARTY_CATEGORY_HOME) and IsInGroup(LE_PARTY_CATEGORY_INSTANCE)) ) then
@@ -4216,7 +4366,7 @@ function ChatEdit_AddHistory(editBox)
 	if ( type == "WHISPER" ) then
 		text = text.." "..editBox:GetAttribute("tellTarget");
 	elseif ( type == "CHANNEL" ) then
-		text = "/"..editBox:GetAttribute("channelTarget");
+		text = "/"..ChatEdit_GetChannelTarget(editBox);
 	end
 
 	local editBoxText = editBox:GetText();
@@ -4252,7 +4402,7 @@ function ChatEdit_SendText(editBox, addHistory)
 				editBox.chatFrame:AddMessage(format(BN_UNABLE_TO_RESOLVE_NAME, target), info.r, info.g, info.b);
 			end
 		elseif ( type == "CHANNEL") then
-			SendChatMessage(text, type, editBox.languageID, editBox:GetAttribute("channelTarget"));
+			SendChatMessage(text, type, editBox.languageID, ChatEdit_GetChannelTarget(editBox));
 		else
 			SendChatMessage(text, type, editBox.languageID);
 		end
@@ -4899,10 +5049,27 @@ function ChatChannelDropDown_Initialize()
 
 	local info = UIDropDownMenu_CreateInfo();
 
-	info.text = frame.chatName;
+	info.text = ChatFrame_ResolveChannelName(frame.chatName);
 	info.notCheckable = true;
 	info.isTitle = true;
 	UIDropDownMenu_AddButton(info, 1);
+
+	local clubId, streamId = ChatFrame_GetCommunityAndStreamFromChannel(frame.chatName);
+	if clubId and streamId and C_Club.IsEnabled() then
+		info = UIDropDownMenu_CreateInfo();
+		info.text = CHAT_CHANNEL_DROP_DOWN_OPEN_COMMUNITIES_FRAME;
+		info.notCheckable = true;
+		info.func = function ()
+			if not CommunitiesFrame or not CommunitiesFrame:IsShown() then
+				ToggleCommunitiesFrame();
+			end
+
+			CommunitiesFrame:SelectStream(clubId, streamId);
+			CommunitiesFrame:SelectClub(clubId);
+		end;
+
+		UIDropDownMenu_AddButton(info);
+	end
 
 	info = UIDropDownMenu_CreateInfo();
 
@@ -4988,6 +5155,12 @@ end
 
 function ChatChannelDropDown_PopInChat(self, chatType, chatTarget)
 	--PopOutChat_PopInChat(chatType, chatTarget);
+end
+
+function Chat_ShouldColorChatByClass(chatTypeInfo)
+	local override = ChatClassColorOverrideShown();
+	local colorByClass = chatTypeInfo and chatTypeInfo.colorNameByClass;
+	return override or (override == nil and colorByClass);
 end
 
 function Chat_GetColoredChatName(chatType, chatTarget)

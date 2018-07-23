@@ -917,7 +917,7 @@ function Graphics_OnLoad (self)
 end
 
 AdvancedPanelOptions = {
-	hdPlayerModels = { text = "SHOW_HD_MODELS_TEXT" },
+	ClipCursor		= { text = "LOCK_CURSOR_TEXT" },
 }
 
 function Advanced_OnLoad (self)

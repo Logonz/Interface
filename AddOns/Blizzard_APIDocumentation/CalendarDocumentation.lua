@@ -170,6 +170,10 @@ local Calendar =
 			},
 		},
 		{
+			Name = "CreateCommunitySignUpEvent",
+			Type = "Function",
+		},
+		{
 			Name = "CreateGuildAnnouncementEvent",
 			Type = "Function",
 		},
@@ -222,6 +226,15 @@ local Calendar =
 			Returns =
 			{
 				{ Name = "calendarType", Type = "string", Nilable = true },
+			},
+		},
+		{
+			Name = "EventGetClubID",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "info", Type = "string", Nilable = true },
 			},
 		},
 		{
@@ -365,6 +378,15 @@ local Calendar =
 		{
 			Name = "EventSetAutoApprove",
 			Type = "Function",
+		},
+		{
+			Name = "EventSetClubID",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "clubID", Type = "string", Nilable = false },
+			},
 		},
 		{
 			Name = "EventSetDate",
@@ -675,6 +697,18 @@ local Calendar =
 			},
 		},
 		{
+			Name = "MassInviteCommunity",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "clubID", Type = "string", Nilable = false },
+				{ Name = "minLevel", Type = "number", Nilable = false },
+				{ Name = "maxLevel", Type = "number", Nilable = false },
+				{ Name = "maxRankOrder", Type = "number", Nilable = true },
+			},
+		},
+		{
 			Name = "MassInviteGuild",
 			Type = "Function",
 
@@ -844,12 +878,12 @@ local Calendar =
 			MaxValue = 5,
 			Fields =
 			{
-				{ Name = "CalendarEventTypeRaid", Type = "CalendarEventType", EnumValue = 0 },
-				{ Name = "CalendarEventTypeDungeon", Type = "CalendarEventType", EnumValue = 1 },
-				{ Name = "CalendarEventTypePvp", Type = "CalendarEventType", EnumValue = 2 },
-				{ Name = "CalendarEventTypeMeeting", Type = "CalendarEventType", EnumValue = 3 },
-				{ Name = "CalendarEventTypeOther", Type = "CalendarEventType", EnumValue = 4 },
-				{ Name = "CalendarEventTypeHeroicDungeonDeprecated", Type = "CalendarEventType", EnumValue = 5 },
+				{ Name = "Raid", Type = "CalendarEventType", EnumValue = 0 },
+				{ Name = "Dungeon", Type = "CalendarEventType", EnumValue = 1 },
+				{ Name = "Pvp", Type = "CalendarEventType", EnumValue = 2 },
+				{ Name = "Meeting", Type = "CalendarEventType", EnumValue = 3 },
+				{ Name = "Other", Type = "CalendarEventType", EnumValue = 4 },
+				{ Name = "HeroicDeprecated", Type = "CalendarEventType", EnumValue = 5 },
 			},
 		},
 		{
@@ -920,6 +954,7 @@ local Calendar =
 				{ Name = "inviteStatus", Type = "number", Nilable = true },
 				{ Name = "inviteType", Type = "number", Nilable = true },
 				{ Name = "calendarType", Type = "string", Nilable = false },
+				{ Name = "communityName", Type = "string", Nilable = true },
 			},
 		},
 		{
@@ -966,7 +1001,7 @@ local Calendar =
 			Fields =
 			{
 				{ Name = "displayString", Type = "string", Nilable = false },
-				{ Name = "displayIndex", Type = "number", Nilable = false },
+				{ Name = "eventType", Type = "CalendarEventType", Nilable = false },
 			},
 		},
 		{

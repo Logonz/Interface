@@ -25,6 +25,15 @@ local VoiceChat =
 			},
 		},
 		{
+			Name = "CanPlayerUseVoiceChat",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "canUseVoiceChat", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "CreateChannel",
 			Type = "Function",
 
@@ -226,6 +235,21 @@ local VoiceChat =
 			},
 		},
 		{
+			Name = "GetMemberName",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "memberID", Type = "number", Nilable = false },
+				{ Name = "channelID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "memberName", Type = "string", Nilable = true },
+			},
+		},
+		{
 			Name = "GetMemberVolume",
 			Type = "Function",
 
@@ -312,21 +336,6 @@ local VoiceChat =
 			},
 		},
 		{
-			Name = "IsMemberConnected",
-			Type = "Function",
-
-			Arguments =
-			{
-				{ Name = "memberID", Type = "number", Nilable = false },
-				{ Name = "channelID", Type = "number", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "isConnected", Type = "bool", Nilable = false },
-			},
-		},
-		{
 			Name = "IsMemberLocalPlayer",
 			Type = "Function",
 
@@ -371,12 +380,45 @@ local VoiceChat =
 			},
 		},
 		{
+			Name = "IsMemberSilenced",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "memberID", Type = "number", Nilable = false },
+				{ Name = "channelID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "silenced", Type = "bool", Nilable = true },
+			},
+		},
+		{
 			Name = "IsMuted",
 			Type = "Function",
 
 			Returns =
 			{
 				{ Name = "isMuted", Type = "bool", Nilable = true },
+			},
+		},
+		{
+			Name = "IsParentalDisabled",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "isParentalDisabled", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "IsParentalMuted",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "isParentalMuted", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -391,6 +433,15 @@ local VoiceChat =
 			Returns =
 			{
 				{ Name = "isUsingVoice", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "IsSilenced",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "isSilenced", Type = "bool", Nilable = true },
 			},
 		},
 		{
@@ -434,11 +485,6 @@ local VoiceChat =
 				{ Name = "clubId", Type = "string", Nilable = false },
 				{ Name = "streamId", Type = "string", Nilable = false },
 			},
-
-			Returns =
-			{
-				{ Name = "status", Type = "VoiceChatStatusCode", Nilable = false },
-			},
 		},
 		{
 			Name = "RequestJoinChannelByChannelType",
@@ -447,11 +493,6 @@ local VoiceChat =
 			Arguments =
 			{
 				{ Name = "channelType", Type = "ChatChannelType", Nilable = false },
-			},
-
-			Returns =
-			{
-				{ Name = "status", Type = "VoiceChatStatusCode", Nilable = false },
 			},
 		},
 		{
@@ -582,6 +623,15 @@ local VoiceChat =
 			Type = "Function",
 		},
 		{
+			Name = "ToggleMemberMuted",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "playerLocation", Type = "table", Mixin = "PlayerLocationMixin", Nilable = false },
+			},
+		},
+		{
 			Name = "ToggleMuted",
 			Type = "Function",
 		},
@@ -626,7 +676,6 @@ local VoiceChat =
 			Payload =
 			{
 				{ Name = "channelID", Type = "number", Nilable = false },
-				{ Name = "status", Type = "VoiceChatStatusCode", Nilable = true },
 			},
 		},
 		{
@@ -636,7 +685,6 @@ local VoiceChat =
 			Payload =
 			{
 				{ Name = "channelID", Type = "number", Nilable = false },
-				{ Name = "status", Type = "VoiceChatStatusCode", Nilable = true },
 			},
 		},
 		{
@@ -657,8 +705,9 @@ local VoiceChat =
 			{
 				{ Name = "status", Type = "VoiceChatStatusCode", Nilable = false },
 				{ Name = "channelID", Type = "number", Nilable = false },
-				{ Name = "clubId", Type = "string", Nilable = false },
-				{ Name = "streamId", Type = "string", Nilable = false },
+				{ Name = "channelType", Type = "ChatChannelType", Nilable = false },
+				{ Name = "clubId", Type = "string", Nilable = true },
+				{ Name = "streamId", Type = "string", Nilable = true },
 			},
 		},
 		{
@@ -679,7 +728,6 @@ local VoiceChat =
 			Payload =
 			{
 				{ Name = "memberID", Type = "number", Nilable = false },
-				{ Name = "displayName", Type = "string", Nilable = false },
 				{ Name = "channelID", Type = "number", Nilable = false },
 			},
 		},
@@ -692,6 +740,16 @@ local VoiceChat =
 				{ Name = "memberID", Type = "number", Nilable = false },
 				{ Name = "channelID", Type = "number", Nilable = false },
 				{ Name = "speakingEnergy", Type = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "VoiceChatChannelMemberGuidUpdated",
+			Type = "Event",
+			LiteralName = "VOICE_CHAT_CHANNEL_MEMBER_GUID_UPDATED",
+			Payload =
+			{
+				{ Name = "memberID", Type = "number", Nilable = false },
+				{ Name = "channelID", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -724,6 +782,17 @@ local VoiceChat =
 			{
 				{ Name = "memberID", Type = "number", Nilable = false },
 				{ Name = "channelID", Type = "number", Nilable = false },
+			},
+		},
+		{
+			Name = "VoiceChatChannelMemberSilencedChanged",
+			Type = "Event",
+			LiteralName = "VOICE_CHAT_CHANNEL_MEMBER_SILENCED_CHANGED",
+			Payload =
+			{
+				{ Name = "memberID", Type = "number", Nilable = false },
+				{ Name = "channelID", Type = "number", Nilable = false },
+				{ Name = "isSilenced", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -869,12 +938,33 @@ local VoiceChat =
 			LiteralName = "VOICE_CHAT_OUTPUT_DEVICES_UPDATED",
 		},
 		{
+			Name = "VoiceChatPendingChannelJoinState",
+			Type = "Event",
+			LiteralName = "VOICE_CHAT_PENDING_CHANNEL_JOIN_STATE",
+			Payload =
+			{
+				{ Name = "channelType", Type = "ChatChannelType", Nilable = false },
+				{ Name = "clubId", Type = "string", Nilable = false },
+				{ Name = "streamId", Type = "string", Nilable = false },
+				{ Name = "pendingJoin", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "VoiceChatPttButtonPressedStateChanged",
 			Type = "Event",
 			LiteralName = "VOICE_CHAT_PTT_BUTTON_PRESSED_STATE_CHANGED",
 			Payload =
 			{
 				{ Name = "isPressed", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "VoiceChatSilencedChanged",
+			Type = "Event",
+			LiteralName = "VOICE_CHAT_SILENCED_CHANGED",
+			Payload =
+			{
+				{ Name = "isSilenced", Type = "bool", Nilable = false },
 			},
 		},
 	},
@@ -896,9 +986,9 @@ local VoiceChat =
 		{
 			Name = "VoiceChatStatusCode",
 			Type = "Enumeration",
-			NumValues = 21,
+			NumValues = 23,
 			MinValue = 0,
-			MaxValue = 20,
+			MaxValue = 22,
 			Fields =
 			{
 				{ Name = "Success", Type = "VoiceChatStatusCode", EnumValue = 0 },
@@ -922,6 +1012,8 @@ local VoiceChat =
 				{ Name = "Disabled", Type = "VoiceChatStatusCode", EnumValue = 18 },
 				{ Name = "UnsupportedChatChannelType", Type = "VoiceChatStatusCode", EnumValue = 19 },
 				{ Name = "InvalidCommunityStream", Type = "VoiceChatStatusCode", EnumValue = 20 },
+				{ Name = "PlayerSilenced", Type = "VoiceChatStatusCode", EnumValue = 21 },
+				{ Name = "PlayerVoiceChatParentalDisabled", Type = "VoiceChatStatusCode", EnumValue = 22 },
 			},
 		},
 		{
@@ -941,12 +1033,12 @@ local VoiceChat =
 			Type = "Structure",
 			Fields =
 			{
-				{ Name = "name", Type = "string", Nilable = false },
 				{ Name = "energy", Type = "number", Nilable = false },
 				{ Name = "memberID", Type = "number", Nilable = false },
 				{ Name = "isActive", Type = "bool", Nilable = false },
 				{ Name = "isSpeaking", Type = "bool", Nilable = false },
 				{ Name = "isMutedForAll", Type = "bool", Nilable = false },
+				{ Name = "isSilenced", Type = "bool", Nilable = false },
 			},
 		},
 		{
