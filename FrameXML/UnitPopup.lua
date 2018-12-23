@@ -26,7 +26,7 @@ UnitPopupButtons = {
 	["TARGET"] = { text = TARGET, },
 	["IGNORE"]	= {
 		text = function(dropdownMenu)
-			return IsIgnored(dropdownMenu.name) and IGNORE_REMOVE or IGNORE;
+			return C_FriendList.IsIgnored(dropdownMenu.name) and IGNORE_REMOVE or IGNORE;
 		end,
 	},
 	["POP_OUT_CHAT"] = { text = MOVE_TO_WHISPER_WINDOW, },
@@ -203,7 +203,7 @@ UnitPopupButtons = {
 			return dropdownMenu.clubInfo.favoriteTimeStamp and COMMUNITIES_LIST_DROP_DOWN_UNFAVORITE or COMMUNITIES_LIST_DROP_DOWN_FAVORITE;
 		end },
 	["COMMUNITIES_SETTINGS"] = { text = COMMUNITIES_LIST_DROP_DOWN_COMMUNITIES_SETTINGS, },
-	["COMMUNITIES_NOTIFICATION_SETTINGS"] = { text = COMMUNITIES_LIST_DROP_DOWN_COMMUNITIES_NOTIFICATION_SETTINGS, },	
+	["COMMUNITIES_NOTIFICATION_SETTINGS"] = { text = COMMUNITIES_LIST_DROP_DOWN_COMMUNITIES_NOTIFICATION_SETTINGS, },
 	["COMMUNITIES_CLEAR_UNREAD_NOTIFICATIONS"] = { text = COMMUNITIES_LIST_DROP_DOWN_CLEAR_UNREAD_NOTIFICATIONS, },
 	["COMMUNITIES_INVITE"] = { text = COMMUNITIES_LIST_DROP_DOWN_INVITE, },
 
@@ -237,7 +237,7 @@ UnitPopupMenus = {
 	["FOCUS"] = { "RAID_TARGET_ICON", "CLEAR_FOCUS", "OTHER_SUBSECTION_TITLE", "VOICE_CHAT", "LARGE_FOCUS", "MOVE_FOCUS_FRAME", "CANCEL" },
 	["BOSS"] = { "RAID_TARGET_ICON", "SET_FOCUS", "OTHER_SUBSECTION_TITLE", "CANCEL" },
 	["WORLD_STATE_SCORE"] = { "REPORT_PLAYER", "PVP_REPORT_AFK", "CANCEL" },
-	["COMMUNITIES_WOW_MEMBER"] = { "ADD_FRIEND_MENU", "SUBSECTION_SEPARATOR", "VOICE_CHAT_MICROPHONE_VOLUME", "VOICE_CHAT_SPEAKER_VOLUME", "VOICE_CHAT_USER_VOLUME", "SUBSECTION_SEPARATOR", "INVITE", "SUGGEST_INVITE", "REQUEST_INVITE", "WHISPER", "IGNORE", "COMMUNITIES_LEAVE", "COMMUNITIES_KICK", "COMMUNITIES_MEMBER_NOTE", "COMMUNITIES_ROLE", "OTHER_SUBSECTION_TITLE", "REPORT_PLAYER" },
+	["COMMUNITIES_WOW_MEMBER"] = { "TARGET", "ADD_FRIEND_MENU", "SUBSECTION_SEPARATOR", "VOICE_CHAT_MICROPHONE_VOLUME", "VOICE_CHAT_SPEAKER_VOLUME", "VOICE_CHAT_USER_VOLUME", "SUBSECTION_SEPARATOR", "INTERACT_SUBSECTION_TITLE", "INVITE", "SUGGEST_INVITE", "REQUEST_INVITE", "WHISPER", "IGNORE", "COMMUNITIES_LEAVE", "COMMUNITIES_KICK", "COMMUNITIES_MEMBER_NOTE", "COMMUNITIES_ROLE", "OTHER_SUBSECTION_TITLE", "REPORT_PLAYER", "CANCEL" },
 	["COMMUNITIES_GUILD_MEMBER"] = { "VOICE_CHAT_MICROPHONE_VOLUME", "VOICE_CHAT_SPEAKER_VOLUME", "VOICE_CHAT_USER_VOLUME", "SUBSECTION_SEPARATOR", "INVITE", "SUGGEST_INVITE", "REQUEST_INVITE", "WHISPER", "IGNORE", "OTHER_SUBSECTION_TITLE", "GUILD_PROMOTE", "GUILD_LEAVE", "REPORT_PLAYER" },
 	["COMMUNITIES_MEMBER"] = { "COMMUNITIES_BATTLETAG_FRIEND", "SUBSECTION_SEPARATOR", "VOICE_CHAT_MICROPHONE_VOLUME", "VOICE_CHAT_SPEAKER_VOLUME", "VOICE_CHAT_USER_VOLUME", "SUBSECTION_SEPARATOR", "COMMUNITIES_LEAVE", "COMMUNITIES_KICK", "COMMUNITIES_MEMBER_NOTE", "COMMUNITIES_ROLE", "OTHER_SUBSECTION_TITLE", "REPORT_PLAYER"  },
 	["COMMUNITIES_COMMUNITY"] = { "COMMUNITIES_CLEAR_UNREAD_NOTIFICATIONS", "COMMUNITIES_INVITE", "COMMUNITIES_SETTINGS", "COMMUNITIES_NOTIFICATION_SETTINGS", "COMMUNITIES_FAVORITE", "COMMUNITIES_LEAVE" },
@@ -591,7 +591,7 @@ function UnitPopup_AddDropDownTitle(unit, name, userData)
 		info.notCheckable = true;
 
 		local class;
-		if unit then
+		if unit and UnitIsPlayer(unit) then
 			class = select(2, UnitClass(unit));
 		end
 
@@ -642,13 +642,41 @@ function UnitPopup_UpdateButtonInfo(info)
 			info.hasArrow = nil;
 			info.tooltipTitle = PVP_LABEL_WAR_MODE;
 			info.tooltipInstruction = PVP_WAR_MODE_ENABLED;
-			if (not C_PvP.CanToggleWarMode()) then
+			if (not C_PvP.CanToggleWarMode(true)) then
 				info.tooltipWarning = UnitFactionGroup("player") == PLAYER_FACTION_GROUP[0] and PVP_WAR_MODE_NOT_NOW_HORDE or PVP_WAR_MODE_NOT_NOW_ALLIANCE;
 			end
 		else
 			info.hasArrow = true;
 		end
 	end
+end
+
+local function UnitPopup_GetGUID(menu)
+	if menu.guid then
+		return menu.guid;
+	elseif menu.unit then
+		return UnitGUID(menu.unit);
+	elseif type(menu.userData) == "table" and menu.userData.guid then
+		return menu.userData.guid;
+	end
+end
+
+local function UnitPopup_TryCreatePlayerLocation(menu, guid)
+	if menu.battlefieldScoreIndex then
+		return PlayerLocation:CreateFromBattlefieldScoreIndex(menu.battlefieldScoreIndex);
+	elseif menu.communityClubID and menu.communityStreamID and menu.communityEpoch and menu.communityPosition then
+		return PlayerLocation:CreateFromCommunityChatData(menu.communityClubID, menu.communityStreamID, menu.communityEpoch, menu.communityPosition);
+	elseif menu.communityClubID and not menu.communityStreamID then
+		return PlayerLocation:CreateFromCommunityInvitation(menu.communityClubID, guid);
+	elseif C_ChatInfo.IsValidChatLine(menu.lineID) then
+		return PlayerLocation:CreateFromChatLineID(menu.lineID);
+	elseif guid then
+		return PlayerLocation:CreateFromGUID(guid);
+	elseif menu.unit then
+		return PlayerLocation:CreateFromUnit(menu.unit);
+	end
+
+	return nil;
 end
 
 function UnitPopup_AddDropDownButton(info, dropdownMenu, cntButton, buttonIndex, level)
@@ -740,7 +768,17 @@ function UnitPopup_AddDropDownButton(info, dropdownMenu, cntButton, buttonIndex,
 	info.tooltipText = tooltipText;
 	info.customFrame = cntButton.customFrame;
 	if info.customFrame then
-		info.customFrame:SetContextData(dropdownMenu);
+		local guid = UnitPopup_GetGUID(dropdownMenu);
+		local playerLocation = UnitPopup_TryCreatePlayerLocation(dropdownMenu, guid);
+		local contextData = {
+			guid = guid,
+			playerLocation = playerLocation,
+			voiceChannelID = dropdownMenu.voiceChannelID,
+			voiceMemberID = dropdownMenu.voiceMemberID,
+			voiceChannel = dropdownMenu.voiceChannel,
+		};
+
+		info.customFrame:SetContextData(contextData);
 	end
 
 	info.tooltipWhileDisabled = cntButton.tooltipWhileDisabled;
@@ -754,32 +792,8 @@ function UnitPopup_AddDropDownButton(info, dropdownMenu, cntButton, buttonIndex,
 	UIDropDownMenu_AddButton(info, level);
 end
 
-local function UnitPopup_GetGUID(menu)
-	if menu.guid then
-		return menu.guid;
-	elseif menu.unit then
-		return UnitGUID(menu.unit);
-	elseif type(menu.userData) == "table" and menu.userData.guid then
-		return menu.userData.guid;
-	end
-end
-
-local function UnitPopup_TryCreatePlayerLocation(menu, guid)
-	if menu.battlefieldScoreIndex then
-		return PlayerLocation:CreateFromBattlefieldScoreIndex(menu.battlefieldScoreIndex);
-	elseif menu.communityClubID and menu.communityStreamID and menu.communityEpoch and menu.communityPosition then
-		return PlayerLocation:CreateFromCommunityChatData(menu.communityClubID, menu.communityStreamID, menu.communityEpoch, menu.communityPosition);
-	elseif menu.communityClubID and not menu.communityStreamID then
-		return PlayerLocation:CreateFromCommunityInvitation(menu.communityClubID, guid);
-	elseif menu.lineID then
-		return PlayerLocation:CreateFromChatLineID(menu.lineID);
-	elseif menu.unit then
-		return PlayerLocation:CreateFromUnit(menu.unit);
-	elseif guid then
-		return PlayerLocation:CreateFromGUID(guid);
-	end
-
-	return nil;
+local function UnitPopup_IsValidPlayerLocation(playerLocation)
+	return playerLocation and playerLocation:IsValid();
 end
 
 local function UnitPopup_HasBattleTag()
@@ -798,7 +812,9 @@ local function UnitPopup_GetLFGCategoryForLFGSlot(lfgSlot)
 end
 
 local function UnitPopup_IsPlayerOffline(menu)
-	if menu.clubMemberInfo then
+	if menu.isOffline then
+		return true;
+	elseif menu.clubMemberInfo then
 		local presence = menu.clubMemberInfo.presence;
 		if presence == Enum.ClubMemberPresence.Offline or presence == Enum.ClubMemberPresence.Unknown then
 			return true;
@@ -820,7 +836,12 @@ local function UnitPopup_IsPlayerMobile(menu)
 end
 
 local function UnitPopup_GetIsLocalPlayer(menu)
-	if menu.isSelf or menu.guid and C_AccountInfo.IsGUIDRelatedToLocalAccount(menu.guid) then
+	if menu.isSelf then
+		return true;
+	end
+
+	local guid = UnitPopup_GetGUID(menu);
+	if guid and C_AccountInfo.IsGUIDRelatedToLocalAccount(guid) then
 		return true;
 	end
 
@@ -849,11 +870,8 @@ function UnitPopup_HideButtons ()
 	local haveBattleTag = UnitPopup_HasBattleTag();
 	local isOffline = UnitPopup_IsPlayerOffline(dropdownMenu);
 
-	dropdownMenu.guid = guid;
-	dropdownMenu.playerLocation = playerLocation;
-
+	local isValidPlayerLocation = UnitPopup_IsValidPlayerLocation(playerLocation);
 	local isLocalPlayer = UnitPopup_GetIsLocalPlayer(dropdownMenu);
-	dropdownMenu.isLocalPlayer = isLocalPlayer;
 
 	for index, value in ipairs(UnitPopupMenus[UIDROPDOWNMENU_MENU_VALUE] or UnitPopupMenus[dropdownMenu.which]) do
 		local shown = true;
@@ -862,7 +880,7 @@ function UnitPopup_HideButtons ()
 				shown = false;
 			end
 		elseif ( value == "ADD_FRIEND" ) then
-			if ( haveBattleTag or not canCoop or not isPlayer or not UnitIsSameServer(dropdownMenu.unit) or GetFriendInfo(UnitName(dropdownMenu.unit)) ) then
+			if ( haveBattleTag or not canCoop or not isPlayer or not UnitIsSameServer(dropdownMenu.unit) or C_FriendList.GetFriendInfo(UnitName(dropdownMenu.unit)) ) then
 				shown = false;
 			end
 		elseif ( value == "ADD_FRIEND_MENU" ) then
@@ -934,7 +952,7 @@ function UnitPopup_HideButtons ()
 				whisperIsLocalPlayer = (dropdownMenu.name == playerName and dropdownMenu.server == playerServer);
 			end
 
-			if whisperIsLocalPlayer or isOffline or ( dropdownMenu.unit and (not canCoop or not isPlayer)) or (dropdownMenu.bnetIDAccount and not BNIsFriend(dropdownMenu.bnetIDAccount)) then
+			if whisperIsLocalPlayer or (isOffline and not dropdownMenu.bnetIDAccount) or ( dropdownMenu.unit and (not canCoop or not isPlayer)) or (dropdownMenu.bnetIDAccount and not BNIsFriend(dropdownMenu.bnetIDAccount)) then
 				shown = false;
 			end
 		elseif ( value == "DUEL" ) then
@@ -974,15 +992,15 @@ function UnitPopup_HideButtons ()
 				shown = false;
 			end
 		elseif ( value == "REPORT_PLAYER" ) then
-			if not playerLocation or not playerLocation:IsValid() or not C_ChatInfo.CanReportPlayer(playerLocation) then
+			if not isValidPlayerLocation or not C_ReportSystem.CanReportPlayer(playerLocation) then
 				shown = false;
 			end
 		elseif ( value == "REPORT_SPAM" ) then
-			if not playerLocation:IsChatLineID() and not playerLocation:IsCommunityInvitation() then
+			if not isValidPlayerLocation or not (playerLocation:IsChatLineID() or playerLocation:IsCommunityInvitation()) then
 				shown = false;
 			end
-		elseif ( value == "REPORT_CHEATING" or value == "REPORT_BATTLE_PET" or value == "REPORT_PET" ) then
-			if dropdownMenu.bnetIDAccount or not playerLocation or playerLocation:IsBattleNetGUID() then
+		elseif ( value == "REPORT_CHEATING" ) then
+			if dropdownMenu.bnetIDAccount or not isValidPlayerLocation or playerLocation:IsBattleNetGUID() then
 				shown = false;
 			end
 		elseif ( value == "POP_OUT_CHAT" ) then
@@ -1248,7 +1266,9 @@ function UnitPopup_HideButtons ()
 				shown = false;
 			end
 		elseif ( value == "VOICE_CHAT" ) then
-			if not C_VoiceChat.CanPlayerUseVoiceChat() or not isLocalPlayer and not C_VoiceChat.IsPlayerUsingVoice(playerLocation) then
+			if not C_VoiceChat.CanPlayerUseVoiceChat() then
+				shown = false;
+			elseif not (isLocalPlayer or (isValidPlayerLocation and C_VoiceChat.IsPlayerUsingVoice(playerLocation))) then
 				shown = false;
 			end
 		elseif value == "VOICE_CHAT_MICROPHONE_VOLUME" then
@@ -1264,7 +1284,9 @@ function UnitPopup_HideButtons ()
 				shown = false;
 			end
 		elseif value == "VOICE_CHAT_USER_VOLUME" then
-			if not C_VoiceChat.CanPlayerUseVoiceChat() or isLocalPlayer or not C_VoiceChat.IsPlayerUsingVoice(playerLocation) then
+			if not C_VoiceChat.CanPlayerUseVoiceChat() then
+				return false;
+			elseif isLocalPlayer or (isValidPlayerLocation and not C_VoiceChat.IsPlayerUsingVoice(playerLocation)) then
 				shown = false;
 			end
 		elseif value == "COMMUNITIES_LEAVE" then
@@ -1305,17 +1327,17 @@ function UnitPopup_HideButtons ()
 					if not messageInfo or messageInfo.destroyed then
 						return false;
 					end
-					
+
 					local privileges = C_Club.GetClubPrivileges(clubId);
 					if not messageInfo.author.isSelf and not privileges.canDestroyOtherMessage then
 						return false;
 					elseif messageInfo.author.isSelf and not privileges.canDestroyOwnMessage then
 						return false;
 					end
-					
+
 					return true;
 				end
-				
+
 				if not CanDestroyMessage(clubId, streamId, messageId) then
 					shown = false;
 				end
@@ -1543,7 +1565,7 @@ function UnitPopup_OnUpdate (elapsed)
 								enable = false;
 							else
 								-- disable if player is from another realm or already on friends list
-								if ( not UnitIsSameServer(UIDROPDOWNMENU_INIT_MENU.unit) or GetFriendInfo(UnitName(UIDROPDOWNMENU_INIT_MENU.unit)) ) then
+								if ( not UnitIsSameServer(UIDROPDOWNMENU_INIT_MENU.unit) or C_FriendList.GetFriendInfo(UnitName(UIDROPDOWNMENU_INIT_MENU.unit)) ) then
 									enable = false;
 								end
 							end
@@ -1592,6 +1614,9 @@ function UnitPopup_OnClick (self)
 		fullname = name.."-"..server;
 	end
 
+	local guid = UnitPopup_GetGUID(dropdownFrame);
+	local playerLocation = UnitPopup_TryCreatePlayerLocation(dropdownFrame, guid);
+
 	local inParty = IsInGroup();
 	local isLeader = UnitIsGroupLeader("player");
 	local isAssistant = UnitIsGroupAssistant("player");
@@ -1599,8 +1624,9 @@ function UnitPopup_OnClick (self)
 	if ( button == "TRADE" ) then
 		InitiateTrade(unit);
 	elseif ( button == "WHISPER" ) then
-		if ( dropdownFrame.bnetIDAccount ) then
-			ChatFrame_SendSmartTell(fullname, dropdownFrame.chatFrame);
+		local isBNetAccount = dropdownFrame.bnetIDAccount or (dropdownFrame.playerLocation and dropdownFrame.playerLocation:IsBattleNetGUID());
+		if ( isBNetAccount  ) then
+			ChatFrame_SendBNetTell(fullname, dropdownFrame.chatFrame);
 		else
 			ChatFrame_SendTell(fullname, dropdownFrame.chatFrame);
 		end
@@ -1611,23 +1637,23 @@ function UnitPopup_OnClick (self)
 	elseif ( button == "TARGET" ) then
 		TargetUnit(fullname, true);
 	elseif ( button == "IGNORE" ) then
-		AddOrDelIgnore(fullname);
+		C_FriendList.AddOrDelIgnore(fullname);
 	elseif ( button == "REPORT_SPAM" ) then
-		PlayerReportFrame:InitiateReport(PLAYER_REPORT_TYPE_SPAM, fullname, dropdownFrame.playerLocation)
+		PlayerReportFrame:InitiateReport(PLAYER_REPORT_TYPE_SPAM, fullname, playerLocation)
 	elseif ( button == "REPORT_BAD_LANGUAGE" ) then
-		PlayerReportFrame:InitiateReport(PLAYER_REPORT_TYPE_LANGUAGE, fullname, dropdownFrame.playerLocation)
+		PlayerReportFrame:InitiateReport(PLAYER_REPORT_TYPE_LANGUAGE, fullname, playerLocation)
 	elseif ( button == "REPORT_BAD_NAME" ) then
-		PlayerReportFrame:InitiateReport(PLAYER_REPORT_TYPE_BAD_PLAYER_NAME, fullname, dropdownFrame.playerLocation)
+		PlayerReportFrame:InitiateReport(PLAYER_REPORT_TYPE_BAD_PLAYER_NAME, fullname, playerLocation)
 	elseif ( button == "REPORT_BAD_GUILD_NAME" ) then
-		PlayerReportFrame:InitiateReport(PLAYER_REPORT_TYPE_BAD_GUILD_NAME, fullname, dropdownFrame.playerLocation)
+		PlayerReportFrame:InitiateReport(PLAYER_REPORT_TYPE_BAD_GUILD_NAME, fullname, playerLocation)
 	elseif ( button == "REPORT_PET" ) then
-		SetPendingReportPetTarget(unit);
+		C_ReportSystem.SetPendingReportPetTarget(unit);
 		StaticPopup_Show("CONFIRM_REPORT_PET_NAME", fullname);
 	elseif ( button == "REPORT_BATTLE_PET" ) then
 		C_PetBattles.SetPendingReportTargetFromUnit(unit);
 		StaticPopup_Show("CONFIRM_REPORT_BATTLEPET_NAME", fullname);
 	elseif ( button == "REPORT_CHEATING" ) then
-		HelpFrame_ShowReportCheatingDialog(dropdownFrame.playerLocation);
+		HelpFrame_ShowReportCheatingDialog(playerLocation);
 	elseif ( button == "POP_OUT_CHAT" ) then
 		FCF_OpenTemporaryWindow(dropdownFrame.chatType, dropdownFrame.chatTarget, dropdownFrame.chatFrame, true);
 	elseif ( button == "DUEL" ) then
@@ -1641,7 +1667,9 @@ function UnitPopup_OnClick (self)
 	elseif ( button == "UNINVITE" or button == "VOTE_TO_KICK" ) then
 		UninviteUnit(fullname, nil, 1);
 	elseif ( button == "REMOVE_FRIEND" ) then
-		RemoveFriend(fullname);
+		if(not C_FriendList.RemoveFriend(fullname)) then
+			UIErrorsFrame:AddExternalErrorMessage(ERR_FRIEND_NOT_FOUND);
+		end
 	elseif ( button == "SET_NOTE" ) then
 		FriendsFrame.NotesID = fullname;
 		StaticPopup_Show("SET_FRIENDNOTE", fullname);
@@ -1819,7 +1847,7 @@ function UnitPopup_OnClick (self)
 	elseif ( strsub(button, 1, 9) == "SET_ROLE_" ) then
 		UnitSetRole(dropdownFrame.unit, strsub(button, 10));
 	elseif ( button == "ADD_FRIEND" or button == "CHARACTER_FRIEND" ) then
-		AddFriend(fullname);
+		C_FriendList.AddFriend(fullname);
 	elseif ( button == "BATTLETAG_FRIEND" ) then
 		local _, battleTag = BNGetInfo();
 		if ( not battleTag ) then
@@ -1867,7 +1895,7 @@ function UnitPopup_OnClick (self)
 				break;
 			end
 		end
-		
+
 		if defaultStreamId then
 			CommunitiesUtil.OpenInviteDialog(clubInfo.clubId, defaultStreamId);
 		end

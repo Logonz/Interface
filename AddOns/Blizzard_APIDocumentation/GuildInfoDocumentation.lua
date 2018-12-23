@@ -7,6 +7,15 @@ local GuildInfo =
 	Functions =
 	{
 		{
+			Name = "CanSpeakInGuildChat",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "canSpeakInGuildChat", Type = "bool", Nilable = false },
+			},
+		},
+		{
 			Name = "GetGuildRankOrder",
 			Type = "Function",
 
@@ -42,6 +51,11 @@ local GuildInfo =
 			{
 				{ Name = "guid", Type = "string", Nilable = false },
 				{ Name = "rankOrder", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "isGuildRankAssignmentAllowed", Type = "bool", Nilable = false },
 			},
 		},
 		{

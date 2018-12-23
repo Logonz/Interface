@@ -80,7 +80,8 @@ function CommunitiesGuildMemberDetailMixin:DisplayMember(clubId, memberInfo)
 
 	local personalNoteText = self.NoteBackground.PersonalNoteText;
 	local note = memberInfo.memberNote;
-	if CanEditPublicNote() then
+	local canEditNote = memberInfo.isSelf or CanEditPublicNote();
+	if canEditNote then
 		personalNoteText:SetTextColor(1.0, 1.0, 1.0);
 		if not note or note == "" then
 			note = GUILD_NOTE_EDITLABEL;
@@ -88,7 +89,7 @@ function CommunitiesGuildMemberDetailMixin:DisplayMember(clubId, memberInfo)
 	else
 		personalNoteText:SetTextColor(0.65, 0.65, 0.65);
 	end
-	self.NoteBackground:EnableMouse(CanEditPublicNote());
+	self.NoteBackground:EnableMouse(canEditNote);
 	personalNoteText:SetText(note);
 
 	local maxRankOrder = GuildControlGetNumRanks();	
@@ -178,11 +179,12 @@ function CommunitiesGuildMemberRankDropdown_Initialize(self)
 		info.value = listRankOrder;
 		-- check
 		if not info.checked then
-			local allowed, reason = C_GuildInfo.IsGuildRankAssignmentAllowed(memberInfo.guid, listRankOrder);
-			if not allowed and reason == "authenticator" then
+			if not C_GuildInfo.IsGuildRankAssignmentAllowed(memberInfo.guid, listRankOrder) then
 				info.disabled = true;
 				info.tooltipWhileDisabled = 1;
 				info.tooltipTitle = GUILD_RANK_UNAVAILABLE;
+				
+				-- We only disallow a rank if it requires an authenticator.
 				info.tooltipText = GUILD_RANK_UNAVAILABLE_AUTHENTICATOR;
 				info.tooltipOnButton = 1;
 			end

@@ -16,14 +16,13 @@ local Club =
 			},
 		},
 		{
-			Name = "AddClubStreamToChatWindow",
+			Name = "AddClubStreamChatChannel",
 			Type = "Function",
 
 			Arguments =
 			{
 				{ Name = "clubId", Type = "string", Nilable = false },
 				{ Name = "streamId", Type = "string", Nilable = false },
-				{ Name = "chatWindowIndex", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -71,6 +70,22 @@ local Club =
 		{
 			Name = "ClearClubPresenceSubscription",
 			Type = "Function",
+		},
+		{
+			Name = "CompareBattleNetDisplayName",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "clubId", Type = "string", Nilable = false },
+				{ Name = "lhsMemberId", Type = "number", Nilable = false },
+				{ Name = "rhsMemberId", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "comparison", Type = "number", Nilable = false },
+			},
 		},
 		{
 			Name = "CreateClub",
@@ -205,6 +220,10 @@ local Club =
 			},
 		},
 		{
+			Name = "Flush",
+			Type = "Function",
+		},
+		{
 			Name = "FocusStream",
 			Type = "Function",
 
@@ -261,6 +280,20 @@ local Club =
 			Returns =
 			{
 				{ Name = "info", Type = "ClubInfo", Nilable = true },
+			},
+		},
+		{
+			Name = "GetClubLimits",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "clubType", Type = "ClubType", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "clubLimits", Type = "ClubLimits", Nilable = false },
 			},
 		},
 		{
@@ -352,6 +385,7 @@ local Club =
 				{ Name = "filter", Type = "string", Nilable = true },
 				{ Name = "maxResults", Type = "number", Nilable = true },
 				{ Name = "cursorPosition", Type = "number", Nilable = true },
+				{ Name = "allowFullMatch", Type = "bool", Nilable = true },
 				{ Name = "clubId", Type = "string", Nilable = false },
 			},
 
@@ -398,6 +432,22 @@ local Club =
 			Returns =
 			{
 				{ Name = "invitations", Type = "table", InnerType = "ClubSelfInvitationInfo", Nilable = false },
+			},
+		},
+		{
+			Name = "GetLastTicketResponse",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "ticket", Type = "string", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "error", Type = "ClubErrorType", Nilable = false },
+				{ Name = "info", Type = "ClubInfo", Nilable = true },
+				{ Name = "showError", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -565,6 +615,20 @@ local Club =
 			Returns =
 			{
 				{ Name = "tickets", Type = "table", InnerType = "ClubTicketInfo", Nilable = false },
+			},
+		},
+		{
+			Name = "IsAccountMuted",
+			Type = "Function",
+
+			Arguments =
+			{
+				{ Name = "clubId", Type = "string", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "accountMuted", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -1119,9 +1183,7 @@ local Club =
 			LiteralName = "CLUB_TICKET_RECEIVED",
 			Payload =
 			{
-				{ Name = "error", Type = "ClubErrorType", Nilable = false },
 				{ Name = "ticket", Type = "string", Nilable = false },
-				{ Name = "info", Type = "ClubInfo", Nilable = true },
 			},
 		},
 		{
@@ -1230,9 +1292,9 @@ local Club =
 		{
 			Name = "ClubErrorType",
 			Type = "Enumeration",
-			NumValues = 39,
+			NumValues = 40,
 			MinValue = 0,
-			MaxValue = 38,
+			MaxValue = 39,
 			Fields =
 			{
 				{ Name = "ErrorCommunitiesNone", Type = "ClubErrorType", EnumValue = 0 },
@@ -1250,30 +1312,31 @@ local Club =
 				{ Name = "ErrorCommunitiesProfanity", Type = "ClubErrorType", EnumValue = 12 },
 				{ Name = "ErrorCommunitiesTrial", Type = "ClubErrorType", EnumValue = 13 },
 				{ Name = "ErrorCommunitiesVeteranTrial", Type = "ClubErrorType", EnumValue = 14 },
-				{ Name = "ErrorClubFull", Type = "ClubErrorType", EnumValue = 15 },
-				{ Name = "ErrorClubNoClub", Type = "ClubErrorType", EnumValue = 16 },
-				{ Name = "ErrorClubNotMember", Type = "ClubErrorType", EnumValue = 17 },
-				{ Name = "ErrorClubAlreadyMember", Type = "ClubErrorType", EnumValue = 18 },
-				{ Name = "ErrorClubNoSuchMember", Type = "ClubErrorType", EnumValue = 19 },
-				{ Name = "ErrorClubNoSuchInvitation", Type = "ClubErrorType", EnumValue = 20 },
-				{ Name = "ErrorClubInvitationAlreadyExists", Type = "ClubErrorType", EnumValue = 21 },
-				{ Name = "ErrorClubInvalidRoleID", Type = "ClubErrorType", EnumValue = 22 },
-				{ Name = "ErrorClubInsufficientPrivileges", Type = "ClubErrorType", EnumValue = 23 },
-				{ Name = "ErrorClubTooManyClubsJoined", Type = "ClubErrorType", EnumValue = 24 },
-				{ Name = "ErrorClubVoiceFull", Type = "ClubErrorType", EnumValue = 25 },
-				{ Name = "ErrorClubStreamNoStream", Type = "ClubErrorType", EnumValue = 26 },
-				{ Name = "ErrorClubStreamInvalidName", Type = "ClubErrorType", EnumValue = 27 },
-				{ Name = "ErrorClubStreamCountAtMin", Type = "ClubErrorType", EnumValue = 28 },
-				{ Name = "ErrorClubStreamCountAtMax", Type = "ClubErrorType", EnumValue = 29 },
-				{ Name = "ErrorClubMemberHasRequiredRole", Type = "ClubErrorType", EnumValue = 30 },
-				{ Name = "ErrorClubSentInvitationCountAtMax", Type = "ClubErrorType", EnumValue = 31 },
-				{ Name = "ErrorClubReceivedInvitationCountAtMax", Type = "ClubErrorType", EnumValue = 32 },
-				{ Name = "ErrorClubTargetIsBanned", Type = "ClubErrorType", EnumValue = 33 },
-				{ Name = "ErrorClubBanAlreadyExists", Type = "ClubErrorType", EnumValue = 34 },
-				{ Name = "ErrorClubBanCountAtMax", Type = "ClubErrorType", EnumValue = 35 },
-				{ Name = "ErrorClubTicketCountAtMax", Type = "ClubErrorType", EnumValue = 36 },
-				{ Name = "ErrorClubTicketNoSuchTicket", Type = "ClubErrorType", EnumValue = 37 },
-				{ Name = "ErrorClubTicketHasConsumedAllowedRedeemCount", Type = "ClubErrorType", EnumValue = 38 },
+				{ Name = "ErrorCommunitiesChatMute", Type = "ClubErrorType", EnumValue = 15 },
+				{ Name = "ErrorClubFull", Type = "ClubErrorType", EnumValue = 16 },
+				{ Name = "ErrorClubNoClub", Type = "ClubErrorType", EnumValue = 17 },
+				{ Name = "ErrorClubNotMember", Type = "ClubErrorType", EnumValue = 18 },
+				{ Name = "ErrorClubAlreadyMember", Type = "ClubErrorType", EnumValue = 19 },
+				{ Name = "ErrorClubNoSuchMember", Type = "ClubErrorType", EnumValue = 20 },
+				{ Name = "ErrorClubNoSuchInvitation", Type = "ClubErrorType", EnumValue = 21 },
+				{ Name = "ErrorClubInvitationAlreadyExists", Type = "ClubErrorType", EnumValue = 22 },
+				{ Name = "ErrorClubInvalidRoleID", Type = "ClubErrorType", EnumValue = 23 },
+				{ Name = "ErrorClubInsufficientPrivileges", Type = "ClubErrorType", EnumValue = 24 },
+				{ Name = "ErrorClubTooManyClubsJoined", Type = "ClubErrorType", EnumValue = 25 },
+				{ Name = "ErrorClubVoiceFull", Type = "ClubErrorType", EnumValue = 26 },
+				{ Name = "ErrorClubStreamNoStream", Type = "ClubErrorType", EnumValue = 27 },
+				{ Name = "ErrorClubStreamInvalidName", Type = "ClubErrorType", EnumValue = 28 },
+				{ Name = "ErrorClubStreamCountAtMin", Type = "ClubErrorType", EnumValue = 29 },
+				{ Name = "ErrorClubStreamCountAtMax", Type = "ClubErrorType", EnumValue = 30 },
+				{ Name = "ErrorClubMemberHasRequiredRole", Type = "ClubErrorType", EnumValue = 31 },
+				{ Name = "ErrorClubSentInvitationCountAtMax", Type = "ClubErrorType", EnumValue = 32 },
+				{ Name = "ErrorClubReceivedInvitationCountAtMax", Type = "ClubErrorType", EnumValue = 33 },
+				{ Name = "ErrorClubTargetIsBanned", Type = "ClubErrorType", EnumValue = 34 },
+				{ Name = "ErrorClubBanAlreadyExists", Type = "ClubErrorType", EnumValue = 35 },
+				{ Name = "ErrorClubBanCountAtMax", Type = "ClubErrorType", EnumValue = 36 },
+				{ Name = "ErrorClubTicketCountAtMax", Type = "ClubErrorType", EnumValue = 37 },
+				{ Name = "ErrorClubTicketNoSuchTicket", Type = "ClubErrorType", EnumValue = 38 },
+				{ Name = "ErrorClubTicketHasConsumedAllowedRedeemCount", Type = "ClubErrorType", EnumValue = 39 },
 			},
 		},
 		{
@@ -1485,6 +1548,14 @@ local Club =
 				{ Name = "invitationId", Type = "string", Nilable = false },
 				{ Name = "isMyInvitation", Type = "bool", Nilable = false },
 				{ Name = "invitee", Type = "ClubMemberInfo", Nilable = false },
+			},
+		},
+		{
+			Name = "ClubLimits",
+			Type = "Structure",
+			Fields =
+			{
+				{ Name = "maximumNumberOfStreams", Type = "number", Nilable = false },
 			},
 		},
 		{

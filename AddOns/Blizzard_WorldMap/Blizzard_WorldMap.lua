@@ -1,11 +1,11 @@
 WorldMapMixin = {};
 
 function WorldMapMixin:SetupTitle()
-	self.BorderFrame.TitleText:SetText(MAP_AND_QUEST_LOG);
+	PortraitFrameTemplate_SetTitle(self.BorderFrame, MAP_AND_QUEST_LOG);
 	self.BorderFrame.Bg:SetParent(self);
 	self.BorderFrame.TopTileStreaks:Hide();
 
-	SetPortraitToTexture(self.BorderFrame.portrait, [[Interface\QuestFrame\UI-QuestLog-BookIcon]]);
+	PortraitFrameTemplate_SetPortraitToAsset(self.BorderFrame, [[Interface\QuestFrame\UI-QuestLog-BookIcon]]);
 end
 
 function WorldMapMixin:SynchronizeDisplayState()
@@ -29,7 +29,9 @@ function WorldMapMixin:Minimize()
 	SetUIPanelAttribute(self, "bottomClampOverride", nil);
 	UpdateUIPanelPositions(self);
 
-	ButtonFrameTemplate_ShowPortrait(self.BorderFrame);
+	PortraitFrameTemplate_SetBorder(self.BorderFrame, "PortraitFrameTemplateMinimizable");
+	PortraitFrameTemplate_SetPortraitShown(self.BorderFrame, true);
+
 	self.BorderFrame.Tutorial:Show();
 	self.NavBar:SetPoint("TOPLEFT", self.TitleCanvasSpacerFrame, "TOPLEFT", 64, -25);
 
@@ -44,7 +46,9 @@ end
 function WorldMapMixin:Maximize()
 	self.isMaximized = true;
 
-	ButtonFrameTemplate_HidePortrait(self.BorderFrame);
+	PortraitFrameTemplate_SetBorder(self.BorderFrame, "ButtonFrameTemplateNoPortraitMinimizable");
+	PortraitFrameTemplate_SetPortraitShown(self.BorderFrame, false);
+
 	self.BorderFrame.Tutorial:Hide();
 	self.NavBar:SetPoint("TOPLEFT", self.TitleCanvasSpacerFrame, "TOPLEFT", 8, -25);
 
@@ -97,6 +101,7 @@ function WorldMapMixin:OnLoad()
 
 	self:RegisterEvent("VARIABLES_LOADED");
 	self:RegisterEvent("DISPLAY_SIZE_CHANGED");
+	self:RegisterEvent("UI_SCALE_CHANGED");
 
 	self:AttachQuestLog();
 end
@@ -110,7 +115,7 @@ function WorldMapMixin:OnEvent(event, ...)
 		else
 			self:Maximize();
 		end
-	elseif event == "DISPLAY_SIZE_CHANGED" then
+	elseif event == "DISPLAY_SIZE_CHANGED" or event == "UI_SCALE_CHANGED" then
 		if self:IsMaximized() then
 			self:UpdateMaximizedSize();
 		end
@@ -144,6 +149,7 @@ function WorldMapMixin:AddStandardDataProviders()
 	self:AddDataProvider(CreateFromMixins(MapLinkDataProviderMixin));
 	self:AddDataProvider(CreateFromMixins(SelectableGraveyardDataProviderMixin));
 	self:AddDataProvider(CreateFromMixins(AreaPOIDataProviderMixin));
+	self:AddDataProvider(CreateFromMixins(MapIndicatorQuestDataProviderMixin));
 
 	if IsGMClient() then
 		self:AddDataProvider(CreateFromMixins(WorldMap_DebugDataProviderMixin));
@@ -186,8 +192,8 @@ function WorldMapMixin:AddStandardDataProviders()
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_VIGNETTE", 200);
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_STORY_LINE");
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_SCENARIO");
-	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_WORLD_QUEST_PING");
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_WORLD_QUEST", 500);
+	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_WORLD_QUEST_PING");
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_ACTIVE_QUEST", C_QuestLog.GetMaxNumQuests());
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_SUPER_TRACKED_QUEST");
 	pinFrameLevelsManager:AddFrameLevel("PIN_FRAME_LEVEL_VEHICLE_BELOW_GROUP_MEMBER");

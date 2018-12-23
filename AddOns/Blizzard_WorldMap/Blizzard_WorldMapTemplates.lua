@@ -92,7 +92,7 @@ function WorldMapTrackingOptionsButtonMixin:OnSelection(value, checked)
 		SetCVar(value, checked and "1" or "0");
 	elseif (value == "worldQuestFilterResources" or value == "worldQuestFilterArtifactPower" or
 			value == "worldQuestFilterProfessionMaterials" or value == "worldQuestFilterGold" or
-			value == "worldQuestFilterEquipment") then
+			value == "worldQuestFilterEquipment" or value == "worldQuestFilterReputation") then
 		-- World quest reward filter cvars
 		SetCVar(value, checked and "1" or "0");
 	end
@@ -138,9 +138,9 @@ function WorldMapTrackingOptionsButtonMixin:InitializeDropDown()
 		UIDropDownMenu_AddButton(info);
 	end
 
-	-- If we aren't on a map with world quests don't show the world quest reward filter options.
+	-- If we aren't on a map which has emissaries don't show the world quest reward filter options.
 	local mapID = self:GetParent():GetMapID();
-	if not mapID or not MapUtil.MapHasUnlockedBounties(mapID) then
+	if not mapID or not MapUtil.MapHasEmissaries(mapID) then
 		return;
 	end
 
@@ -197,6 +197,11 @@ function WorldMapTrackingOptionsButtonMixin:InitializeDropDown()
 	info.text = WORLD_QUEST_REWARD_FILTERS_EQUIPMENT;
 	info.value = "worldQuestFilterEquipment";
 	info.checked = GetCVarBool("worldQuestFilterEquipment");
+	UIDropDownMenu_AddButton(info);
+	
+	info.text = WORLD_QUEST_REWARD_FILTERS_REPUTATION;
+	info.value = "worldQuestFilterReputation";
+	info.checked = GetCVarBool("worldQuestFilterReputation");
 	UIDropDownMenu_AddButton(info);
 end
 
